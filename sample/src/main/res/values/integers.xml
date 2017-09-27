@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="sample_line_middle_points_num">6</integer>
+</resources>

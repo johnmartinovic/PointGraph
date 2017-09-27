@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LaGrange">
+        <attr name="line_color" format="color"/>
+        <attr name="selectors_connect_line_color" format="color"/>
+        <attr name="selector_color" format="color"/>
+        <attr name="selector_border_color" format="color"/>
+        <attr name="text_color" format="color"/>
+        <attr name="graph_color" format="color"/>
+        <attr name="selected_graph_color" format="color"/>
+        <attr name="line_middle_points_num" format="integer"/>
+        <attr name="bar_graph_color" format="color"/>
+    </declare-styleable>
+</resources>

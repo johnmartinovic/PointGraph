@@ -11,9 +11,12 @@ import android.view.View
 import kotlin.collections.ArrayList
 
 /**
- *
+ * Draws a La Graph of Range count values in form of a spline.
  */
-class LaGrange : View {
+class LaGrange @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
     companion object {
 
@@ -45,6 +48,16 @@ class LaGrange : View {
     }
 
     // Constant graph values
+    private val lineColor: Int
+    private val selectorsConnectLineColor: Int
+    private val selectorColor: Int
+    private val selectorBorderColor: Int
+    private val textColor: Int
+    private val graphColor: Int
+    private val selectedGraphColor: Int
+    private val lineMiddlePointsNum: Int
+    private val barGraphColor: Int
+
     private val viewHeight: Float
     private val lineThickness: Float
     private val selectedLineThickness: Float
@@ -118,13 +131,22 @@ class LaGrange : View {
     private var minSelectorValue : Long = 0
     private var maxSelectorValue : Long = 0
 
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
     init {
+        val attributes = context.obtainStyledAttributes(attrs, R.styleable.LaGrange, defStyleAttr, 0)
+        try {
+            lineColor = attributes.getColor(R.styleable.LaGrange_line_color, LINE_COLOR)
+            selectorsConnectLineColor = attributes.getColor(R.styleable.LaGrange_selectors_connect_line_color, SELECTORS_CONNECT_LINE_COLOR)
+            selectorColor = attributes.getColor(R.styleable.LaGrange_selector_color, SELECTOR_COLOR)
+            selectorBorderColor = attributes.getColor(R.styleable.LaGrange_selector_border_color, SELECTOR_BORDER_COLOR)
+            textColor = attributes.getColor(R.styleable.LaGrange_text_color, TEXT_COLOR)
+            graphColor = attributes.getColor(R.styleable.LaGrange_graph_color, GRAPH_COLOR)
+            selectedGraphColor = attributes.getColor(R.styleable.LaGrange_selected_graph_color, SELECTED_GRAPH_COLOR)
+            lineMiddlePointsNum = attributes.getInteger(R.styleable.LaGrange_line_middle_points_num, LINE_MIDDLE_POINTS_NUM)
+            barGraphColor = attributes.getColor(R.styleable.LaGrange_bar_graph_color, BAR_GRAPH_COLOR)
+        } finally {
+            attributes.recycle()
+        }
+
         // Calculate view dimensions from the given attributes
         viewHeight = convertDpToPixel(VIEW_HEIGHT.toFloat(), context)
         lineThickness = convertDpToPixel(LINE_THICKNESS.toFloat(), context)
@@ -140,7 +162,7 @@ class LaGrange : View {
         showBarGraph = BAR_GRAPH_SHOWN
         animateSelectorChanges = ANIMATE_SELECTOR_CHANGES
 
-        numbersPositions = FloatArray(LINE_MIDDLE_POINTS_NUM + 2)
+        numbersPositions = FloatArray(lineMiddlePointsNum + 2)
 
         // Init drawing objects
         minSelector = RectF(
@@ -159,8 +181,8 @@ class LaGrange : View {
         xAxisRect = RectF()
         xAxisFirstPointRect = RectF()
         xAxisLastPointRect = RectF()
-        xAxisMiddlePointsRects = List(LINE_MIDDLE_POINTS_NUM) {RectF()}
-        numbers = LongArray(LINE_MIDDLE_POINTS_NUM + 2)
+        xAxisMiddlePointsRects = List(lineMiddlePointsNum) {RectF()}
+        numbers = LongArray(lineMiddlePointsNum + 2)
 
         graphBoundsRect = RectF()
         selectedGraphBoundsRect = RectF()
@@ -176,44 +198,44 @@ class LaGrange : View {
         // Init draw settings
         xAxisRectPaint = Paint()
         xAxisRectPaint.isAntiAlias = true
-        xAxisRectPaint.color = LINE_COLOR
+        xAxisRectPaint.color = lineColor
         xAxisRectPaint.style = Paint.Style.FILL
 
         textPaint = TextPaint()
         textPaint.isAntiAlias = true
-        textPaint.color = TEXT_COLOR
+        textPaint.color = textColor
         textPaint.textAlign = Paint.Align.CENTER
         textPaint.textSize = convertDpToPixel(12f, context)
 
         selectorPaint = Paint()
         selectorPaint.isAntiAlias = true
         selectorPaint.style = Paint.Style.FILL
-        selectorPaint.color = SELECTOR_COLOR
+        selectorPaint.color = selectorColor
 
         selectorBorderPaint = Paint()
         selectorBorderPaint.isAntiAlias = true
         selectorBorderPaint.style = Paint.Style.STROKE
-        selectorBorderPaint.color = SELECTOR_BORDER_COLOR
+        selectorBorderPaint.color = selectorBorderColor
         selectorBorderPaint.strokeWidth = convertDpToPixel(2f, context)
 
         selectorsConnectLinePaint = Paint()
         selectorsConnectLinePaint.isAntiAlias = true
         selectorsConnectLinePaint.style = Paint.Style.FILL
-        selectorsConnectLinePaint.color = SELECTORS_CONNECT_LINE_COLOR
+        selectorsConnectLinePaint.color = selectorsConnectLineColor
 
         graphPaint = Paint()
         graphPaint.isAntiAlias = true
-        graphPaint.color = GRAPH_COLOR
+        graphPaint.color = graphColor
         graphPaint.style = Paint.Style.FILL
 
         selectedGraphPaint = Paint()
         selectedGraphPaint.isAntiAlias = true
-        selectedGraphPaint.color = SELECTED_GRAPH_COLOR
+        selectedGraphPaint.color = selectedGraphColor
         selectedGraphPaint.style = Paint.Style.FILL
 
         barGraphPaint = Paint()
         barGraphPaint.isAntiAlias = true
-        barGraphPaint.color = BAR_GRAPH_COLOR
+        barGraphPaint.color = barGraphColor
         barGraphPaint.style = Paint.Style.STROKE
     }
 
@@ -239,7 +261,7 @@ class LaGrange : View {
         // Caculate X axis number positions
         numbersPositions[0] = xAxisFirstPointRect.centerX()
         numbersPositions[numbersPositions.size - 1] = xAxisLastPointRect.centerX()
-        pointsDistance = (xAxisRect.right - xAxisRect.left - (2 + LINE_MIDDLE_POINTS_NUM) * lineThickness) / (LINE_MIDDLE_POINTS_NUM + 1)
+        pointsDistance = (xAxisRect.right - xAxisRect.left - (2 + lineMiddlePointsNum) * lineThickness) / (lineMiddlePointsNum + 1)
         var middlePointIndicatorX: Float
         for (i in xAxisMiddlePointsRects.indices) {
             middlePointIndicatorX = xAxisFirstPointRect.left + (i + 1) * (pointsDistance + lineThickness)
@@ -397,7 +419,7 @@ class LaGrange : View {
         canvas.drawOval(maxSelector, selectorPaint)
         canvas.drawOval(maxSelector, selectorBorderPaint)
 
-        for (i in 0 until LINE_MIDDLE_POINTS_NUM + 2) {
+        for (i in 0 until lineMiddlePointsNum + 2) {
             canvas.drawText(numbers[i].toString(),
                     numbersPositions[i],
                     numbersYPosition,
@@ -530,7 +552,7 @@ class LaGrange : View {
                 .filter { rangeDataMaxY < it.count }
                 .forEach { rangeDataMaxY = it.count }
 
-        numbers = LongArray(LINE_MIDDLE_POINTS_NUM + 2)
+        numbers = LongArray(lineMiddlePointsNum + 2)
         for (i in numbers.indices) {
             numbers[i] = i * rangeDataXRange / (numbers.size - 1) + rangeDataMinX
         }
@@ -614,7 +636,6 @@ class LaGrange : View {
 
         return points
     }
-
 
     fun addMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
         minSelectorPositionChangeListeners.add(minSelectorPositionChangeListener)
