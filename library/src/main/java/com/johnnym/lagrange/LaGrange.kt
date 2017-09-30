@@ -3,6 +3,8 @@ package com.johnnym.lagrange
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -21,30 +23,30 @@ class LaGrange @JvmOverloads constructor(
     companion object {
 
         // Default settings
-        private val LINE_COLOR : Int = 0xFFE0E0E0.toInt()
-        private val SELECTORS_CONNECT_LINE_COLOR : Int = 0xFF1787AE.toInt()
-        private val SELECTOR_COLOR : Int = 0xFFFFFFFF.toInt()
-        private val SELECTOR_BORDER_COLOR : Int = 0xFF1787AE.toInt()
-        private val TEXT_COLOR : Int = 0xFF1787AE.toInt()
-        private val GRAPH_COLOR : Int = 0xFFE0E0E0.toInt()
-        private val SELECTED_GRAPH_COLOR : Int = 0xFFC4E1EB.toInt()
-        private val LINE_MIDDLE_POINTS_NUM : Int = 4
-        private val BAR_GRAPH_COLOR : Int = Color.RED
+        private val LINE_COLOR: Int = 0xFFE0E0E0.toInt()
+        private val SELECTORS_CONNECT_LINE_COLOR: Int = 0xFF1787AE.toInt()
+        private val SELECTOR_COLOR: Int = 0xFFFFFFFF.toInt()
+        private val SELECTOR_BORDER_COLOR: Int = 0xFF1787AE.toInt()
+        private val TEXT_COLOR: Int = 0xFF1787AE.toInt()
+        private val GRAPH_COLOR: Int = 0xFFE0E0E0.toInt()
+        private val SELECTED_GRAPH_COLOR: Int = 0xFFC4E1EB.toInt()
+        private val LINE_MIDDLE_POINTS_NUM: Int = 4
+        private val BAR_GRAPH_COLOR: Int = Color.RED
 
         // LaGrange view settings
-        private val VIEW_HEIGHT : Int = 150
-        private val LINE_THICKNESS : Int = 3
-        private val SELECTED_LINE_THICKNESS : Int = 5
-        private val GRAPH_TOP_DRAW_POSITION : Int = 0
-        private val GRAPH_TOP_POSITION : Int = 20
-        private val LINE_Y_POSITION : Int = 100
-        private val NUMBERS_Y_POSITION : Int = 130
-        private val X_AXIS_LEFT_RIGHT_PADDING : Int = 16
-        private val POINT_INDICATOR_LENGTH : Int = 11
-        private val SELECTOR_DIAMETER : Int = 30
-        private val SELECTOR_TOUCH_DIAMETER : Int = 60
-        private val BAR_GRAPH_SHOWN : Boolean = false
-        private val ANIMATE_SELECTOR_CHANGES : Boolean = true
+        private val VIEW_HEIGHT: Int = 150
+        private val LINE_THICKNESS: Int = 3
+        private val SELECTED_LINE_THICKNESS: Int = 5
+        private val GRAPH_TOP_DRAW_POSITION: Int = 0
+        private val GRAPH_TOP_POSITION: Int = 20
+        private val LINE_Y_POSITION: Int = 100
+        private val NUMBERS_Y_POSITION: Int = 130
+        private val X_AXIS_LEFT_RIGHT_PADDING: Int = 16
+        private val POINT_INDICATOR_LENGTH: Int = 11
+        private val SELECTOR_DIAMETER: Int = 30
+        private val SELECTOR_TOUCH_DIAMETER: Int = 60
+        private val BAR_GRAPH_SHOWN: Boolean = true
+        private val ANIMATE_SELECTOR_CHANGES: Boolean = true
     }
 
     // Constant graph values
@@ -93,9 +95,9 @@ class LaGrange @JvmOverloads constructor(
     private val graphBoundsRect: RectF
     private val selectedGraphBoundsRect: RectF
     private val selectorConnectLine: RectF
-    private var splineGraphPath: Path
-    private var barGraphPath: Path
-    private var numbers: LongArray
+    private val splineGraphPath: Path
+    private val barGraphPath: Path
+    private val numbers: LongArray
     private val minSelectorAnimator: ValueAnimator
     private val maxSelectorAnimator: ValueAnimator
 
@@ -108,6 +110,7 @@ class LaGrange @JvmOverloads constructor(
     private var numbersPositions: FloatArray
     private var graphMinXPosition: Float = 0f
     private var graphMaxXPosition: Float = 0f
+    private var selectorsYPosition: Float = 0f
 
     // Touch event variables
     private var actionDownXValue: Float = 0f
@@ -121,15 +124,10 @@ class LaGrange @JvmOverloads constructor(
     private var rangeData: RangeData? = null
     private val minSelectorPositionChangeListeners = ArrayList<MinSelectorPositionChangeListener>()
     private val maxSelectorPositionChangeListeners = ArrayList<MaxSelectorPositionChangeListener>()
-    private var rangeDataMinX: Long = 0
-    private var rangeDataMaxX: Long = 0
-    private var rangeDataMinY: Long = 0
-    private var rangeDataMaxY: Long = 0
-    private var rangeDataXRange: Long = 0
 
     // True selectors values (set from outside by setters or by touch events)
-    private var minSelectorValue : Long = 0
-    private var maxSelectorValue : Long = 0
+    private var minSelectorValue: Long = 0
+    private var maxSelectorValue: Long = 0
 
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.LaGrange, defStyleAttr, 0)
@@ -181,12 +179,17 @@ class LaGrange @JvmOverloads constructor(
         xAxisRect = RectF()
         xAxisFirstPointRect = RectF()
         xAxisLastPointRect = RectF()
-        xAxisMiddlePointsRects = List(lineMiddlePointsNum) {RectF()}
+        xAxisMiddlePointsRects = List(lineMiddlePointsNum) { RectF() }
         numbers = LongArray(lineMiddlePointsNum + 2)
 
         graphBoundsRect = RectF()
         selectedGraphBoundsRect = RectF()
-        selectorConnectLine = RectF()
+        selectorConnectLine = RectF(
+                0f,
+                0f,
+                0f,
+                selectedLineThickness)
+
         splineGraphPath = Path()
         barGraphPath = Path()
 
@@ -279,102 +282,105 @@ class LaGrange @JvmOverloads constructor(
         graphBoundsRect.set(graphMinXPosition, graphTopDrawPosition, graphMaxXPosition, lineYPosition)
         selectedGraphBoundsRect.set(graphBoundsRect)
 
-        val selectorsYPosition = (xAxisRect.top + xAxisRect.bottom) / 2
-        minSelector.setXMiddle(graphMinXPosition)
+        selectorsYPosition = (xAxisRect.top + xAxisRect.bottom) / 2
         minSelector.setYMiddle(selectorsYPosition)
-        minSelectorTouchField.setXMiddle(graphMinXPosition)
         minSelectorTouchField.setYMiddle(selectorsYPosition)
-        maxSelector.setXMiddle(graphMaxXPosition)
         maxSelector.setYMiddle(selectorsYPosition)
-        maxSelectorTouchField.setXMiddle(graphMaxXPosition)
         maxSelectorTouchField.setYMiddle(selectorsYPosition)
+        selectorConnectLine.setYMiddle(selectorsYPosition)
 
-        selectorConnectLine.set(xAxisRect)
-        val linesThicknessDifference = (selectedLineThickness - lineThickness) / 2
-        selectorConnectLine.top -= linesThicknessDifference
-        selectorConnectLine.bottom += linesThicknessDifference
+        rangeData?.let { rangeData ->
+            generateSplineGraphPath(rangeData)
+            generateBarGraphPath(rangeData)
+            refreshSelectorsPositions(rangeData)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event == null || this.rangeData == null) {
+        if (event == null) {
             return false
         }
 
-        val action = event.actionMasked
+        rangeData?.let { rangeData ->
+            val action = event.actionMasked
 
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                actionDownXValue = event.x
-                actionDownYValue = event.y
-                if (minSelectorTouchField.contains(actionDownXValue, actionDownYValue)
-                        && maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
-                    // variables that mark whether the touch is close to min/max selector center
-                    var minCenterIsClose = false
-                    var maxCenterIsClose = false
-                    if (Math.abs(minSelectorTouchField.centerX() - actionDownXValue) < 0.2 * minSelectorTouchField.width()) {
-                        minCenterIsClose = true
-                    }
-                    if (Math.abs(maxSelectorTouchField.centerX() - actionDownXValue) < 0.2 * maxSelectorTouchField.width()) {
-                        maxCenterIsClose = true
-                    }
-                    if (minCenterIsClose && !maxCenterIsClose) {
-                        minSelectorSelected = true
-                    } else if (!minCenterIsClose && maxCenterIsClose) {
-                        maxSelectorSelected = true
-                    } else {
-                        bothSelectorsSelected = true
-                    }
-                } else if (minSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
-                    minSelectorSelected = true
-                } else if (maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
-                    maxSelectorSelected = true
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                actionMoveXValue = event.x
-                if (bothSelectorsSelected) {
-                    if (Math.abs(actionMoveXValue - actionDownXValue) > convertDpToPixel(1f, context)) {
-                        if (actionMoveXValue < actionDownXValue) {
-                            bothSelectorsSelected = false
+            when (action) {
+                MotionEvent.ACTION_DOWN -> {
+                    actionDownXValue = event.x
+                    actionDownYValue = event.y
+                    if (minSelectorTouchField.contains(actionDownXValue, actionDownYValue)
+                            && maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
+                        // variables that mark whether the touch is close to min/max selector center
+                        var minCenterIsClose = false
+                        var maxCenterIsClose = false
+                        if (Math.abs(minSelectorTouchField.centerX() - actionDownXValue) < 0.2 * minSelectorTouchField.width()) {
+                            minCenterIsClose = true
+                        }
+                        if (Math.abs(maxSelectorTouchField.centerX() - actionDownXValue) < 0.2 * maxSelectorTouchField.width()) {
+                            maxCenterIsClose = true
+                        }
+                        if (minCenterIsClose && !maxCenterIsClose) {
                             minSelectorSelected = true
-                        } else if (actionMoveXValue > actionDownXValue) {
-                            bothSelectorsSelected = false
+                        } else if (!minCenterIsClose && maxCenterIsClose) {
                             maxSelectorSelected = true
+                        } else {
+                            bothSelectorsSelected = true
+                        }
+                    } else if (minSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
+                        minSelectorSelected = true
+                    } else if (maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
+                        maxSelectorSelected = true
+                    }
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    actionMoveXValue = event.x
+                    if (bothSelectorsSelected) {
+                        if (Math.abs(actionMoveXValue - actionDownXValue) > convertDpToPixel(1f, context)) {
+                            if (actionMoveXValue < actionDownXValue) {
+                                bothSelectorsSelected = false
+                                minSelectorSelected = true
+                            } else if (actionMoveXValue > actionDownXValue) {
+                                bothSelectorsSelected = false
+                                maxSelectorSelected = true
+                            }
                         }
                     }
                 }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    bothSelectorsSelected = false
+                    minSelectorSelected = false
+                    maxSelectorSelected = false
+                }
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                bothSelectorsSelected = false
-                minSelectorSelected = false
-                maxSelectorSelected = false
-            }
-        }
 
-        var newXPosition = event.x
-        if (minSelectorSelected) {
-            if (newXPosition < graphMinXPosition) {
-                newXPosition = graphMinXPosition
-            } else if (newXPosition > maxSelector.getXPosition()) {
-                newXPosition = maxSelector.getXPosition()
+            var newXPosition = event.x
+            if (minSelectorSelected) {
+                if (newXPosition < graphMinXPosition) {
+                    newXPosition = graphMinXPosition
+                } else if (newXPosition > maxSelector.getXPosition()) {
+                    newXPosition = maxSelector.getXPosition()
+                }
+                setMinSelectorXPosition(newXPosition, false)
+                dispatchOnMinSelectorPositionChanged(rangeData)
+            } else if (maxSelectorSelected) {
+                if (newXPosition > graphMaxXPosition) {
+                    newXPosition = graphMaxXPosition
+                } else if (newXPosition < minSelector.getXPosition()) {
+                    newXPosition = minSelector.getXPosition()
+                }
+                setMaxSelectorXPosition(newXPosition, false)
+                dispatchOnMaxSelectorPositionChanged(rangeData)
             }
-            setMinSelectorXPosition(newXPosition, false)
-            dispatchOnMinSelectorPositionChanged()
-        } else if (maxSelectorSelected) {
-            if (newXPosition > graphMaxXPosition) {
-                newXPosition = graphMaxXPosition
-            } else if (newXPosition < minSelector.getXPosition()) {
-                newXPosition = minSelector.getXPosition()
+
+            // If any of the selectors is selected, then user must be able to move his finger anywhere
+            // on the screen and still have control of the selected selector.
+            if (bothSelectorsSelected || minSelectorSelected || maxSelectorSelected) {
+                parent.requestDisallowInterceptTouchEvent(true)
             }
-            setMaxSelectorXPosition(newXPosition, false)
-            dispatchOnMaxSelectorPositionChanged()
-        }
 
-        if (bothSelectorsSelected || minSelectorSelected || maxSelectorSelected) {
-            parent.requestDisallowInterceptTouchEvent(true)
+            return true
         }
-
-        return true
+        ?: return false
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -395,6 +401,30 @@ class LaGrange @JvmOverloads constructor(
         if (hasData()) {
             drawDataViewPart(canvas)
         }
+    }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        val savedState = SavedState(superState)
+        savedState.rangeData = rangeData
+        savedState.minSelectorValue = minSelectorValue
+        savedState.maxSelectorValue = maxSelectorValue
+        return savedState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state !is SavedState) {
+            super.onRestoreInstanceState(state)
+            return
+        }
+
+        state.rangeData
+                ?.let { rangeData ->
+                    refreshGraphValues(rangeData, state.minSelectorValue, state.maxSelectorValue)
+                }
+                ?: refreshGraphValues(state.rangeData)
+
+        super.onRestoreInstanceState(state.superState)
     }
 
     private fun drawDataViewPart(canvas: Canvas) {
@@ -434,6 +464,11 @@ class LaGrange @JvmOverloads constructor(
     private fun convertDpToPixel(dp: Float, context: Context): Float {
         val resources = context.resources
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics)
+    }
+
+    private fun RectF.setMiddle(x: Float, y: Float) {
+        this.setXMiddle(x)
+        this.setYMiddle(y)
     }
 
     private fun RectF.setXMiddle(x: Float) {
@@ -492,15 +527,15 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
-    private fun dispatchOnMinSelectorPositionChanged() {
-        updateSelectorValues()
+    private fun dispatchOnMinSelectorPositionChanged(rangeData: RangeData) {
+        updateSelectorValues(rangeData)
         for (minSelectorPositionChangeListener in minSelectorPositionChangeListeners) {
             minSelectorPositionChangeListener.onMinValueChanged(minSelectorValue)
         }
     }
 
-    private fun dispatchOnMaxSelectorPositionChanged() {
-        updateSelectorValues()
+    private fun dispatchOnMaxSelectorPositionChanged(rangeData: RangeData) {
+        updateSelectorValues(rangeData)
         for (maxSelectorPositionChangeListener in maxSelectorPositionChangeListeners) {
             maxSelectorPositionChangeListener.onMaxValueChanged(maxSelectorValue)
         }
@@ -514,54 +549,56 @@ class LaGrange @JvmOverloads constructor(
         fun onMaxValueChanged(newMaxValue: Long)
     }
 
-    private fun updateSelectorValues() {
-        minSelectorValue = getXValueFromXGraphPosition(minSelector.getXPosition()).toLong()
-        maxSelectorValue = getXValueFromXGraphPosition(maxSelector.getXPosition()).toLong()
+    private fun updateSelectorValues(rangeData: RangeData) {
+        minSelectorValue = getXValueFromXGraphPosition(rangeData, minSelector.getXPosition()).toLong()
+        maxSelectorValue = getXValueFromXGraphPosition(rangeData, maxSelector.getXPosition()).toLong()
     }
 
-    private fun getXValueFromXGraphPosition(x: Float): Float {
-        return (x - graphMinXPosition) * rangeDataXRange / (graphMaxXPosition - graphMinXPosition) + rangeDataMinX
+    private fun getXValueFromXGraphPosition(rangeData: RangeData, x: Float): Float {
+        return (x - graphMinXPosition) * rangeData.xRange / (graphMaxXPosition - graphMinXPosition) + rangeData.minX
     }
 
-    private fun getXGraphPositionFromXValue(x: Float): Float {
-        return (graphMaxXPosition - graphMinXPosition) / rangeDataXRange * (x - rangeDataMinX) + graphMinXPosition
+    private fun getXGraphPositionFromXValue(rangeData: RangeData, x: Float): Float {
+        return (graphMaxXPosition - graphMinXPosition) / rangeData.xRange * (x - rangeData.minX) + graphMinXPosition
     }
 
-    private fun getYGraphPositionFromYValue(y: Float): Float {
-        return (lineYPosition - graphTopPosition) / (rangeDataMaxY - rangeDataMinY) * (rangeDataMaxY - y) + graphTopPosition
+    private fun getYGraphPositionFromYValue(rangeData: RangeData, y: Float): Float {
+        return (lineYPosition - graphTopPosition) / (rangeData.maxY - rangeData.minY) * (rangeData.maxY - y) + graphTopPosition
     }
 
     fun setRangeData(rangeData: RangeData?) {
+        refreshGraphValues(rangeData)
+        invalidate()
+    }
+
+    private fun refreshGraphValues(rangeData: RangeData?) {
         this.rangeData = rangeData
 
-        if (this.rangeData == null) {
-            return
-        } else {
-            setGraphValues()
+        // calculate RangeData data
+        rangeData?.let { rangeDataNotNull ->
+            refreshGraphValues(rangeDataNotNull, rangeDataNotNull.minX, rangeDataNotNull.maxX)
         }
     }
 
-    private fun setGraphValues() {
-        rangeDataMinX = this.rangeData!!.rangeList[0].from
-        rangeDataMaxX = this.rangeData!!.rangeList[this.rangeData!!.rangeList.size - 1].to
-        rangeDataXRange = rangeDataMaxX - rangeDataMinX
-        rangeDataMinY = 0
-        rangeDataMaxY = 0
-        this.rangeData!!.rangeList
-                .asSequence()
-                .filter { rangeDataMaxY < it.count }
-                .forEach { rangeDataMaxY = it.count }
+    private fun refreshGraphValues(rangeData: RangeData, minSelectorValue: Long, maxSelectorValue: Long) {
+        this.rangeData = rangeData
 
-        numbers = LongArray(lineMiddlePointsNum + 2)
         for (i in numbers.indices) {
-            numbers[i] = i * rangeDataXRange / (numbers.size - 1) + rangeDataMinX
+            numbers[i] = i * rangeData.xRange / (numbers.size - 1) + rangeData.minX
         }
 
-        generateBarGraphPath()
+        this.minSelectorValue = minSelectorValue
+        this.maxSelectorValue = maxSelectorValue
 
-        val knotsArr = getGraphPointsFromRangeList(this.rangeData!!.rangeList)
+        generateSplineGraphPath(rangeData)
+        generateBarGraphPath(rangeData)
+        refreshSelectorsPositions(rangeData)
+    }
+
+    private fun generateSplineGraphPath(rangeData: RangeData) {
+        val knotsArr = getGraphPointsFromRangeData(rangeData)
         val (firstCP, secondCP) = BezierSplineUtil.getCurveControlPoints(knotsArr)
-        splineGraphPath = Path()
+        splineGraphPath.reset()
         // move to the start of the graph
         splineGraphPath.moveTo(graphMinXPosition, lineYPosition)
         splineGraphPath.lineTo(knotsArr[0].x, knotsArr[0].y)
@@ -572,47 +609,49 @@ class LaGrange @JvmOverloads constructor(
         }
         // move to the end of the graph
         splineGraphPath.lineTo(graphMaxXPosition, lineYPosition)
-
-        minSelectorValue = rangeDataMinX
-        maxSelectorValue = rangeDataMaxX
-
-        invalidate()
     }
 
-    private fun generateBarGraphPath() {
+    private fun generateBarGraphPath(rangeData: RangeData) {
         barGraphPath.reset()
         barGraphPath.moveTo(
-                getXGraphPositionFromXValue(rangeDataMinX.toFloat()),
-                getYGraphPositionFromYValue(0f))
+                getXGraphPositionFromXValue(rangeData, rangeData.minX.toFloat()),
+                getYGraphPositionFromYValue(rangeData, 0f))
 
-        for ((from, to, count) in rangeData!!.rangeList) {
+        for ((from, to, count) in rangeData.rangeList) {
             barGraphPath.lineTo(
-                    getXGraphPositionFromXValue(from.toFloat()),
-                    getYGraphPositionFromYValue(count.toFloat()))
+                    getXGraphPositionFromXValue(rangeData, from.toFloat()),
+                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
             barGraphPath.lineTo(
-                    getXGraphPositionFromXValue(to.toFloat()),
-                    getYGraphPositionFromYValue(count.toFloat()))
+                    getXGraphPositionFromXValue(rangeData, to.toFloat()),
+                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
         }
 
         barGraphPath.lineTo(
-                getXGraphPositionFromXValue(rangeDataMaxX.toFloat()),
-                getYGraphPositionFromYValue(0f))
+                getXGraphPositionFromXValue(rangeData, rangeData.maxX.toFloat()),
+                getYGraphPositionFromYValue(rangeData, 0f))
     }
 
-    private fun getGraphPointsFromRangeList(rangeList: ArrayList<Range>): ArrayList<Point> {
+    private fun refreshSelectorsPositions(rangeData: RangeData) {
+        setMinSelectorXPosition(getXGraphPositionFromXValue(rangeData, minSelectorValue.toFloat()), false)
+        setMaxSelectorXPosition(getXGraphPositionFromXValue(rangeData, maxSelectorValue.toFloat()), false)
+    }
+
+    private fun getGraphPointsFromRangeData(rangeData: RangeData): List<Point> {
         var rangeDataX: Float
         var rangeDataY: Float
         var x: Float
         var y: Float
 
+        val rangeList = rangeData.rangeList
+
         val points = ArrayList<Point>()
 
         // Calculate and add first point
         // (lets say its value is the half of the first data point)
-        rangeDataX = rangeDataMinX.toFloat()
+        rangeDataX = rangeList[0].from.toFloat()
         rangeDataY = (rangeList[0].count / 2).toFloat()
-        x = getXGraphPositionFromXValue(rangeDataX)
-        y = getYGraphPositionFromYValue(rangeDataY)
+        x = getXGraphPositionFromXValue(rangeData, rangeDataX)
+        y = getYGraphPositionFromYValue(rangeData, rangeDataY)
 
         points.add(Point(x, y))
 
@@ -620,18 +659,18 @@ class LaGrange @JvmOverloads constructor(
         val middlePoints = Array(rangeList.size) {
             val rangeDataXValue = rangeList[it].middle.toFloat()
             val rangeDataYValue = rangeList[it].count.toFloat()
-            x = getXGraphPositionFromXValue(rangeDataXValue)
-            y = getYGraphPositionFromYValue(rangeDataYValue)
+            x = getXGraphPositionFromXValue(rangeData, rangeDataXValue)
+            y = getYGraphPositionFromYValue(rangeData, rangeDataYValue)
             Point(x, y)
         }
         points.addAll(middlePoints)
 
         // Calculate and add last point
         // (lets say its value is the half of the last data point)
-        rangeDataX = rangeDataMaxX.toFloat()
+        rangeDataX = rangeList[rangeList.size - 1].to.toFloat()
         rangeDataY = (rangeList[rangeList.size - 1].count / 2).toFloat()
-        x = getXGraphPositionFromXValue(rangeDataX)
-        y = getYGraphPositionFromYValue(rangeDataY)
+        x = getXGraphPositionFromXValue(rangeData, rangeDataX)
+        y = getYGraphPositionFromYValue(rangeData, rangeDataY)
         points[points.size - 1] = Point(x, y)
 
         return points
@@ -643,5 +682,37 @@ class LaGrange @JvmOverloads constructor(
 
     fun addMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
         maxSelectorPositionChangeListeners.add(maxSelectorPositionChangeListener)
+    }
+
+    class SavedState : BaseSavedState {
+
+        var rangeData: RangeData? = null
+        var minSelectorValue: Long = 0
+        var maxSelectorValue: Long = 0
+
+        constructor(superState: Parcelable) : super(superState)
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeParcelable(rangeData, flags)
+            out.writeLong(minSelectorValue)
+            out.writeLong(maxSelectorValue)
+        }
+
+        private constructor(parcel: Parcel) : super(parcel) {
+            rangeData = parcel.readParcelable(RangeData.javaClass.classLoader)
+            minSelectorValue = parcel.readLong()
+            maxSelectorValue = parcel.readLong()
+        }
+
+        companion object CREATOR : Parcelable.Creator<SavedState> {
+            override fun createFromParcel(parcel: Parcel): SavedState {
+                return SavedState(parcel)
+            }
+
+            override fun newArray(size: Int): Array<SavedState?> {
+                return arrayOfNulls(size)
+            }
+        }
     }
 }

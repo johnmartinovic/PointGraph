@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var maxValueTextView: TextView
     private lateinit var approxResultsNumTextView: TextView
     private lateinit var setDataButton: Button
+    private lateinit var resetDataButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,13 +27,17 @@ class MainActivity : AppCompatActivity() {
         maxValueTextView = findViewById(R.id.tv_max_value)
         approxResultsNumTextView = findViewById(R.id.tv_approx_results_num)
         setDataButton = findViewById(R.id.btn_set_data)
+        resetDataButton = findViewById(R.id.btn_reset_data)
 
         setDataButton.setOnClickListener {
-            setupLaGrange()
+            setLaGrange()
+        }
+        resetDataButton.setOnClickListener {
+            resetLaGrange()
         }
     }
 
-    private fun setupLaGrange() {
+    private fun setLaGrange() {
         val rangeDataList = ArrayList<Range>()
         rangeDataList.add(Range(0, 20, 0))
         rangeDataList.add(Range(21, 40, 30))
@@ -70,9 +75,12 @@ class MainActivity : AppCompatActivity() {
             override fun onMaxValueChanged(newMaxValue: Long) {
                 maxValueTextView.text = newMaxValue.toString()
             }
-
         })
 
         laGrange.setRangeData(RangeData(rangeDataList))
+    }
+
+    private fun resetLaGrange() {
+        laGrange.setRangeData(null)
     }
 }

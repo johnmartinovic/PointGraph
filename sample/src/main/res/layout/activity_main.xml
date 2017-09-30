@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         app:bar_graph_color="@color/sample_bar_graph_color"
         app:graph_color="@color/sample_graph_color"
-        app:layout_constraintBottom_toTopOf="@id/btn_set_data"
+        app:layout_constraintBottom_toTopOf="@id/buttons_linear_layout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_approx_results_num"
@@ -55,15 +55,33 @@
         app:selectors_connect_line_color="@color/sample_selectors_connect_line_color"
         app:text_color="@color/sample_text_color"/>
 
-    <Button
-        android:id="@+id/btn_set_data"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/buttons_linear_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/set_data_button_text"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/la_grange"/>
+        app:layout_constraintTop_toBottomOf="@id/la_grange">
+
+        <Button
+            android:id="@+id/btn_set_data"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/set_data_button_text"/>
+
+        <Button
+            android:id="@+id/btn_reset_data"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/reset_data_button_text"/>
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
