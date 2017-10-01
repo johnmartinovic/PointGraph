@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.*
 import android.os.Parcel
 import android.os.Parcelable
+import android.support.v4.content.ContextCompat
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -21,18 +22,6 @@ class LaGrange @JvmOverloads constructor(
         defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
     companion object {
-
-        // Default settings
-        private val LINE_COLOR: Int = 0xFFE0E0E0.toInt()
-        private val SELECTORS_CONNECT_LINE_COLOR: Int = 0xFF1787AE.toInt()
-        private val SELECTOR_COLOR: Int = 0xFFFFFFFF.toInt()
-        private val SELECTOR_BORDER_COLOR: Int = 0xFF1787AE.toInt()
-        private val TEXT_COLOR: Int = 0xFF1787AE.toInt()
-        private val GRAPH_COLOR: Int = 0xFFE0E0E0.toInt()
-        private val SELECTED_GRAPH_COLOR: Int = 0xFFC4E1EB.toInt()
-        private val LINE_MIDDLE_POINTS_NUM: Int = 4
-        private val BAR_GRAPH_COLOR: Int = Color.RED
-
         // LaGrange view settings
         private val VIEW_HEIGHT: Int = 150
         private val LINE_THICKNESS: Int = 3
@@ -130,17 +119,35 @@ class LaGrange @JvmOverloads constructor(
     private var maxSelectorValue: Long = 0
 
     init {
-        val attributes = context.obtainStyledAttributes(attrs, R.styleable.LaGrange, defStyleAttr, 0)
+        val attributes = context.obtainStyledAttributes(attrs, R.styleable.sgrs__LaGrange, defStyleAttr, 0)
         try {
-            lineColor = attributes.getColor(R.styleable.LaGrange_line_color, LINE_COLOR)
-            selectorsConnectLineColor = attributes.getColor(R.styleable.LaGrange_selectors_connect_line_color, SELECTORS_CONNECT_LINE_COLOR)
-            selectorColor = attributes.getColor(R.styleable.LaGrange_selector_color, SELECTOR_COLOR)
-            selectorBorderColor = attributes.getColor(R.styleable.LaGrange_selector_border_color, SELECTOR_BORDER_COLOR)
-            textColor = attributes.getColor(R.styleable.LaGrange_text_color, TEXT_COLOR)
-            graphColor = attributes.getColor(R.styleable.LaGrange_graph_color, GRAPH_COLOR)
-            selectedGraphColor = attributes.getColor(R.styleable.LaGrange_selected_graph_color, SELECTED_GRAPH_COLOR)
-            lineMiddlePointsNum = attributes.getInteger(R.styleable.LaGrange_line_middle_points_num, LINE_MIDDLE_POINTS_NUM)
-            barGraphColor = attributes.getColor(R.styleable.LaGrange_bar_graph_color, BAR_GRAPH_COLOR)
+            lineColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__line_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_line_color))
+            selectorsConnectLineColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__selectors_connect_line_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selectors_connect_line_color))
+            selectorColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__selector_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selector_color))
+            selectorBorderColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__selector_border_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selector_border_color))
+            textColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__text_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_text_color))
+            graphColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__graph_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_graph_color))
+            selectedGraphColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__selected_graph_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selected_graph_color))
+            lineMiddlePointsNum = attributes.getInteger(
+                    R.styleable.sgrs__LaGrange_sgrs__line_middle_points_num,
+                    resources.getInteger(R.integer.sgrs__default_line_middle_points_num))
+            barGraphColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__bar_graph_color,
+                    ContextCompat.getColor(getContext(), R.color.sgrs__default_bar_graph_color))
         } finally {
             attributes.recycle()
         }
@@ -380,7 +387,7 @@ class LaGrange @JvmOverloads constructor(
 
             return true
         }
-        ?: return false
+                ?: return false
     }
 
     override fun onDraw(canvas: Canvas?) {

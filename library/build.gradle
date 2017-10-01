@@ -10,6 +10,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.1"
 
+    resourcePrefix 'sgrs__'
 
     defaultConfig {
         minSdkVersion 15
