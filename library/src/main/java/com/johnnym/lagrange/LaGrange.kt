@@ -578,12 +578,12 @@ class LaGrange @JvmOverloads constructor(
         invalidate()
     }
 
-    private fun refreshGraphValues(rangeData: RangeData?) {
-        this.rangeData = rangeData
+    private fun refreshGraphValues(newRangeData: RangeData?) {
+        rangeData = newRangeData
 
         // calculate RangeData data
-        rangeData?.let { rangeDataNotNull ->
-            refreshGraphValues(rangeDataNotNull, rangeDataNotNull.minX, rangeDataNotNull.maxX)
+        rangeData?.let { rangeData ->
+            refreshGraphValues(rangeData, rangeData.minX, rangeData.maxX)
         }
     }
 
