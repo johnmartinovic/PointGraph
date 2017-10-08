@@ -23,13 +23,14 @@ class LaGrange @JvmOverloads constructor(
 
     companion object {
         // LaGrange view settings
-        private val VIEW_HEIGHT: Int = 150
+        private val MIN_VIEW_WIDTH: Int = 200
+        private val MIN_VIEW_HEIGHT: Int = 150
         private val LINE_THICKNESS: Int = 3
         private val SELECTED_LINE_THICKNESS: Int = 5
-        private val GRAPH_TOP_DRAW_POSITION: Int = 0
-        private val GRAPH_TOP_POSITION: Int = 20
-        private val LINE_Y_POSITION: Int = 100
-        private val NUMBERS_Y_POSITION: Int = 130
+        private val GRAPH_TOP_DRAW_POSITION_FROM_TOP: Int = 0
+        private val GRAPH_TOP_POSITION_FROM_TOP: Int = 20
+        private val LINE_Y_POSITION_FROM_BOTTOM: Int = 50
+        private val NUMBERS_Y_POSITION_FROM_BOTTOM: Int = 20
         private val X_AXIS_LEFT_RIGHT_PADDING: Int = 16
         private val POINT_INDICATOR_LENGTH: Int = 11
         private val SELECTOR_DIAMETER: Int = 30
@@ -49,13 +50,14 @@ class LaGrange @JvmOverloads constructor(
     private val lineMiddlePointsNum: Int
     private val barGraphColor: Int
 
-    private val viewHeight: Float
+    private val minViewWidth: Float
+    private val minViewHeight: Float
     private val lineThickness: Float
     private val selectedLineThickness: Float
-    private val graphTopDrawPosition: Float
-    private val graphTopPosition: Float
-    private val lineYPosition: Float
-    private val numbersYPosition: Float
+    private val graphTopDrawPositionFromTop: Float
+    private val graphTopPositionFromTop: Float
+    private val lineYPositionFromBottom: Float
+    private val numbersYPositionFromBottom: Float
     private val xAxisLeftRightPadding: Float
     private val pointIndicatorLength: Float
     private val selectorDiameter: Float
@@ -91,6 +93,10 @@ class LaGrange @JvmOverloads constructor(
     private val maxSelectorAnimator: ValueAnimator
 
     // View's dimensions and sizes, positions etc.
+    private var graphTopDrawYPosition: Float = 0f
+    private var graphTopYPosition: Float = 0f
+    private var lineYPosition: Float = 0f
+    private var numbersYPosition: Float = 0f
     private var viewStartX: Float = 0f
     private var viewEndX: Float = 0f
     private var viewStartY: Float = 0f
@@ -153,13 +159,14 @@ class LaGrange @JvmOverloads constructor(
         }
 
         // Calculate view dimensions from the given attributes
-        viewHeight = convertDpToPixel(VIEW_HEIGHT.toFloat(), context)
+        minViewWidth = convertDpToPixel(MIN_VIEW_WIDTH.toFloat(), context)
+        minViewHeight = convertDpToPixel(MIN_VIEW_HEIGHT.toFloat(), context)
         lineThickness = convertDpToPixel(LINE_THICKNESS.toFloat(), context)
         selectedLineThickness = convertDpToPixel(SELECTED_LINE_THICKNESS.toFloat(), context)
-        graphTopDrawPosition = convertDpToPixel(GRAPH_TOP_DRAW_POSITION.toFloat(), context)
-        graphTopPosition = convertDpToPixel(GRAPH_TOP_POSITION.toFloat(), context)
-        lineYPosition = convertDpToPixel(LINE_Y_POSITION.toFloat(), context)
-        numbersYPosition = convertDpToPixel(NUMBERS_Y_POSITION.toFloat(), context)
+        graphTopDrawPositionFromTop = convertDpToPixel(GRAPH_TOP_DRAW_POSITION_FROM_TOP.toFloat(), context)
+        graphTopPositionFromTop = convertDpToPixel(GRAPH_TOP_POSITION_FROM_TOP.toFloat(), context)
+        lineYPositionFromBottom = convertDpToPixel(LINE_Y_POSITION_FROM_BOTTOM.toFloat(), context)
+        numbersYPositionFromBottom = convertDpToPixel(NUMBERS_Y_POSITION_FROM_BOTTOM.toFloat(), context)
         xAxisLeftRightPadding = convertDpToPixel(X_AXIS_LEFT_RIGHT_PADDING.toFloat(), context)
         pointIndicatorLength = convertDpToPixel(POINT_INDICATOR_LENGTH.toFloat(), context)
         selectorDiameter = convertDpToPixel(SELECTOR_DIAMETER.toFloat(), context)
@@ -250,8 +257,8 @@ class LaGrange @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = View.MeasureSpec.getSize(widthMeasureSpec)
-        val height = View.resolveSizeAndState(viewHeight.toInt() + paddingTop + paddingBottom, heightMeasureSpec, 0)
+        val width = resolveSizeAndState(minViewWidth.toInt(), widthMeasureSpec, 0)
+        val height = resolveSizeAndState(minViewHeight.toInt(), heightMeasureSpec, 0)
 
         setMeasuredDimension(width, height)
     }
@@ -263,6 +270,11 @@ class LaGrange @JvmOverloads constructor(
         viewEndX = (w - paddingRight).toFloat()
         viewStartY = paddingTop.toFloat()
         viewEndY = (h - paddingBottom).toFloat()
+
+        graphTopDrawYPosition = viewStartY + graphTopDrawPositionFromTop
+        graphTopYPosition = viewStartY + graphTopPositionFromTop
+        lineYPosition = viewEndY - lineYPositionFromBottom
+        numbersYPosition = viewEndY - numbersYPositionFromBottom
 
         xAxisRect.set(viewStartX + xAxisLeftRightPadding, lineYPosition, viewEndX - xAxisLeftRightPadding, lineYPosition + lineThickness)
         xAxisFirstPointRect.set(xAxisRect.left, xAxisRect.top, xAxisRect.left + lineThickness, xAxisRect.top + pointIndicatorLength)
@@ -286,7 +298,9 @@ class LaGrange @JvmOverloads constructor(
         graphMinXPosition = xAxisRect.left + lineThickness / 2
         graphMaxXPosition = xAxisRect.right - lineThickness / 2
 
-        graphBoundsRect.set(graphMinXPosition, graphTopDrawPosition, graphMaxXPosition, lineYPosition)
+        graphTopDrawYPosition = viewStartY
+
+        graphBoundsRect.set(graphMinXPosition, graphTopDrawYPosition, graphMaxXPosition, lineYPosition)
         selectedGraphBoundsRect.set(graphBoundsRect)
 
         selectorsYPosition = (xAxisRect.top + xAxisRect.bottom) / 2
@@ -570,7 +584,7 @@ class LaGrange @JvmOverloads constructor(
     }
 
     private fun getYGraphPositionFromYValue(rangeData: RangeData, y: Float): Float {
-        return (lineYPosition - graphTopPosition) / (rangeData.maxY - rangeData.minY) * (rangeData.maxY - y) + graphTopPosition
+        return (lineYPosition - graphTopYPosition) / (rangeData.maxY - rangeData.minY) * (rangeData.maxY - y) + graphTopYPosition
     }
 
     fun setRangeData(rangeData: RangeData?) {
