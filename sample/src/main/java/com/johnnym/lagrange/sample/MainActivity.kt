@@ -3,7 +3,9 @@ package com.johnnym.lagrange.sample
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import com.jakewharton.rxbinding2.widget.RxTextView
 import com.johnnym.lagrange.LaGrange
 import com.johnnym.lagrange.Range
 import com.johnnym.lagrange.RangeData
@@ -12,32 +14,53 @@ import java.util.ArrayList
 class MainActivity : AppCompatActivity() {
 
     private lateinit var laGrange: LaGrange
-    private lateinit var minValueTextView: TextView
-    private lateinit var maxValueTextView: TextView
+    private lateinit var minValueEditText: EditText
+    private lateinit var maxValueEditText: EditText
     private lateinit var approxResultsNumTextView: TextView
     private lateinit var setDataButton: Button
     private lateinit var resetDataButton: Button
+
+    private var changingDoneByLaGrange: Boolean = false
+    private var changingDoneByEditTexts: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         laGrange = findViewById(R.id.la_grange)
-        minValueTextView = findViewById(R.id.tv_min_value)
-        maxValueTextView = findViewById(R.id.tv_max_value)
+        minValueEditText = findViewById(R.id.et_min_value)
+        maxValueEditText = findViewById(R.id.et_max_value)
         approxResultsNumTextView = findViewById(R.id.tv_approx_results_num)
         setDataButton = findViewById(R.id.btn_set_data)
         resetDataButton = findViewById(R.id.btn_reset_data)
 
+        RxTextView.textChanges(minValueEditText)
+                .filter { !changingDoneByLaGrange }
+                .subscribe {
+                    changingDoneByEditTexts = true
+                    updatePriceGraph()
+                    changingDoneByEditTexts = false
+                }
+
+        RxTextView.textChanges(maxValueEditText)
+                .filter { !changingDoneByLaGrange }
+                .subscribe {
+                    changingDoneByEditTexts = true
+                    updatePriceGraph()
+                    changingDoneByEditTexts = false
+                }
+
+        initLaGrangeSelectorListeners()
+
         setDataButton.setOnClickListener {
-            setLaGrange()
+            setLaGrangeData()
         }
         resetDataButton.setOnClickListener {
-            resetLaGrange()
+            resetLaGrangeData()
         }
     }
 
-    private fun setLaGrange() {
+    private fun setLaGrangeData() {
         val rangeDataList = ArrayList<Range>()
         rangeDataList.add(Range(0, 20, 0))
         rangeDataList.add(Range(21, 40, 30))
@@ -65,22 +88,54 @@ class MainActivity : AppCompatActivity() {
         rangeDataList.add(Range(461, 480, 0))
         rangeDataList.add(Range(481, 500, 0))
 
-        laGrange.addMinSelectorChangeListener(object: LaGrange.MinSelectorPositionChangeListener {
-            override fun onMinValueChanged(newMinValue: Long) {
-                minValueTextView.text = newMinValue.toString()
-            }
-        })
-
-        laGrange.addMaxSelectorChangeListener(object: LaGrange.MaxSelectorPositionChangeListener {
-            override fun onMaxValueChanged(newMaxValue: Long) {
-                maxValueTextView.text = newMaxValue.toString()
-            }
-        })
-
         laGrange.setRangeData(RangeData(rangeDataList))
     }
 
-    private fun resetLaGrange() {
+    private fun initLaGrangeSelectorListeners() {
+        laGrange.addMinSelectorChangeListener(minSelectorPositionChangeListener)
+        laGrange.addMaxSelectorChangeListener(maxSelectorPositionChangeListener)
+    }
+
+    private fun removeLaGrangeSelectorListeners() {
+        laGrange.removeMinSelectorChangeListener(minSelectorPositionChangeListener)
+        laGrange.removeMaxSelectorChangeListener(maxSelectorPositionChangeListener)
+    }
+
+    private fun resetLaGrangeData() {
         laGrange.setRangeData(null)
+        updateApproxResultsNumTextView()
+    }
+
+    private fun updatePriceGraph() {
+        val minValue: Long? = minValueEditText.text.toString().toLongOrNull()
+        val maxValue: Long? = maxValueEditText.text.toString().toLongOrNull()
+
+        laGrange.setSelectorsValues(minValue, maxValue)
+    }
+
+    private fun updateApproxResultsNumTextView() {
+        approxResultsNumTextView.text = String.format("%d", laGrange.getApproxCountInSelectedRange())
+    }
+
+    private val minSelectorPositionChangeListener = object : LaGrange.MinSelectorPositionChangeListener {
+        override fun onMinValueChanged(newMinValue: Long) {
+            changingDoneByLaGrange = true
+            if (!changingDoneByEditTexts) {
+                minValueEditText.setText(newMinValue.toString())
+            }
+            updateApproxResultsNumTextView()
+            changingDoneByLaGrange = false
+        }
+    }
+
+    private val maxSelectorPositionChangeListener = object : LaGrange.MaxSelectorPositionChangeListener {
+        override fun onMaxValueChanged(newMaxValue: Long) {
+            changingDoneByLaGrange = true
+            if (!changingDoneByEditTexts) {
+                maxValueEditText.setText(newMaxValue.toString())
+            }
+            updateApproxResultsNumTextView()
+            changingDoneByLaGrange = false
+        }
     }
 }

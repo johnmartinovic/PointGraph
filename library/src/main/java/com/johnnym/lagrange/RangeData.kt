@@ -23,6 +23,12 @@ data class RangeData(val rangeList: List<Range>) : Parcelable {
         maxY = rangeDataMaxYTemp
     }
 
+    fun getApproxCountInRange(minValue: Long, maxValue: Long): Long {
+        return rangeList
+                .map { Math.max(0, Math.min(it.to, maxValue) - Math.max(it.from, minValue)) * it.count / it.range }
+                .sum()
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeList(rangeList)
     }

@@ -12,6 +12,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import kotlin.collections.ArrayList
+import kotlin.properties.Delegates
 
 /**
  * Draws a La Graph of Range count values in form of a spline.
@@ -120,9 +121,23 @@ class LaGrange @JvmOverloads constructor(
     private val minSelectorPositionChangeListeners = ArrayList<MinSelectorPositionChangeListener>()
     private val maxSelectorPositionChangeListeners = ArrayList<MaxSelectorPositionChangeListener>()
 
+    private var listenersEnabled = true
+
     // True selectors values (set from outside by setters or by touch events)
-    private var minSelectorValue: Long = 0
-    private var maxSelectorValue: Long = 0
+    private var minSelectorValue: Long by Delegates.observable(0) { _, _, new: Long ->
+        if (listenersEnabled) {
+            for (minSelectorPositionChangeListener in minSelectorPositionChangeListeners) {
+                minSelectorPositionChangeListener.onMinValueChanged(new)
+            }
+        }
+    }
+    private var maxSelectorValue: Long by Delegates.observable(0) { _, _, new: Long ->
+        if (listenersEnabled) {
+            for (maxSelectorPositionChangeListener in maxSelectorPositionChangeListeners) {
+                maxSelectorPositionChangeListener.onMaxValueChanged(new)
+            }
+        }
+    }
 
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.sgrs__LaGrange, defStyleAttr, 0)
@@ -254,6 +269,63 @@ class LaGrange @JvmOverloads constructor(
         barGraphPaint.isAntiAlias = true
         barGraphPaint.color = barGraphColor
         barGraphPaint.style = Paint.Style.STROKE
+    }
+
+    fun setRangeData(rangeData: RangeData?) {
+        refreshGraphValues(rangeData)
+        invalidate()
+    }
+
+    fun setSelectorsValues(minValue: Long?, maxValue: Long?) {
+        // if user is interacting with the view, do not set values from outside
+        if (minSelectorSelected || maxSelectorSelected) {
+            return
+        }
+
+        rangeData?.let { rangeData ->
+            var minSelectorValue: Long = minValue ?: rangeData.minX
+            var maxSelectorValue: Long = maxValue ?: rangeData.maxX
+
+            minSelectorValue = Math.max(minSelectorValue, rangeData.minX)
+            minSelectorValue = Math.min(minSelectorValue, rangeData.maxX)
+            maxSelectorValue = Math.max(maxSelectorValue, rangeData.minX)
+            maxSelectorValue = Math.min(maxSelectorValue, rangeData.maxX)
+
+            if (minSelectorValue > maxSelectorValue) {
+                maxSelectorValue = minSelectorValue
+            }
+
+            this.minSelectorValue = minSelectorValue
+            this.maxSelectorValue = maxSelectorValue
+
+            setMinSelectorXPosition(
+                    getXGraphPositionFromXValue(rangeData, minSelectorValue.toFloat()),
+                    animateSelectorChanges)
+
+            setMaxSelectorXPosition(
+                    getXGraphPositionFromXValue(rangeData, maxSelectorValue.toFloat()),
+                    animateSelectorChanges)
+        }
+    }
+
+    fun getApproxCountInSelectedRange(): Long? {
+        return rangeData?.getApproxCountInRange(minSelectorValue, maxSelectorValue)
+    }
+
+    fun addMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
+        minSelectorPositionChangeListeners.add(minSelectorPositionChangeListener)
+    }
+
+    fun removeMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
+        minSelectorPositionChangeListeners.remove(minSelectorPositionChangeListener)
+    }
+
+    fun addMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
+        maxSelectorPositionChangeListeners.add(maxSelectorPositionChangeListener)
+    }
+
+    fun removeMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
+        maxSelectorPositionChangeListeners.remove(maxSelectorPositionChangeListener)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -439,11 +511,13 @@ class LaGrange @JvmOverloads constructor(
             return
         }
 
+        listenersEnabled = false
         state.rangeData
                 ?.let { rangeData ->
                     refreshGraphValues(rangeData, state.minSelectorValue, state.maxSelectorValue)
                 }
                 ?: refreshGraphValues(state.rangeData)
+        listenersEnabled = true
 
         super.onRestoreInstanceState(state.superState)
     }
@@ -550,24 +624,10 @@ class LaGrange @JvmOverloads constructor(
 
     private fun dispatchOnMinSelectorPositionChanged(rangeData: RangeData) {
         updateSelectorValues(rangeData)
-        for (minSelectorPositionChangeListener in minSelectorPositionChangeListeners) {
-            minSelectorPositionChangeListener.onMinValueChanged(minSelectorValue)
-        }
     }
 
     private fun dispatchOnMaxSelectorPositionChanged(rangeData: RangeData) {
         updateSelectorValues(rangeData)
-        for (maxSelectorPositionChangeListener in maxSelectorPositionChangeListeners) {
-            maxSelectorPositionChangeListener.onMaxValueChanged(maxSelectorValue)
-        }
-    }
-
-    interface MinSelectorPositionChangeListener {
-        fun onMinValueChanged(newMinValue: Long)
-    }
-
-    interface MaxSelectorPositionChangeListener {
-        fun onMaxValueChanged(newMaxValue: Long)
     }
 
     private fun updateSelectorValues(rangeData: RangeData) {
@@ -585,11 +645,6 @@ class LaGrange @JvmOverloads constructor(
 
     private fun getYGraphPositionFromYValue(rangeData: RangeData, y: Float): Float {
         return (lineYPosition - graphTopYPosition) / (rangeData.maxY - rangeData.minY) * (rangeData.maxY - y) + graphTopYPosition
-    }
-
-    fun setRangeData(rangeData: RangeData?) {
-        refreshGraphValues(rangeData)
-        invalidate()
     }
 
     private fun refreshGraphValues(newRangeData: RangeData?) {
@@ -697,12 +752,12 @@ class LaGrange @JvmOverloads constructor(
         return points
     }
 
-    fun addMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
-        minSelectorPositionChangeListeners.add(minSelectorPositionChangeListener)
+    interface MinSelectorPositionChangeListener {
+        fun onMinValueChanged(newMinValue: Long)
     }
 
-    fun addMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
-        maxSelectorPositionChangeListeners.add(maxSelectorPositionChangeListener)
+    interface MaxSelectorPositionChangeListener {
+        fun onMaxValueChanged(newMaxValue: Long)
     }
 
     class SavedState : BaseSavedState {
