@@ -121,7 +121,10 @@ class MainActivity : AppCompatActivity() {
         override fun onMinValueChanged(newMinValue: Long) {
             changingDoneByLaGrange = true
             if (!changingDoneByEditTexts) {
-                minValueEditText.setText(newMinValue.toString())
+                // This is done instead of "setText" method to prevent the block of the keyboard
+                // when EditText is focused. This bug has to be researched.
+                minValueEditText.text.clear()
+                minValueEditText.text.append(newMinValue.toString())
             }
             updateApproxResultsNumTextView()
             changingDoneByLaGrange = false
@@ -132,7 +135,10 @@ class MainActivity : AppCompatActivity() {
         override fun onMaxValueChanged(newMaxValue: Long) {
             changingDoneByLaGrange = true
             if (!changingDoneByEditTexts) {
-                maxValueEditText.setText(newMaxValue.toString())
+                // This is done instead of "setText" method to prevent the block of the keyboard
+                // when EditText is focused. This bug has to be researched.
+                maxValueEditText.text.clear()
+                maxValueEditText.text.append(newMaxValue.toString())
             }
             updateApproxResultsNumTextView()
             changingDoneByLaGrange = false
