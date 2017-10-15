@@ -88,6 +88,8 @@ class LaGrange @JvmOverloads constructor(
     private val numbers: LongArray
     private val minSelectorAnimator: ValueAnimator
     private val maxSelectorAnimator: ValueAnimator
+    private val graphScaleAnimator: ValueAnimator
+    private var graphYAxisScaleFactor: Float = 1f
 
     // View's dimensions and sizes, positions etc.
     private var graphTopDrawYPosition: Float = 0f
@@ -229,6 +231,8 @@ class LaGrange @JvmOverloads constructor(
         minSelectorAnimator.duration = 150
         maxSelectorAnimator = ValueAnimator()
         maxSelectorAnimator.duration = 150
+        graphScaleAnimator = ValueAnimator()
+        graphScaleAnimator.duration = 300
 
         // Init draw settings
         xAxisRectPaint = Paint()
@@ -275,8 +279,21 @@ class LaGrange @JvmOverloads constructor(
     }
 
     fun setRangeData(rangeData: RangeData?) {
+        setRangeData(rangeData, true)
+    }
+
+    fun setRangeData(rangeData: RangeData?, animated: Boolean) {
         refreshGraphValues(rangeData)
-        invalidate()
+        if (animated) {
+            graphScaleAnimator.setFloatValues(0f, 1f)
+            graphScaleAnimator.addUpdateListener { animation ->
+                graphYAxisScaleFactor = animation.animatedValue as Float
+                invalidate()
+            }
+            graphScaleAnimator.start()
+        } else {
+            invalidate()
+        }
     }
 
     fun setSelectorsValues(minValue: Long?, maxValue: Long?) {
@@ -528,6 +545,7 @@ class LaGrange @JvmOverloads constructor(
 
     private fun drawDataViewPart(canvas: Canvas) {
         canvas.save()
+        canvas.scale(1f, graphYAxisScaleFactor, 0f, lineYPosition)
         canvas.clipRect(graphBoundsRect)
         canvas.drawPath(splineGraphPath, graphPaint)
         canvas.clipRect(selectedGraphBoundsRect)
