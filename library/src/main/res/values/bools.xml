@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="sgrs__default_bar_graph_shown">false</bool>
+    <bool name="sgrs__default_animate_selector_changes">true</bool>
+</resources>

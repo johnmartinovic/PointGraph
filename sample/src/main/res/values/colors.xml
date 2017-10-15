@@ -5,7 +5,7 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="sample_line_color">#2b2b2b</color>
-    <color name="sample_selectors_connect_line_color">#0040ff</color>
+    <color name="sample_selected_line_color">#8c49ff2d</color>
     <color name="sample_selector_color">#6088ff</color>
     <color name="sample_selector_border_color">#0040ff</color>
     <color name="sample_text_color">#2b2b2b</color>

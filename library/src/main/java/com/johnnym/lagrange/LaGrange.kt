@@ -26,8 +26,6 @@ class LaGrange @JvmOverloads constructor(
         // LaGrange view settings
         private val MIN_VIEW_WIDTH: Int = 200
         private val MIN_VIEW_HEIGHT: Int = 150
-        private val LINE_THICKNESS: Int = 3
-        private val SELECTED_LINE_THICKNESS: Int = 5
         private val GRAPH_TOP_DRAW_POSITION_FROM_TOP: Int = 0
         private val GRAPH_TOP_POSITION_FROM_TOP: Int = 20
         private val LINE_Y_POSITION_FROM_BOTTOM: Int = 50
@@ -36,13 +34,13 @@ class LaGrange @JvmOverloads constructor(
         private val POINT_INDICATOR_LENGTH: Int = 11
         private val SELECTOR_DIAMETER: Int = 30
         private val SELECTOR_TOUCH_DIAMETER: Int = 60
-        private val BAR_GRAPH_SHOWN: Boolean = true
-        private val ANIMATE_SELECTOR_CHANGES: Boolean = true
     }
 
     // Constant graph values
     private val lineColor: Int
-    private val selectorsConnectLineColor: Int
+    private val lineThickness: Float
+    private val selectedLineColor: Int
+    private val selectedLineThickness: Float
     private val selectorColor: Int
     private val selectorBorderColor: Int
     private val textColor: Int
@@ -50,11 +48,11 @@ class LaGrange @JvmOverloads constructor(
     private val selectedGraphColor: Int
     private val lineMiddlePointsNum: Int
     private val barGraphColor: Int
+    private val showBarGraph: Boolean
+    private val animateSelectorChanges: Boolean
 
     private val minViewWidth: Float
     private val minViewHeight: Float
-    private val lineThickness: Float
-    private val selectedLineThickness: Float
     private val graphTopDrawPositionFromTop: Float
     private val graphTopPositionFromTop: Float
     private val lineYPositionFromBottom: Float
@@ -63,8 +61,6 @@ class LaGrange @JvmOverloads constructor(
     private val pointIndicatorLength: Float
     private val selectorDiameter: Float
     private val selectorTouchDiameter: Float
-    private val showBarGraph: Boolean
-    private val animateSelectorChanges: Boolean
 
     // Graph drawing objects
     private val xAxisRectPaint: Paint
@@ -106,7 +102,6 @@ class LaGrange @JvmOverloads constructor(
     private var numbersPositions: FloatArray
     private var graphMinXPosition: Float = 0f
     private var graphMaxXPosition: Float = 0f
-    private var selectorsYPosition: Float = 0f
 
     // Touch event variables
     private var actionDownXValue: Float = 0f
@@ -140,14 +135,21 @@ class LaGrange @JvmOverloads constructor(
     }
 
     init {
+        // Calculate view dimensions from the given attributes
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.sgrs__LaGrange, defStyleAttr, 0)
         try {
             lineColor = attributes.getColor(
                     R.styleable.sgrs__LaGrange_sgrs__line_color,
                     ContextCompat.getColor(getContext(), R.color.sgrs__default_line_color))
-            selectorsConnectLineColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__selectors_connect_line_color,
+            lineThickness = attributes.getDimension(
+                    R.styleable.sgrs__LaGrange_sgrs__line_thickness,
+                    resources.getDimension(R.dimen.sgrs__default_line_thickness))
+            selectedLineColor = attributes.getColor(
+                    R.styleable.sgrs__LaGrange_sgrs__selected_line_color,
                     ContextCompat.getColor(getContext(), R.color.sgrs__default_selectors_connect_line_color))
+            selectedLineThickness = attributes.getDimension(
+                    R.styleable.sgrs__LaGrange_sgrs__selected_line_thickness,
+                    resources.getDimension(R.dimen.sgrs__default_selected_line_thickness))
             selectorColor = attributes.getColor(
                     R.styleable.sgrs__LaGrange_sgrs__selector_color,
                     ContextCompat.getColor(getContext(), R.color.sgrs__default_selector_color))
@@ -169,15 +171,18 @@ class LaGrange @JvmOverloads constructor(
             barGraphColor = attributes.getColor(
                     R.styleable.sgrs__LaGrange_sgrs__bar_graph_color,
                     ContextCompat.getColor(getContext(), R.color.sgrs__default_bar_graph_color))
+            showBarGraph = attributes.getBoolean(
+                    R.styleable.sgrs__LaGrange_sgrs__bar_graph_shown,
+                    resources.getBoolean(R.bool.sgrs__default_bar_graph_shown))
+            animateSelectorChanges = attributes.getBoolean(
+                    R.styleable.sgrs__LaGrange_sgrs__animate_selector_changes,
+                    resources.getBoolean(R.bool.sgrs__default_animate_selector_changes))
         } finally {
             attributes.recycle()
         }
 
-        // Calculate view dimensions from the given attributes
         minViewWidth = convertDpToPixel(MIN_VIEW_WIDTH.toFloat(), context)
         minViewHeight = convertDpToPixel(MIN_VIEW_HEIGHT.toFloat(), context)
-        lineThickness = convertDpToPixel(LINE_THICKNESS.toFloat(), context)
-        selectedLineThickness = convertDpToPixel(SELECTED_LINE_THICKNESS.toFloat(), context)
         graphTopDrawPositionFromTop = convertDpToPixel(GRAPH_TOP_DRAW_POSITION_FROM_TOP.toFloat(), context)
         graphTopPositionFromTop = convertDpToPixel(GRAPH_TOP_POSITION_FROM_TOP.toFloat(), context)
         lineYPositionFromBottom = convertDpToPixel(LINE_Y_POSITION_FROM_BOTTOM.toFloat(), context)
@@ -186,8 +191,6 @@ class LaGrange @JvmOverloads constructor(
         pointIndicatorLength = convertDpToPixel(POINT_INDICATOR_LENGTH.toFloat(), context)
         selectorDiameter = convertDpToPixel(SELECTOR_DIAMETER.toFloat(), context)
         selectorTouchDiameter = convertDpToPixel(SELECTOR_TOUCH_DIAMETER.toFloat(), context)
-        showBarGraph = BAR_GRAPH_SHOWN
-        animateSelectorChanges = ANIMATE_SELECTOR_CHANGES
 
         numbersPositions = FloatArray(lineMiddlePointsNum + 2)
 
@@ -205,7 +208,7 @@ class LaGrange @JvmOverloads constructor(
                 selectorTouchDiameter)
         maxSelectorTouchField = RectF(minSelectorTouchField)
 
-        xAxisRect = RectF()
+        xAxisRect = RectF(0f, 0f, 0f, lineThickness)
         xAxisFirstPointRect = RectF()
         xAxisLastPointRect = RectF()
         xAxisMiddlePointsRects = List(lineMiddlePointsNum) { RectF() }
@@ -253,7 +256,7 @@ class LaGrange @JvmOverloads constructor(
         selectorsConnectLinePaint = Paint()
         selectorsConnectLinePaint.isAntiAlias = true
         selectorsConnectLinePaint.style = Paint.Style.FILL
-        selectorsConnectLinePaint.color = selectorsConnectLineColor
+        selectorsConnectLinePaint.color = selectedLineColor
 
         graphPaint = Paint()
         graphPaint.isAntiAlias = true
@@ -348,7 +351,9 @@ class LaGrange @JvmOverloads constructor(
         lineYPosition = viewEndY - lineYPositionFromBottom
         numbersYPosition = viewEndY - numbersYPositionFromBottom
 
-        xAxisRect.set(viewStartX + xAxisLeftRightPadding, lineYPosition, viewEndX - xAxisLeftRightPadding, lineYPosition + lineThickness)
+        xAxisRect.left = viewStartX + xAxisLeftRightPadding
+        xAxisRect.right = viewEndX - xAxisLeftRightPadding
+        xAxisRect.setYMiddle(lineYPosition)
         xAxisFirstPointRect.set(xAxisRect.left, xAxisRect.top, xAxisRect.left + lineThickness, xAxisRect.top + pointIndicatorLength)
         xAxisLastPointRect.set(xAxisRect.right - lineThickness, xAxisRect.bottom - pointIndicatorLength, xAxisRect.right, xAxisRect.bottom)
 
@@ -372,15 +377,14 @@ class LaGrange @JvmOverloads constructor(
 
         graphTopDrawYPosition = viewStartY
 
-        graphBoundsRect.set(graphMinXPosition, graphTopDrawYPosition, graphMaxXPosition, lineYPosition)
+        graphBoundsRect.set(graphMinXPosition, graphTopDrawYPosition, graphMaxXPosition, lineYPosition - lineThickness / 2)
         selectedGraphBoundsRect.set(graphBoundsRect)
 
-        selectorsYPosition = (xAxisRect.top + xAxisRect.bottom) / 2
-        minSelector.setYMiddle(selectorsYPosition)
-        minSelectorTouchField.setYMiddle(selectorsYPosition)
-        maxSelector.setYMiddle(selectorsYPosition)
-        maxSelectorTouchField.setYMiddle(selectorsYPosition)
-        selectorConnectLine.setYMiddle(selectorsYPosition)
+        minSelector.setYMiddle(lineYPosition)
+        minSelectorTouchField.setYMiddle(lineYPosition)
+        maxSelector.setYMiddle(lineYPosition)
+        maxSelectorTouchField.setYMiddle(lineYPosition)
+        selectorConnectLine.setYMiddle(lineYPosition)
 
         rangeData?.let { rangeData ->
             generateSplineGraphPath(rangeData)
@@ -571,7 +575,7 @@ class LaGrange @JvmOverloads constructor(
     }
 
     private fun RectF.setYMiddle(y: Float) {
-        this.offsetTo(this.left, y - this.width() / 2)
+        this.offsetTo(this.left, y - this.height() / 2)
     }
 
     private fun RectF.getXPosition(): Float {

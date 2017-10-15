@@ -31,9 +31,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@id/la_grange"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/la_grange"
         app:layout_constraintTop_toBottomOf="@id/et_min_value"/>
 
     <com.johnnym.lagrange.LaGrange
@@ -47,10 +47,12 @@
         app:sgrs__graph_color="@color/sample_graph_color"
         app:sgrs__line_color="@color/sample_line_color"
         app:sgrs__line_middle_points_num="@integer/sample_line_middle_points_num"
+        app:sgrs__line_thickness="@dimen/sgrs__sample_line_thickness"
         app:sgrs__selected_graph_color="@color/sample_selected_graph_color"
+        app:sgrs__selected_line_color="@color/sample_selected_line_color"
+        app:sgrs__selected_line_thickness="@dimen/sgrs__sample_selected_line_thickness"
         app:sgrs__selector_border_color="@color/sample_selector_border_color"
         app:sgrs__selector_color="@color/sample_selector_color"
-        app:sgrs__selectors_connect_line_color="@color/sample_selectors_connect_line_color"
         app:sgrs__text_color="@color/sample_text_color"/>
 
     <Button

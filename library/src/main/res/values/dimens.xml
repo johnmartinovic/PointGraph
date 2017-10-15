@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sgrs__default_line_thickness">3dp</dimen>
+    <dimen name="sgrs__default_selected_line_thickness">5dp</dimen>
+</resources>
