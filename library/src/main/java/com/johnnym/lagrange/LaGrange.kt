@@ -8,9 +8,12 @@ import android.os.Parcelable
 import android.support.v4.content.ContextCompat
 import android.text.TextPaint
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import com.johnnym.lagrange.utils.convertDpToPixel
+import com.johnnym.lagrange.utils.getXPosition
+import com.johnnym.lagrange.utils.setXMiddle
+import com.johnnym.lagrange.utils.setYMiddle
 import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
@@ -278,11 +281,7 @@ class LaGrange @JvmOverloads constructor(
         barGraphPaint.style = Paint.Style.STROKE
     }
 
-    fun setRangeData(rangeData: RangeData?) {
-        setRangeData(rangeData, true)
-    }
-
-    fun setRangeData(rangeData: RangeData?, animated: Boolean) {
+    fun setRangeData(rangeData: RangeData?, animated: Boolean = true) {
         refreshGraphValues(rangeData)
         if (animated) {
             graphScaleAnimator.setFloatValues(0f, 1f)
@@ -576,28 +575,6 @@ class LaGrange @JvmOverloads constructor(
 
     private fun hasData(): Boolean {
         return rangeData != null
-    }
-
-    private fun convertDpToPixel(dp: Float, context: Context): Float {
-        val resources = context.resources
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics)
-    }
-
-    private fun RectF.setMiddle(x: Float, y: Float) {
-        this.setXMiddle(x)
-        this.setYMiddle(y)
-    }
-
-    private fun RectF.setXMiddle(x: Float) {
-        this.offsetTo(x - this.width() / 2, this.top)
-    }
-
-    private fun RectF.setYMiddle(y: Float) {
-        this.offsetTo(this.left, y - this.height() / 2)
-    }
-
-    private fun RectF.getXPosition(): Float {
-        return this.centerX()
     }
 
     private fun setMinSelectorXPosition(x: Float, animated: Boolean) {
