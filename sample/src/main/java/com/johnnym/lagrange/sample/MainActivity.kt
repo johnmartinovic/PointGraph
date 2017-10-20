@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     private var changingDoneByLaGrange: Boolean = false
     private var changingDoneByEditTexts: Boolean = false
 
+    private var rangeData: RangeData? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -62,33 +64,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun setLaGrangeData() {
         val rangeDataList = ArrayList<Range>()
-        rangeDataList.add(Range(0, 20, 0))
-        rangeDataList.add(Range(21, 40, 30))
-        rangeDataList.add(Range(41, 60, 50))
-        rangeDataList.add(Range(61, 80, 30))
-        rangeDataList.add(Range(81, 100, 60))
-        rangeDataList.add(Range(101, 120, 60))
-        rangeDataList.add(Range(121, 140, 55))
-        rangeDataList.add(Range(141, 160, 70))
-        rangeDataList.add(Range(161, 180, 75))
-        rangeDataList.add(Range(181, 200, 75))
-        rangeDataList.add(Range(200, 220, 80))
-        rangeDataList.add(Range(221, 240, 100))
-        rangeDataList.add(Range(241, 260, 95))
-        rangeDataList.add(Range(261, 280, 98))
-        rangeDataList.add(Range(281, 300, 95))
-        rangeDataList.add(Range(300, 320, 90))
-        rangeDataList.add(Range(321, 340, 90))
-        rangeDataList.add(Range(341, 360, 85))
-        rangeDataList.add(Range(361, 380, 80))
-        rangeDataList.add(Range(381, 400, 20))
-        rangeDataList.add(Range(400, 420, 10))
-        rangeDataList.add(Range(421, 440, 1))
-        rangeDataList.add(Range(441, 460, 2))
-        rangeDataList.add(Range(461, 480, 0))
-        rangeDataList.add(Range(481, 500, 0))
+        rangeDataList.add(Range(0f, 20f, 0f))
+        rangeDataList.add(Range(21f, 40f, 30f))
+        rangeDataList.add(Range(41f, 60f, 50f))
+        rangeDataList.add(Range(61f, 80f, 30f))
+        rangeDataList.add(Range(81f, 100f, 60f))
+        rangeDataList.add(Range(101f, 120f, 60f))
+        rangeDataList.add(Range(121f, 140f, 55f))
+        rangeDataList.add(Range(141f, 160f, 70f))
+        rangeDataList.add(Range(161f, 180f, 75f))
+        rangeDataList.add(Range(181f, 200f, 75f))
+        rangeDataList.add(Range(200f, 220f, 80f))
+        rangeDataList.add(Range(221f, 240f, 100f))
+        rangeDataList.add(Range(241f, 260f, 95f))
+        rangeDataList.add(Range(261f, 280f, 98f))
+        rangeDataList.add(Range(281f, 300f, 95f))
+        rangeDataList.add(Range(300f, 320f, 90f))
+        rangeDataList.add(Range(321f, 340f, 90f))
+        rangeDataList.add(Range(341f, 360f, 85f))
+        rangeDataList.add(Range(361f, 380f, 80f))
+        rangeDataList.add(Range(381f, 400f, 20f))
+        rangeDataList.add(Range(400f, 420f, 10f))
+        rangeDataList.add(Range(421f, 440f, 1f))
+        rangeDataList.add(Range(441f, 460f, 2f))
+        rangeDataList.add(Range(461f, 480f, 0f))
+        rangeDataList.add(Range(481f, 500f, 0f))
 
-        laGrange.setRangeData(RangeData(rangeDataList))
+        rangeData = RangeData(rangeDataList)
+        rangeData?.let { rangeData ->
+            laGrange.setPointsData(rangeData.pointsData)
+        }
     }
 
     private fun initLaGrangeSelectorListeners() {
@@ -102,29 +107,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetLaGrangeData() {
-        laGrange.setRangeData(null)
+        laGrange.setPointsData(null)
         updateApproxResultsNumTextView()
     }
 
     private fun updatePriceGraph() {
-        val minValue: Long? = minValueEditText.text.toString().toLongOrNull()
-        val maxValue: Long? = maxValueEditText.text.toString().toLongOrNull()
+        val minValue: Float? = minValueEditText.text.toString().toFloatOrNull()
+        val maxValue: Float? = maxValueEditText.text.toString().toFloatOrNull()
 
         laGrange.setSelectorsValues(minValue, maxValue)
     }
 
     private fun updateApproxResultsNumTextView() {
-        approxResultsNumTextView.text = String.format("%d", laGrange.getApproxCountInSelectedRange())
+        approxResultsNumTextView.text = String.format(
+                "%.0f",
+                rangeData?.getApproxCountInRange(
+                        laGrange.minSelectorValue,
+                        laGrange.maxSelectorValue))
     }
 
     private val minSelectorPositionChangeListener = object : LaGrange.MinSelectorPositionChangeListener {
-        override fun onMinValueChanged(newMinValue: Long) {
+        override fun onMinValueChanged(newMinValue: Float) {
             changingDoneByLaGrange = true
             if (!changingDoneByEditTexts) {
                 // This is done instead of "setText" method to prevent the block of the keyboard
                 // when EditText is focused. This bug has to be researched.
                 minValueEditText.text.clear()
-                minValueEditText.text.append(newMinValue.toString())
+                minValueEditText.text.append(String.format("%.0f", newMinValue))
             }
             updateApproxResultsNumTextView()
             changingDoneByLaGrange = false
@@ -132,13 +141,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val maxSelectorPositionChangeListener = object : LaGrange.MaxSelectorPositionChangeListener {
-        override fun onMaxValueChanged(newMaxValue: Long) {
+        override fun onMaxValueChanged(newMaxValue: Float) {
             changingDoneByLaGrange = true
             if (!changingDoneByEditTexts) {
                 // This is done instead of "setText" method to prevent the block of the keyboard
                 // when EditText is focused. This bug has to be researched.
                 maxValueEditText.text.clear()
-                maxValueEditText.text.append(newMaxValue.toString())
+                maxValueEditText.text.append(String.format("%.0f", newMaxValue))
             }
             updateApproxResultsNumTextView()
             changingDoneByLaGrange = false

@@ -18,7 +18,7 @@ import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
 /**
- * Draws a La Graph of Range count values in form of a spline.
+ * Draws a Graph of Points in form of a spline.
  */
 class LaGrange @JvmOverloads constructor(
         context: Context,
@@ -88,7 +88,7 @@ class LaGrange @JvmOverloads constructor(
     private val selectorConnectLine: RectF
     private val splineGraphPath: Path
     private val barGraphPath: Path
-    private val numbers: LongArray
+    private val numbers: FloatArray
     private val minSelectorAnimator: ValueAnimator
     private val maxSelectorAnimator: ValueAnimator
     private val graphScaleAnimator: ValueAnimator
@@ -117,27 +117,30 @@ class LaGrange @JvmOverloads constructor(
     private var bothSelectorsSelected: Boolean = false
 
     // Data variables
-    private var rangeData: RangeData? = null
+    private var pointsData: PointsData? = null
     private val minSelectorPositionChangeListeners = ArrayList<MinSelectorPositionChangeListener>()
     private val maxSelectorPositionChangeListeners = ArrayList<MaxSelectorPositionChangeListener>()
 
     private var listenersEnabled = true
 
     // True selectors values (set from outside by setters or by touch events)
-    private var minSelectorValue: Long by Delegates.observable(0) { _, _, new: Long ->
+    var minSelectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
             for (minSelectorPositionChangeListener in minSelectorPositionChangeListeners) {
                 minSelectorPositionChangeListener.onMinValueChanged(new)
             }
         }
     }
-    private var maxSelectorValue: Long by Delegates.observable(0) { _, _, new: Long ->
+        private set
+
+    var maxSelectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
             for (maxSelectorPositionChangeListener in maxSelectorPositionChangeListeners) {
                 maxSelectorPositionChangeListener.onMaxValueChanged(new)
             }
         }
     }
+        private set
 
     init {
         // Calculate view dimensions from the given attributes
@@ -217,7 +220,7 @@ class LaGrange @JvmOverloads constructor(
         xAxisFirstPointRect = RectF()
         xAxisLastPointRect = RectF()
         xAxisMiddlePointsRects = List(lineMiddlePointsNum) { RectF() }
-        numbers = LongArray(lineMiddlePointsNum + 2)
+        numbers = FloatArray(lineMiddlePointsNum + 2)
 
         graphBoundsRect = RectF()
         selectedGraphBoundsRect = RectF()
@@ -281,8 +284,8 @@ class LaGrange @JvmOverloads constructor(
         barGraphPaint.style = Paint.Style.STROKE
     }
 
-    fun setRangeData(rangeData: RangeData?, animated: Boolean = true) {
-        refreshGraphValues(rangeData)
+    fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
+        refreshGraphValues(pointsData)
         if (animated) {
             graphScaleAnimator.setFloatValues(0f, 1f)
             graphScaleAnimator.addUpdateListener { animation ->
@@ -295,20 +298,20 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
-    fun setSelectorsValues(minValue: Long?, maxValue: Long?) {
+    fun setSelectorsValues(minValue: Float?, maxValue: Float?) {
         // if user is interacting with the view, do not set values from outside
         if (minSelectorSelected || maxSelectorSelected) {
             return
         }
 
-        rangeData?.let { rangeData ->
-            var minSelectorValue: Long = minValue ?: rangeData.minX
-            var maxSelectorValue: Long = maxValue ?: rangeData.maxX
+        pointsData?.let { pointsData ->
+            var minSelectorValue: Float = minValue ?: pointsData.minX
+            var maxSelectorValue: Float = maxValue ?: pointsData.maxX
 
-            minSelectorValue = Math.max(minSelectorValue, rangeData.minX)
-            minSelectorValue = Math.min(minSelectorValue, rangeData.maxX)
-            maxSelectorValue = Math.max(maxSelectorValue, rangeData.minX)
-            maxSelectorValue = Math.min(maxSelectorValue, rangeData.maxX)
+            minSelectorValue = Math.max(minSelectorValue, pointsData.minX)
+            minSelectorValue = Math.min(minSelectorValue, pointsData.maxX)
+            maxSelectorValue = Math.max(maxSelectorValue, pointsData.minX)
+            maxSelectorValue = Math.min(maxSelectorValue, pointsData.maxX)
 
             if (minSelectorValue > maxSelectorValue) {
                 maxSelectorValue = minSelectorValue
@@ -318,17 +321,13 @@ class LaGrange @JvmOverloads constructor(
             this.maxSelectorValue = maxSelectorValue
 
             setMinSelectorXPosition(
-                    getXGraphPositionFromXValue(rangeData, minSelectorValue.toFloat()),
+                    getXGraphPositionFromXValue(pointsData, minSelectorValue),
                     animateSelectorChanges)
 
             setMaxSelectorXPosition(
-                    getXGraphPositionFromXValue(rangeData, maxSelectorValue.toFloat()),
+                    getXGraphPositionFromXValue(pointsData, maxSelectorValue),
                     animateSelectorChanges)
         }
-    }
-
-    fun getApproxCountInSelectedRange(): Long? {
-        return rangeData?.getApproxCountInRange(minSelectorValue, maxSelectorValue)
     }
 
     fun addMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
@@ -402,10 +401,10 @@ class LaGrange @JvmOverloads constructor(
         maxSelectorTouchField.setYMiddle(lineYPosition)
         selectorConnectLine.setYMiddle(lineYPosition)
 
-        rangeData?.let { rangeData ->
-            generateSplineGraphPath(rangeData)
-            generateBarGraphPath(rangeData)
-            refreshSelectorsPositions(rangeData)
+        pointsData?.let { pointsData ->
+            generateSplineGraphPath(pointsData)
+//            generateBarGraphPath(rangeData)
+            refreshSelectorsPositions(pointsData)
         }
     }
 
@@ -414,7 +413,7 @@ class LaGrange @JvmOverloads constructor(
             return false
         }
 
-        rangeData?.let { rangeData ->
+        pointsData?.let { pointsData ->
             val action = event.actionMasked
 
             when (action) {
@@ -473,16 +472,16 @@ class LaGrange @JvmOverloads constructor(
                 } else if (newXPosition > maxSelector.getXPosition()) {
                     newXPosition = maxSelector.getXPosition()
                 }
-                setMinSelectorXPosition(newXPosition, false)
-                dispatchOnMinSelectorPositionChanged(rangeData)
+                setMinSelectorXPosition(newXPosition)
+                dispatchOnMinSelectorPositionChanged(pointsData)
             } else if (maxSelectorSelected) {
                 if (newXPosition > graphMaxXPosition) {
                     newXPosition = graphMaxXPosition
                 } else if (newXPosition < minSelector.getXPosition()) {
                     newXPosition = minSelector.getXPosition()
                 }
-                setMaxSelectorXPosition(newXPosition, false)
-                dispatchOnMaxSelectorPositionChanged(rangeData)
+                setMaxSelectorXPosition(newXPosition)
+                dispatchOnMaxSelectorPositionChanged(pointsData)
             }
 
             // If any of the selectors is selected, then user must be able to move his finger anywhere
@@ -519,7 +518,7 @@ class LaGrange @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable {
         val superState = super.onSaveInstanceState()
         val savedState = SavedState(superState)
-        savedState.rangeData = rangeData
+        savedState.pointsData = pointsData
         savedState.minSelectorValue = minSelectorValue
         savedState.maxSelectorValue = maxSelectorValue
         return savedState
@@ -532,11 +531,11 @@ class LaGrange @JvmOverloads constructor(
         }
 
         listenersEnabled = false
-        state.rangeData
-                ?.let { rangeData ->
-                    refreshGraphValues(rangeData, state.minSelectorValue, state.maxSelectorValue)
+        state.pointsData
+                ?.let { pointsData ->
+                    refreshGraphValues(pointsData, state.minSelectorValue, state.maxSelectorValue)
                 }
-                ?: refreshGraphValues(state.rangeData)
+                ?: refreshGraphValues(state.pointsData)
         listenersEnabled = true
 
         super.onRestoreInstanceState(state.superState)
@@ -566,7 +565,8 @@ class LaGrange @JvmOverloads constructor(
         canvas.drawOval(maxSelector, selectorBorderPaint)
 
         for (i in 0 until lineMiddlePointsNum + 2) {
-            canvas.drawText(numbers[i].toString(),
+            canvas.drawText(
+                    String.format("%.0f", numbers[i]),
                     numbersPositions[i],
                     numbersYPosition,
                     textPaint)
@@ -574,10 +574,10 @@ class LaGrange @JvmOverloads constructor(
     }
 
     private fun hasData(): Boolean {
-        return rangeData != null
+        return pointsData != null
     }
 
-    private fun setMinSelectorXPosition(x: Float, animated: Boolean) {
+    private fun setMinSelectorXPosition(x: Float, animated: Boolean = false) {
 
         fun setMinSelectorShapes(x: Float) {
             selectedGraphBoundsRect.left = x
@@ -599,7 +599,7 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
-    private fun setMaxSelectorXPosition(x: Float, animated: Boolean) {
+    private fun setMaxSelectorXPosition(x: Float, animated: Boolean = false) {
 
         fun setMaxSelectorShapes(x: Float) {
             selectedGraphBoundsRect.right = x
@@ -621,57 +621,56 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
-    private fun dispatchOnMinSelectorPositionChanged(rangeData: RangeData) {
-        updateSelectorValues(rangeData)
+    private fun dispatchOnMinSelectorPositionChanged(pointsData: PointsData) {
+        updateSelectorValues(pointsData)
     }
 
-    private fun dispatchOnMaxSelectorPositionChanged(rangeData: RangeData) {
-        updateSelectorValues(rangeData)
+    private fun dispatchOnMaxSelectorPositionChanged(pointsData: PointsData) {
+        updateSelectorValues(pointsData)
     }
 
-    private fun updateSelectorValues(rangeData: RangeData) {
-        minSelectorValue = getXValueFromXGraphPosition(rangeData, minSelector.getXPosition()).toLong()
-        maxSelectorValue = getXValueFromXGraphPosition(rangeData, maxSelector.getXPosition()).toLong()
+    private fun updateSelectorValues(pointsData: PointsData) {
+        minSelectorValue = getXValueFromXGraphPosition(pointsData, minSelector.getXPosition())
+        maxSelectorValue = getXValueFromXGraphPosition(pointsData, maxSelector.getXPosition())
     }
 
-    private fun getXValueFromXGraphPosition(rangeData: RangeData, x: Float): Float {
-        return (x - graphMinXPosition) * rangeData.xRange / (graphMaxXPosition - graphMinXPosition) + rangeData.minX
+    private fun getXValueFromXGraphPosition(pointsData: PointsData, x: Float): Float {
+        return (x - graphMinXPosition) * pointsData.xRange / (graphMaxXPosition - graphMinXPosition) + pointsData.minX
     }
 
-    private fun getXGraphPositionFromXValue(rangeData: RangeData, x: Float): Float {
-        return (graphMaxXPosition - graphMinXPosition) / rangeData.xRange * (x - rangeData.minX) + graphMinXPosition
+    private fun getXGraphPositionFromXValue(pointsData: PointsData, x: Float): Float {
+        return (graphMaxXPosition - graphMinXPosition) / pointsData.xRange * (x - pointsData.minX) + graphMinXPosition
     }
 
-    private fun getYGraphPositionFromYValue(rangeData: RangeData, y: Float): Float {
-        return (lineYPosition - graphTopYPosition) / (rangeData.maxY - rangeData.minY) * (rangeData.maxY - y) + graphTopYPosition
+    private fun getYGraphPositionFromYValue(pointsData: PointsData, y: Float): Float {
+        return (lineYPosition - graphTopYPosition) / (pointsData.maxY - pointsData.minY) * (pointsData.maxY - y) + graphTopYPosition
     }
 
-    private fun refreshGraphValues(newRangeData: RangeData?) {
-        rangeData = newRangeData
+    private fun refreshGraphValues(newPointsData: PointsData?) {
+        pointsData = newPointsData
 
-        // calculate RangeData data
-        rangeData?.let { rangeData ->
-            refreshGraphValues(rangeData, rangeData.minX, rangeData.maxX)
+        pointsData?.let { pointsData ->
+            refreshGraphValues(pointsData, pointsData.minX, pointsData.maxX)
         }
     }
 
-    private fun refreshGraphValues(rangeData: RangeData, minSelectorValue: Long, maxSelectorValue: Long) {
-        this.rangeData = rangeData
+    private fun refreshGraphValues(pointsData: PointsData, minSelectorValue: Float, maxSelectorValue: Float) {
+        this.pointsData = pointsData
 
         for (i in numbers.indices) {
-            numbers[i] = i * rangeData.xRange / (numbers.size - 1) + rangeData.minX
+            numbers[i] = i * pointsData.xRange / (numbers.size - 1) + pointsData.minX
         }
 
         this.minSelectorValue = minSelectorValue
         this.maxSelectorValue = maxSelectorValue
 
-        generateSplineGraphPath(rangeData)
-        generateBarGraphPath(rangeData)
-        refreshSelectorsPositions(rangeData)
+        generateSplineGraphPath(pointsData)
+//        generateBarGraphPath(rangeData)
+        refreshSelectorsPositions(pointsData)
     }
 
-    private fun generateSplineGraphPath(rangeData: RangeData) {
-        val knotsArr = getGraphPointsFromRangeData(rangeData)
+    private fun generateSplineGraphPath(pointsData: PointsData) {
+        val knotsArr = getGraphPointsFromPointsData(pointsData)
         val (firstCP, secondCP) = BezierSplineUtil.getCurveControlPoints(knotsArr)
         splineGraphPath.reset()
         // move to the start of the graph
@@ -686,98 +685,68 @@ class LaGrange @JvmOverloads constructor(
         splineGraphPath.lineTo(graphMaxXPosition, lineYPosition)
     }
 
-    private fun generateBarGraphPath(rangeData: RangeData) {
-        barGraphPath.reset()
-        barGraphPath.moveTo(
-                getXGraphPositionFromXValue(rangeData, rangeData.minX.toFloat()),
-                getYGraphPositionFromYValue(rangeData, 0f))
+//    private fun generateBarGraphPath(rangeData: RangeData) {
+//        barGraphPath.reset()
+//        barGraphPath.moveTo(
+//                getXGraphPositionFromXValue(rangeData, rangeData.minX.toFloat()),
+//                getYGraphPositionFromYValue(rangeData, 0f))
+//
+//        for ((from, to, count) in rangeData.rangeList) {
+//            barGraphPath.lineTo(
+//                    getXGraphPositionFromXValue(rangeData, from.toFloat()),
+//                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
+//            barGraphPath.lineTo(
+//                    getXGraphPositionFromXValue(rangeData, to.toFloat()),
+//                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
+//        }
+//
+//        barGraphPath.lineTo(
+//                getXGraphPositionFromXValue(rangeData, rangeData.maxX.toFloat()),
+//                getYGraphPositionFromYValue(rangeData, 0f))
+//    }
 
-        for ((from, to, count) in rangeData.rangeList) {
-            barGraphPath.lineTo(
-                    getXGraphPositionFromXValue(rangeData, from.toFloat()),
-                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
-            barGraphPath.lineTo(
-                    getXGraphPositionFromXValue(rangeData, to.toFloat()),
-                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
-        }
-
-        barGraphPath.lineTo(
-                getXGraphPositionFromXValue(rangeData, rangeData.maxX.toFloat()),
-                getYGraphPositionFromYValue(rangeData, 0f))
+    private fun refreshSelectorsPositions(pointsData: PointsData) {
+        setMinSelectorXPosition(getXGraphPositionFromXValue(pointsData, minSelectorValue))
+        setMaxSelectorXPosition(getXGraphPositionFromXValue(pointsData, maxSelectorValue))
     }
 
-    private fun refreshSelectorsPositions(rangeData: RangeData) {
-        setMinSelectorXPosition(getXGraphPositionFromXValue(rangeData, minSelectorValue.toFloat()), false)
-        setMaxSelectorXPosition(getXGraphPositionFromXValue(rangeData, maxSelectorValue.toFloat()), false)
-    }
+    private fun getGraphPointsFromPointsData(pointsData: PointsData): List<Point> {
+        val points = pointsData.points
 
-    private fun getGraphPointsFromRangeData(rangeData: RangeData): List<Point> {
-        var rangeDataX: Float
-        var rangeDataY: Float
-        var x: Float
-        var y: Float
-
-        val rangeList = rangeData.rangeList
-
-        val points = ArrayList<Point>()
-
-        // Calculate and add first point
-        // (lets say its value is the half of the first data point)
-        rangeDataX = rangeList[0].from.toFloat()
-        rangeDataY = (rangeList[0].count / 2).toFloat()
-        x = getXGraphPositionFromXValue(rangeData, rangeDataX)
-        y = getYGraphPositionFromYValue(rangeData, rangeDataY)
-
-        points.add(Point(x, y))
-
-        // Calculate and add middle points
-        val middlePoints = Array(rangeList.size) {
-            val rangeDataXValue = rangeList[it].middle.toFloat()
-            val rangeDataYValue = rangeList[it].count.toFloat()
-            x = getXGraphPositionFromXValue(rangeData, rangeDataXValue)
-            y = getYGraphPositionFromYValue(rangeData, rangeDataYValue)
-            Point(x, y)
+        return List(points.size) {
+            Point(
+                    getXGraphPositionFromXValue(pointsData, points[it].x),
+                    getYGraphPositionFromYValue(pointsData, points[it].y))
         }
-        points.addAll(middlePoints)
-
-        // Calculate and add last point
-        // (lets say its value is the half of the last data point)
-        rangeDataX = rangeList[rangeList.size - 1].to.toFloat()
-        rangeDataY = (rangeList[rangeList.size - 1].count / 2).toFloat()
-        x = getXGraphPositionFromXValue(rangeData, rangeDataX)
-        y = getYGraphPositionFromYValue(rangeData, rangeDataY)
-        points[points.size - 1] = Point(x, y)
-
-        return points
     }
 
     interface MinSelectorPositionChangeListener {
-        fun onMinValueChanged(newMinValue: Long)
+        fun onMinValueChanged(newMinValue: Float)
     }
 
     interface MaxSelectorPositionChangeListener {
-        fun onMaxValueChanged(newMaxValue: Long)
+        fun onMaxValueChanged(newMaxValue: Float)
     }
 
     class SavedState : BaseSavedState {
 
-        var rangeData: RangeData? = null
-        var minSelectorValue: Long = 0
-        var maxSelectorValue: Long = 0
+        var pointsData: PointsData? = null
+        var minSelectorValue: Float = 0f
+        var maxSelectorValue: Float = 0f
 
         constructor(superState: Parcelable) : super(superState)
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
-            out.writeParcelable(rangeData, flags)
-            out.writeLong(minSelectorValue)
-            out.writeLong(maxSelectorValue)
+            out.writeParcelable(pointsData, flags)
+            out.writeFloat(minSelectorValue)
+            out.writeFloat(maxSelectorValue)
         }
 
         private constructor(parcel: Parcel) : super(parcel) {
-            rangeData = parcel.readParcelable(RangeData.javaClass.classLoader)
-            minSelectorValue = parcel.readLong()
-            maxSelectorValue = parcel.readLong()
+            pointsData = parcel.readParcelable(PointsData.javaClass.classLoader)
+            minSelectorValue = parcel.readFloat()
+            maxSelectorValue = parcel.readFloat()
         }
 
         companion object CREATOR : Parcelable.Creator<SavedState> {

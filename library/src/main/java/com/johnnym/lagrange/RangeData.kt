@@ -3,29 +3,43 @@ package com.johnnym.lagrange
 import android.os.Parcel
 import android.os.Parcelable
 
-data class RangeData(val rangeList: List<Range>) : Parcelable {
+data class RangeData(private val rangeList: List<Range>) : Parcelable {
 
-    val minX: Long
-    val maxX: Long
-    val minY: Long
-    val maxY: Long
-    val xRange: Long
+    val pointsData: PointsData
 
     init {
-        minX = rangeList[0].from
-        maxX = rangeList[rangeList.size - 1].to
-        minY = 0
-        xRange = maxX - minX
-        var rangeDataMaxYTemp = 0L
-        rangeList.asSequence()
-                .filter { rangeDataMaxYTemp < it.count }
-                .forEach { rangeDataMaxYTemp = it.count }
-        maxY = rangeDataMaxYTemp
+        var x: Float
+        var y: Float
+
+        val points = ArrayList<Point>()
+
+        // Calculate and add first point
+        // (lets say its value is the half of the first data point)
+        x = rangeList[0].from
+        y = (rangeList[0].count / 2)
+
+        points.add(Point(x, y))
+
+        // Calculate and add middle points
+        val middlePoints = Array(rangeList.size) {
+            val x = rangeList[it].middle
+            val y = rangeList[it].count
+            Point(x, y)
+        }
+        points.addAll(middlePoints)
+
+        // Calculate and add last point
+        // (lets say its value is the half of the last data point)
+        x = rangeList[rangeList.size - 1].to
+        y = (rangeList[rangeList.size - 1].count / 2)
+        points[points.size - 1] = Point(x, y)
+
+        pointsData = PointsData(points)
     }
 
-    fun getApproxCountInRange(minValue: Long, maxValue: Long): Long {
+    fun getApproxCountInRange(minValue: Float, maxValue: Float): Float {
         return rangeList
-                .map { Math.max(0, Math.min(it.to, maxValue) - Math.max(it.from, minValue)) * it.count / it.range }
+                .map { Math.max(0f, Math.min(it.to, maxValue) - Math.max(it.from, minValue)) * it.count / it.range }
                 .sum()
     }
 

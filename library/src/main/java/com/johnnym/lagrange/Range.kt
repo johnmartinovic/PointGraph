@@ -3,18 +3,18 @@ package com.johnnym.lagrange
 import android.os.Parcel
 import android.os.Parcelable
 
-data class Range(val from: Long, val to: Long, val count: Long) : Parcelable {
+data class Range(val from: Float, val to: Float, val count: Float) : Parcelable {
 
-    val middle: Long
+    val middle: Float
         get() = (from + to) / 2
 
-    val range: Long
+    val range: Float
         get() = to - from
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(from)
-        parcel.writeLong(to)
-        parcel.writeLong(count)
+        parcel.writeFloat(from)
+        parcel.writeFloat(to)
+        parcel.writeFloat(count)
     }
 
     override fun describeContents(): Int {
@@ -24,9 +24,9 @@ data class Range(val from: Long, val to: Long, val count: Long) : Parcelable {
     companion object CREATOR : Parcelable.Creator<Range> {
         override fun createFromParcel(parcel: Parcel): Range {
             return Range(
-                    parcel.readLong(),
-                    parcel.readLong(),
-                    parcel.readLong())
+                    parcel.readFloat(),
+                    parcel.readFloat(),
+                    parcel.readFloat())
         }
 
         override fun newArray(size: Int): Array<Range?> {
