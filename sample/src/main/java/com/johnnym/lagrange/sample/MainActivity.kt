@@ -13,12 +13,12 @@ import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var laGrange: LaGrange
-    private lateinit var minValueEditText: EditText
-    private lateinit var maxValueEditText: EditText
-    private lateinit var approxResultsNumTextView: TextView
-    private lateinit var setDataButton: Button
-    private lateinit var resetDataButton: Button
+    private val laGrange: LaGrange by bindView(R.id.la_grange)
+    private val minValueEditText: EditText by bindView(R.id.et_min_value)
+    private val maxValueEditText: EditText by bindView(R.id.et_max_value)
+    private val approxResultsNumTextView: TextView by bindView(R.id.tv_approx_results_num)
+    private val setDataButton: Button by bindView(R.id.btn_set_data)
+    private val resetDataButton: Button by bindView(R.id.btn_reset_data)
 
     private var changingDoneByLaGrange: Boolean = false
     private var changingDoneByEditTexts: Boolean = false
@@ -28,13 +28,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        laGrange = findViewById(R.id.la_grange)
-        minValueEditText = findViewById(R.id.et_min_value)
-        maxValueEditText = findViewById(R.id.et_max_value)
-        approxResultsNumTextView = findViewById(R.id.tv_approx_results_num)
-        setDataButton = findViewById(R.id.btn_set_data)
-        resetDataButton = findViewById(R.id.btn_reset_data)
 
         RxTextView.textChanges(minValueEditText)
                 .filter { !changingDoneByLaGrange }

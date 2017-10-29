@@ -11,8 +11,6 @@
         <attr name="sgrs__graph_color" format="color"/>
         <attr name="sgrs__selected_graph_color" format="color"/>
         <attr name="sgrs__line_middle_points_num" format="integer"/>
-        <attr name="sgrs__bar_graph_color" format="color"/>
-        <attr name="sgrs__bar_graph_shown" format="boolean"/>
         <attr name="sgrs__animate_selector_changes" format="boolean"/>
     </declare-styleable>
 </resources>

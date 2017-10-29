@@ -43,7 +43,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_approx_results_num"
-        app:sgrs__bar_graph_color="@color/sample_bar_graph_color"
         app:sgrs__graph_color="@color/sample_graph_color"
         app:sgrs__line_color="@color/sample_line_color"
         app:sgrs__line_middle_points_num="@integer/sample_line_middle_points_num"

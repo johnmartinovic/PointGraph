@@ -7,5 +7,4 @@
     <color name="sgrs__default_text_color">#1787ae</color>
     <color name="sgrs__default_graph_color">#e0e0e0</color>
     <color name="sgrs__default_selected_graph_color">#c4e1eb</color>
-    <color name="sgrs__default_bar_graph_color">#ff0000</color>
 </resources>

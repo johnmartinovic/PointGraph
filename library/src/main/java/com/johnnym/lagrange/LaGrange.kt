@@ -50,8 +50,6 @@ class LaGrange @JvmOverloads constructor(
     private val graphColor: Int
     private val selectedGraphColor: Int
     private val lineMiddlePointsNum: Int
-    private val barGraphColor: Int
-    private val showBarGraph: Boolean
     private val animateSelectorChanges: Boolean
 
     private val minViewWidth: Float
@@ -73,7 +71,6 @@ class LaGrange @JvmOverloads constructor(
     private val selectorsConnectLinePaint: Paint
     private val graphPaint: Paint
     private val selectedGraphPaint: Paint
-    private val barGraphPaint: Paint
 
     private val minSelector: RectF
     private val maxSelector: RectF
@@ -87,7 +84,6 @@ class LaGrange @JvmOverloads constructor(
     private val selectedGraphBoundsRect: RectF
     private val selectorConnectLine: RectF
     private val splineGraphPath: Path
-    private val barGraphPath: Path
     private val numbers: FloatArray
     private val minSelectorAnimator: ValueAnimator
     private val maxSelectorAnimator: ValueAnimator
@@ -176,12 +172,6 @@ class LaGrange @JvmOverloads constructor(
             lineMiddlePointsNum = attributes.getInteger(
                     R.styleable.sgrs__LaGrange_sgrs__line_middle_points_num,
                     resources.getInteger(R.integer.sgrs__default_line_middle_points_num))
-            barGraphColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__bar_graph_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_bar_graph_color))
-            showBarGraph = attributes.getBoolean(
-                    R.styleable.sgrs__LaGrange_sgrs__bar_graph_shown,
-                    resources.getBoolean(R.bool.sgrs__default_bar_graph_shown))
             animateSelectorChanges = attributes.getBoolean(
                     R.styleable.sgrs__LaGrange_sgrs__animate_selector_changes,
                     resources.getBoolean(R.bool.sgrs__default_animate_selector_changes))
@@ -231,7 +221,6 @@ class LaGrange @JvmOverloads constructor(
                 selectedLineThickness)
 
         splineGraphPath = Path()
-        barGraphPath = Path()
 
         minSelectorAnimator = ValueAnimator()
         minSelectorAnimator.duration = 150
@@ -277,11 +266,6 @@ class LaGrange @JvmOverloads constructor(
         selectedGraphPaint.isAntiAlias = true
         selectedGraphPaint.color = selectedGraphColor
         selectedGraphPaint.style = Paint.Style.FILL
-
-        barGraphPaint = Paint()
-        barGraphPaint.isAntiAlias = true
-        barGraphPaint.color = barGraphColor
-        barGraphPaint.style = Paint.Style.STROKE
     }
 
     fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
@@ -403,7 +387,6 @@ class LaGrange @JvmOverloads constructor(
 
         pointsData?.let { pointsData ->
             generateSplineGraphPath(pointsData)
-//            generateBarGraphPath(rangeData)
             refreshSelectorsPositions(pointsData)
         }
     }
@@ -550,13 +533,6 @@ class LaGrange @JvmOverloads constructor(
         canvas.drawPath(splineGraphPath, selectedGraphPaint)
         canvas.restore()
 
-        if (showBarGraph) {
-            canvas.save()
-            canvas.clipRect(graphBoundsRect)
-            canvas.drawPath(barGraphPath, barGraphPaint)
-            canvas.restore()
-        }
-
         // draw selectors connect line and selectors
         canvas.drawRect(selectorConnectLine, selectorsConnectLinePaint)
         canvas.drawOval(minSelector, selectorPaint)
@@ -665,7 +641,6 @@ class LaGrange @JvmOverloads constructor(
         this.maxSelectorValue = maxSelectorValue
 
         generateSplineGraphPath(pointsData)
-//        generateBarGraphPath(rangeData)
         refreshSelectorsPositions(pointsData)
     }
 
@@ -684,26 +659,6 @@ class LaGrange @JvmOverloads constructor(
         // move to the end of the graph
         splineGraphPath.lineTo(graphMaxXPosition, lineYPosition)
     }
-
-//    private fun generateBarGraphPath(rangeData: RangeData) {
-//        barGraphPath.reset()
-//        barGraphPath.moveTo(
-//                getXGraphPositionFromXValue(rangeData, rangeData.minX.toFloat()),
-//                getYGraphPositionFromYValue(rangeData, 0f))
-//
-//        for ((from, to, count) in rangeData.rangeList) {
-//            barGraphPath.lineTo(
-//                    getXGraphPositionFromXValue(rangeData, from.toFloat()),
-//                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
-//            barGraphPath.lineTo(
-//                    getXGraphPositionFromXValue(rangeData, to.toFloat()),
-//                    getYGraphPositionFromYValue(rangeData, count.toFloat()))
-//        }
-//
-//        barGraphPath.lineTo(
-//                getXGraphPositionFromXValue(rangeData, rangeData.maxX.toFloat()),
-//                getYGraphPositionFromYValue(rangeData, 0f))
-//    }
 
     private fun refreshSelectorsPositions(pointsData: PointsData) {
         setMinSelectorXPosition(getXGraphPositionFromXValue(pointsData, minSelectorValue))
@@ -744,7 +699,7 @@ class LaGrange @JvmOverloads constructor(
         }
 
         private constructor(parcel: Parcel) : super(parcel) {
-            pointsData = parcel.readParcelable(PointsData.javaClass.classLoader)
+            pointsData = parcel.readParcelable(PointsData::class.java.classLoader)
             minSelectorValue = parcel.readFloat()
             maxSelectorValue = parcel.readFloat()
         }

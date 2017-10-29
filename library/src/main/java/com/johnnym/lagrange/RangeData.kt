@@ -22,9 +22,7 @@ data class RangeData(private val rangeList: List<Range>) : Parcelable {
 
         // Calculate and add middle points
         val middlePoints = Array(rangeList.size) {
-            val x = rangeList[it].middle
-            val y = rangeList[it].count
-            Point(x, y)
+            Point(rangeList[it].middle, rangeList[it].count)
         }
         points.addAll(middlePoints)
 
