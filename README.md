@@ -2,7 +2,7 @@
 
 PointGraph library is a group of optimized and well-designed interactive Android Views whose main feature is a graphical representation of list of points in form of a ["spline"](https://en.wikipedia.org/wiki/Spline_(mathematics)).
 
-[![Release](https://jitpack.io/v/User/Repo.svg)](https://jitpack.io/#johnmartinovic/PointGraph)
+[![Release](https://jitpack.io/v/User/Repo.svg)](https://jitpack.io/#johnnymartinovic/PointGraph)
 
 
 ## Demos
@@ -26,7 +26,7 @@ allprojects {
 In your app level build.gradle add:
 ```groovy
 dependencies {
-    implementation 'com.github.johnmartinovic:PointGraph:v0.1'
+    implementation 'com.github.johnnymartinovic:PointGraph:v0.1'
 }      
 ```
 
@@ -64,7 +64,7 @@ laGrange.addMaxSelectorChangeListener(maxSelectorPositionChangeListener)
 laGrange.setSelectorsValues(minValue, maxValue)
 ```
 
-For more detailed view, checkout a simple [sample app](https://github.com/johnmartinovic/PointGraph/tree/master/sample) included in this project which shows how to use the library in a more advanced way.
+For more detailed view, checkout a simple [sample app](https://github.com/johnnymartinovic/PointGraph/tree/master/sample) included in this project which shows how to use the library in a more advanced way.
 
 License
 --------

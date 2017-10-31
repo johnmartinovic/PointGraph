@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.android.extensions'
 apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.johnmartinovic'
+group='com.github.johnnymartinovic'
 
 androidExtensions {
     experimental = true
