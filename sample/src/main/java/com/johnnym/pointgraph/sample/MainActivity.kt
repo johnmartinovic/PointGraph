@@ -1,4 +1,4 @@
-package com.johnnym.lagrange.sample
+package com.johnnym.pointgraph.sample
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -6,9 +6,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import com.jakewharton.rxbinding2.widget.RxTextView
-import com.johnnym.lagrange.LaGrange
-import com.johnnym.lagrange.Range
-import com.johnnym.lagrange.RangeData
+import com.johnnym.pointgraph.LaGrange
+import com.johnnym.pointgraph.Range
+import com.johnnym.pointgraph.RangeData
 import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {

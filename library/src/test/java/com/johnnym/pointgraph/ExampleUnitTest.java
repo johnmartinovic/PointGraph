@@ -1,4 +1,4 @@
-package com.johnnym.lagrange;
+package com.johnnym.pointgraph;
 
 import org.junit.Test;
 

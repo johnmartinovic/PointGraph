@@ -1,4 +1,4 @@
-package com.johnnym.lagrange
+package com.johnnym.pointgraph
 
 import android.os.Parcel
 import android.os.Parcelable

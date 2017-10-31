@@ -1,4 +1,4 @@
-package com.johnnym.lagrange.utils
+package com.johnnym.pointgraph.utils
 
 import android.content.Context
 import android.graphics.RectF

@@ -38,7 +38,7 @@ dependencies {
 
 ## Usage
 ```xml
-<com.johnnym.lagrange.LaGrange
+<com.johnnym.pointgraph.LaGrange
         android:id="@+id/la_grange"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

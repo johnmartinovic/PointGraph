@@ -1,4 +1,4 @@
-package com.johnnym.lagrange
+package com.johnnym.pointgraph
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -10,10 +10,10 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.johnnym.lagrange.utils.convertDpToPixel
-import com.johnnym.lagrange.utils.getXPosition
-import com.johnnym.lagrange.utils.setXMiddle
-import com.johnnym.lagrange.utils.setYMiddle
+import com.johnnym.pointgraph.utils.convertDpToPixel
+import com.johnnym.pointgraph.utils.getXPosition
+import com.johnnym.pointgraph.utils.setXMiddle
+import com.johnnym.pointgraph.utils.setYMiddle
 import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 

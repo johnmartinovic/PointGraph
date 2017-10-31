@@ -1,4 +1,4 @@
-package com.johnnym.lagrange.sample
+package com.johnnym.pointgraph.sample
 
 import android.app.Activity
 import android.app.Dialog
