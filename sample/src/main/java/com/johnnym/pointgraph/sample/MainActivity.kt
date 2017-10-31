@@ -9,7 +9,6 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import com.johnnym.pointgraph.LaGrange
 import com.johnnym.pointgraph.Range
 import com.johnnym.pointgraph.RangeData
-import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,32 +55,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setLaGrangeData() {
-        val rangeDataList = ArrayList<Range>()
-        rangeDataList.add(Range(0f, 20f, 0f))
-        rangeDataList.add(Range(21f, 40f, 30f))
-        rangeDataList.add(Range(41f, 60f, 50f))
-        rangeDataList.add(Range(61f, 80f, 30f))
-        rangeDataList.add(Range(81f, 100f, 60f))
-        rangeDataList.add(Range(101f, 120f, 60f))
-        rangeDataList.add(Range(121f, 140f, 55f))
-        rangeDataList.add(Range(141f, 160f, 70f))
-        rangeDataList.add(Range(161f, 180f, 75f))
-        rangeDataList.add(Range(181f, 200f, 75f))
-        rangeDataList.add(Range(200f, 220f, 80f))
-        rangeDataList.add(Range(221f, 240f, 100f))
-        rangeDataList.add(Range(241f, 260f, 95f))
-        rangeDataList.add(Range(261f, 280f, 98f))
-        rangeDataList.add(Range(281f, 300f, 95f))
-        rangeDataList.add(Range(300f, 320f, 90f))
-        rangeDataList.add(Range(321f, 340f, 90f))
-        rangeDataList.add(Range(341f, 360f, 85f))
-        rangeDataList.add(Range(361f, 380f, 80f))
-        rangeDataList.add(Range(381f, 400f, 20f))
-        rangeDataList.add(Range(400f, 420f, 10f))
-        rangeDataList.add(Range(421f, 440f, 1f))
-        rangeDataList.add(Range(441f, 460f, 2f))
-        rangeDataList.add(Range(461f, 480f, 0f))
-        rangeDataList.add(Range(481f, 500f, 0f))
+        val rangeDataList = listOf(
+                Range(0f, 20f, 0f),
+                Range(21f, 40f, 30f),
+                Range(41f, 60f, 50f),
+                Range(61f, 80f, 30f),
+                Range(81f, 100f, 60f),
+                Range(101f, 120f, 60f),
+                Range(121f, 140f, 55f),
+                Range(141f, 160f, 70f),
+                Range(161f, 180f, 75f),
+                Range(181f, 200f, 75f),
+                Range(200f, 220f, 80f),
+                Range(221f, 240f, 100f),
+                Range(241f, 260f, 95f),
+                Range(261f, 280f, 98f),
+                Range(281f, 300f, 95f),
+                Range(300f, 320f, 90f),
+                Range(321f, 340f, 90f),
+                Range(341f, 360f, 85f),
+                Range(361f, 380f, 80f),
+                Range(381f, 400f, 20f),
+                Range(400f, 420f, 10f),
+                Range(421f, 440f, 1f),
+                Range(441f, 460f, 2f),
+                Range(461f, 480f, 0f),
+                Range(481f, 500f, 0f))
 
         rangeData = RangeData(rangeDataList)
         rangeData?.let { rangeData ->
