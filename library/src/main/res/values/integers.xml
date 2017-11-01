@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="sgrs__default_line_middle_points_num">4</integer>
+    <integer name="pg__default_line_middle_points_num">4</integer>
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="sgrs__sample_line_thickness">2dp</dimen>
-    <dimen name="sgrs__sample_selected_line_thickness">6dp</dimen>
+    <dimen name="pg__sample_line_thickness">2dp</dimen>
+    <dimen name="pg__sample_selected_line_thickness">6dp</dimen>
 </resources>

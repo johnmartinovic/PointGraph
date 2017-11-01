@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="sgrs__LaGrange">
-        <attr name="sgrs__line_color" format="color"/>
-        <attr name="sgrs__line_thickness" format="dimension"/>
-        <attr name="sgrs__selected_line_color" format="color"/>
-        <attr name="sgrs__selected_line_thickness" format="dimension"/>
-        <attr name="sgrs__selector_color" format="color"/>
-        <attr name="sgrs__selector_border_color" format="color"/>
-        <attr name="sgrs__text_color" format="color"/>
-        <attr name="sgrs__graph_color" format="color"/>
-        <attr name="sgrs__selected_graph_color" format="color"/>
-        <attr name="sgrs__line_middle_points_num" format="integer"/>
-        <attr name="sgrs__animate_selector_changes" format="boolean"/>
+    <declare-styleable name="pg__LaGrange">
+        <attr name="pg__line_color" format="color"/>
+        <attr name="pg__line_thickness" format="dimension"/>
+        <attr name="pg__selected_line_color" format="color"/>
+        <attr name="pg__selected_line_thickness" format="dimension"/>
+        <attr name="pg__selector_color" format="color"/>
+        <attr name="pg__selector_border_color" format="color"/>
+        <attr name="pg__text_color" format="color"/>
+        <attr name="pg__graph_color" format="color"/>
+        <attr name="pg__selected_graph_color" format="color"/>
+        <attr name="pg__line_middle_points_num" format="integer"/>
+        <attr name="pg__animate_selector_changes" format="boolean"/>
     </declare-styleable>
 </resources>

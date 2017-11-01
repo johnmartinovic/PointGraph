@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.johnnym.pointgraph.sample.MainActivity">
+    tools:context="com.johnnym.pointgraph.sample.LaGrangeActivity">
 
     <EditText
         android:id="@+id/et_min_value"
@@ -43,16 +43,16 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_approx_results_num"
-        app:sgrs__graph_color="@color/sample_graph_color"
-        app:sgrs__line_color="@color/sample_line_color"
-        app:sgrs__line_middle_points_num="@integer/sample_line_middle_points_num"
-        app:sgrs__line_thickness="@dimen/sgrs__sample_line_thickness"
-        app:sgrs__selected_graph_color="@color/sample_selected_graph_color"
-        app:sgrs__selected_line_color="@color/sample_selected_line_color"
-        app:sgrs__selected_line_thickness="@dimen/sgrs__sample_selected_line_thickness"
-        app:sgrs__selector_border_color="@color/sample_selector_border_color"
-        app:sgrs__selector_color="@color/sample_selector_color"
-        app:sgrs__text_color="@color/sample_text_color"/>
+        app:pg__graph_color="@color/sample_graph_color"
+        app:pg__line_color="@color/sample_line_color"
+        app:pg__line_middle_points_num="@integer/sample_line_middle_points_num"
+        app:pg__line_thickness="@dimen/pg__sample_line_thickness"
+        app:pg__selected_graph_color="@color/sample_selected_graph_color"
+        app:pg__selected_line_color="@color/sample_selected_line_color"
+        app:pg__selected_line_thickness="@dimen/pg__sample_selected_line_thickness"
+        app:pg__selector_border_color="@color/sample_selector_border_color"
+        app:pg__selector_color="@color/sample_selector_color"
+        app:pg__text_color="@color/sample_text_color"/>
 
     <Button
         android:id="@+id/btn_set_data"

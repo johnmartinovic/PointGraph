@@ -9,8 +9,9 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import com.johnnym.pointgraph.LaGrange
 import com.johnnym.pointgraph.Range
 import com.johnnym.pointgraph.RangeData
+import com.johnnym.pointgraph.sample.common.bindView
 
-class MainActivity : AppCompatActivity() {
+class LaGrangeActivity : AppCompatActivity() {
 
     private val laGrange: LaGrange by bindView(R.id.la_grange)
     private val minValueEditText: EditText by bindView(R.id.et_min_value)

@@ -12,7 +12,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion "26.0.2"
 
-    resourcePrefix 'sgrs__'
+    resourcePrefix 'pg__'
 
     defaultConfig {
         minSdkVersion 15

@@ -140,41 +140,41 @@ class LaGrange @JvmOverloads constructor(
 
     init {
         // Calculate view dimensions from the given attributes
-        val attributes = context.obtainStyledAttributes(attrs, R.styleable.sgrs__LaGrange, defStyleAttr, 0)
+        val attributes = context.obtainStyledAttributes(attrs, R.styleable.pg__LaGrange, defStyleAttr, 0)
         try {
             lineColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__line_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_line_color))
+                    R.styleable.pg__LaGrange_pg__line_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_line_color))
             lineThickness = attributes.getDimension(
-                    R.styleable.sgrs__LaGrange_sgrs__line_thickness,
-                    resources.getDimension(R.dimen.sgrs__default_line_thickness))
+                    R.styleable.pg__LaGrange_pg__line_thickness,
+                    resources.getDimension(R.dimen.pg__default_line_thickness))
             selectedLineColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__selected_line_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selectors_connect_line_color))
+                    R.styleable.pg__LaGrange_pg__selected_line_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_selectors_connect_line_color))
             selectedLineThickness = attributes.getDimension(
-                    R.styleable.sgrs__LaGrange_sgrs__selected_line_thickness,
-                    resources.getDimension(R.dimen.sgrs__default_selected_line_thickness))
+                    R.styleable.pg__LaGrange_pg__selected_line_thickness,
+                    resources.getDimension(R.dimen.pg__default_selected_line_thickness))
             selectorColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__selector_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selector_color))
+                    R.styleable.pg__LaGrange_pg__selector_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_selector_color))
             selectorBorderColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__selector_border_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selector_border_color))
+                    R.styleable.pg__LaGrange_pg__selector_border_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_selector_border_color))
             textColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__text_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_text_color))
+                    R.styleable.pg__LaGrange_pg__text_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_text_color))
             graphColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__graph_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_graph_color))
+                    R.styleable.pg__LaGrange_pg__graph_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_graph_color))
             selectedGraphColor = attributes.getColor(
-                    R.styleable.sgrs__LaGrange_sgrs__selected_graph_color,
-                    ContextCompat.getColor(getContext(), R.color.sgrs__default_selected_graph_color))
+                    R.styleable.pg__LaGrange_pg__selected_graph_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_selected_graph_color))
             lineMiddlePointsNum = attributes.getInteger(
-                    R.styleable.sgrs__LaGrange_sgrs__line_middle_points_num,
-                    resources.getInteger(R.integer.sgrs__default_line_middle_points_num))
+                    R.styleable.pg__LaGrange_pg__line_middle_points_num,
+                    resources.getInteger(R.integer.pg__default_line_middle_points_num))
             animateSelectorChanges = attributes.getBoolean(
-                    R.styleable.sgrs__LaGrange_sgrs__animate_selector_changes,
-                    resources.getBoolean(R.bool.sgrs__default_animate_selector_changes))
+                    R.styleable.pg__LaGrange_pg__animate_selector_changes,
+                    resources.getBoolean(R.bool.pg__default_animate_selector_changes))
         } finally {
             attributes.recycle()
         }

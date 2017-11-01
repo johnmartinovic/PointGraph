@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <bool name="sgrs__default_animate_selector_changes">true</bool>
+    <bool name="pg__default_animate_selector_changes">true</bool>
 </resources>
