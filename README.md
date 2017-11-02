@@ -4,9 +4,9 @@ PointGraph library is a group of optimized and well-designed interactive Android
 [![Release](https://jitpack.io/v/johnnymartinovic/PointGraph.svg)](https://jitpack.io/#johnnymartinovic/PointGraph)
 
 ## Demos
-| LaGrange                    |
-|:---------------------------:|
-|![](assets/Demo_LaGrange.gif)|
+| LaGrange                    | GraphEnd                    |
+|:---------------------------:|:---------------------------:|
+|![](assets/Demo_LaGrange.gif)|![](assets/Demo_GraphEnd.gif)|
 
 ## Download
 This library is available in JitPack.io repository:
