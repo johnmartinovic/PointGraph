@@ -47,6 +47,7 @@ class GraphEndActivity : AppCompatActivity() {
         }
 
         startTimeButton.setOnClickListener {
+            countDownTimer?.cancel()
             initCountDownTimer()
             countDownTimer?.start()
         }
