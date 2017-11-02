@@ -27,6 +27,7 @@ class GraphEnd @JvmOverloads constructor(
         defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
     companion object {
+
         // GraphEnd view settings
         private val MIN_VIEW_WIDTH: Int = 200
         private val MIN_VIEW_HEIGHT: Int = 150
@@ -36,6 +37,10 @@ class GraphEnd @JvmOverloads constructor(
         private val X_AXIS_LEFT_RIGHT_PADDING: Int = 16
         private val SELECTOR_DIAMETER: Int = 16
         private val SELECTOR_TOUCH_DIAMETER: Int = 64
+
+        // Graph Y Axis Scale Factor
+        private val GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE: Float = 0f
+        private val GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE: Float = 1f
     }
 
     // Constant graph values
@@ -74,7 +79,9 @@ class GraphEnd @JvmOverloads constructor(
     private val splineGraphPath: Path
     private val selectorAnimator: ValueAnimator
     private val graphScaleAnimator: ValueAnimator
-    private var graphYAxisScaleFactor: Float = 1f
+
+    private var graphYAxisScaleFactor: Float = GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE
+    private var graphIsShown: Boolean = true
 
     // View's dimensions and sizes, positions etc.
     private var graphTopDrawYPosition: Float = 0f
@@ -173,8 +180,13 @@ class GraphEnd @JvmOverloads constructor(
 
         selectorAnimator = ValueAnimator()
         selectorAnimator.duration = 150
+
         graphScaleAnimator = ValueAnimator()
         graphScaleAnimator.duration = 300
+        graphScaleAnimator.addUpdateListener { animation ->
+            graphYAxisScaleFactor = animation.animatedValue as Float
+            invalidate()
+        }
 
         // Init draw settings
         xAxisRectPaint = Paint()
@@ -212,12 +224,7 @@ class GraphEnd @JvmOverloads constructor(
     fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
         refreshGraphValues(pointsData)
         if (animated) {
-            graphScaleAnimator.setFloatValues(0f, 1f)
-            graphScaleAnimator.addUpdateListener { animation ->
-                graphYAxisScaleFactor = animation.animatedValue as Float
-                invalidate()
-            }
-            graphScaleAnimator.start()
+            showGraph()
         } else {
             invalidate()
         }
@@ -249,6 +256,28 @@ class GraphEnd @JvmOverloads constructor(
 
     fun removeSelectorListener(selectorListener: SelectorListener) {
         selectorListeners.remove(selectorListener)
+    }
+
+    fun toggleGraphVisibility() {
+        if (graphIsShown) {
+            hideGraph()
+        } else {
+            showGraph()
+        }
+    }
+
+    fun showGraph() {
+        graphScaleAnimator.cancel()
+        graphScaleAnimator.setFloatValues(graphYAxisScaleFactor, GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE)
+        graphScaleAnimator.start()
+        graphIsShown = true
+    }
+
+    fun hideGraph() {
+        graphScaleAnimator.cancel()
+        graphScaleAnimator.setFloatValues(graphYAxisScaleFactor, GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE)
+        graphScaleAnimator.start()
+        graphIsShown = false
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -320,21 +349,21 @@ class GraphEnd @JvmOverloads constructor(
                 }
             }
 
-            var newXPosition = event.x
             if (selectorSelected) {
+                var newXPosition = event.x
                 newXPosition = Math.max(newXPosition, graphMinXPosition)
                 newXPosition = Math.min(newXPosition, graphMaxXPosition)
                 setSelectorXPosition(newXPosition)
                 updateSelectorValue(pointsData)
-            }
 
-            // If selector is selected, then user must be able to move his finger anywhere
-            // on the screen and still have control of the selected selector.
-            if (selectorSelected) {
+                // If selector is selected, then user must be able to move his finger anywhere
+                // on the screen and still have control of the selected selector.
                 parent.requestDisallowInterceptTouchEvent(true)
-            }
 
-            return true
+                return true
+            } else {
+                return false
+            }
         }
                 ?: return false
     }
