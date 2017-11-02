@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import com.johnnym.pointgraph.*
@@ -13,6 +14,12 @@ import com.johnnym.pointgraph.sample.common.bindView
 class GraphEndActivity : AppCompatActivity() {
 
     companion object {
+
+        private val TOTAL_TIME: Long = 20
+
+        private val S_TO_MS_FACTOR: Long = 1000
+
+        private val REFRESH_TIME_MS: Long = 50
 
         fun getIntent(context: Context): Intent {
             return Intent(context, GraphEndActivity::class.java)
@@ -25,41 +32,37 @@ class GraphEndActivity : AppCompatActivity() {
     private val stopTimeButton: Button by bindView(R.id.btn_stop_time)
 
     private lateinit var pointsData: PointsData
-    private lateinit var countDownTimer: CountDownTimer
 
-    private var totalTime: Long = 0
+    private var countDownTimer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_graph_end)
 
-        initCountDownTimer()
-
         initGraphEndSelectorListener()
 
         setGraphEndData()
 
-        totalTime = ((pointsData.maxX - pointsData.minX) * 1000).toLong()
-
         startTimeButton.setOnClickListener {
             initCountDownTimer()
-            countDownTimer.start()
+            countDownTimer?.start()
         }
         stopTimeButton.setOnClickListener {
-            countDownTimer.cancel()
+            countDownTimer?.cancel()
         }
     }
 
     private fun initCountDownTimer() {
         countDownTimer = object : CountDownTimer(
-                totalTime - graphEnd.selectorValue.toLong(),
-                50.toLong()) {
+                (TOTAL_TIME.toFloat() * S_TO_MS_FACTOR - graphEnd.selectorValue * S_TO_MS_FACTOR).toLong(),
+                REFRESH_TIME_MS) {
             override fun onFinish() {
-                setGraphEndSelectorValue(totalTime.toFloat() / 1000)
+                setGraphEndSelectorValue(TOTAL_TIME.toFloat())
             }
 
             override fun onTick(millisUntilFinished: Long) {
-                setGraphEndSelectorValue((totalTime - millisUntilFinished).toFloat() / 1000)
+                setGraphEndSelectorValue(
+                        (TOTAL_TIME.toFloat() * S_TO_MS_FACTOR - millisUntilFinished.toFloat()) / S_TO_MS_FACTOR)
             }
         }
     }
@@ -97,11 +100,11 @@ class GraphEndActivity : AppCompatActivity() {
     }
 
     private fun initGraphEndSelectorListener() {
-        graphEnd.addSelectorChangeListener(selectorPositionChangeListener)
+        graphEnd.addSelectorListener(selectorListener)
     }
 
     private fun removeLaGrangeSelectorListeners() {
-        graphEnd.removeSelectorChangeListener(selectorPositionChangeListener)
+        graphEnd.removeSelectorListener(selectorListener)
     }
 
     private fun updateCurrentTimerStateTextView(newValue: Float) {
@@ -110,9 +113,18 @@ class GraphEndActivity : AppCompatActivity() {
                 newValue)
     }
 
-    private val selectorPositionChangeListener = object : GraphEnd.SelectorPositionChangeListener {
+    private val selectorListener = object : GraphEnd.SelectorListener {
+
+        override fun onSelectorPressed() {
+            countDownTimer?.cancel()
+        }
+
         override fun onValueChanged(newValue: Float) {
             updateCurrentTimerStateTextView(newValue)
+        }
+
+        override fun onSelectorReleased() {
+            // do nothing
         }
     }
 }

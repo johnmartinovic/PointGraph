@@ -459,7 +459,7 @@ class LaGrange @JvmOverloads constructor(
                     newXPosition = maxSelector.getXPosition()
                 }
                 setMinSelectorXPosition(newXPosition)
-                dispatchOnMinSelectorPositionChanged(pointsData)
+                updateSelectorValues(pointsData)
             } else if (maxSelectorSelected) {
                 if (newXPosition > graphMaxXPosition) {
                     newXPosition = graphMaxXPosition
@@ -467,7 +467,7 @@ class LaGrange @JvmOverloads constructor(
                     newXPosition = minSelector.getXPosition()
                 }
                 setMaxSelectorXPosition(newXPosition)
-                dispatchOnMaxSelectorPositionChanged(pointsData)
+                updateSelectorValues(pointsData)
             }
 
             // If any of the selectors is selected, then user must be able to move his finger anywhere
@@ -598,14 +598,6 @@ class LaGrange @JvmOverloads constructor(
             setMaxSelectorShapes(x)
             invalidate()
         }
-    }
-
-    private fun dispatchOnMinSelectorPositionChanged(pointsData: PointsData) {
-        updateSelectorValues(pointsData)
-    }
-
-    private fun dispatchOnMaxSelectorPositionChanged(pointsData: PointsData) {
-        updateSelectorValues(pointsData)
     }
 
     private fun updateSelectorValues(pointsData: PointsData) {

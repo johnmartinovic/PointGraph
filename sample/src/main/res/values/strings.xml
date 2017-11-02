@@ -10,7 +10,7 @@
     <string name="reset_data_button_text">Reset data</string>
 
     <!-- GraphEnd demo screen -->
-    <string name="start_time_button_text">Start time</string>
-    <string name="stop_time_button_text">Stop time</string>
+    <string name="start_time_button_text">Resume time</string>
+    <string name="stop_time_button_text">Pause time</string>
 
 </resources>

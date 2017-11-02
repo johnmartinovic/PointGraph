@@ -36,7 +36,6 @@
         <attr name="pg__selector_border_color"/>
         <attr name="pg__graph_color"/>
         <attr name="pg__selected_graph_color"/>
-        <attr name="pg__animate_selector_changes"/>
     </declare-styleable>
 
 </resources>

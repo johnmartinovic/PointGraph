@@ -47,7 +47,6 @@ class GraphEnd @JvmOverloads constructor(
     private val selectorBorderColor: Int
     private val graphColor: Int
     private val selectedGraphColor: Int
-    private val animateSelectorChanges: Boolean
 
     private val minViewWidth: Float
     private val minViewHeight: Float
@@ -95,16 +94,14 @@ class GraphEnd @JvmOverloads constructor(
 
     // Data variables
     private var pointsData: PointsData? = null
-    private val selectorPositionChangeListeners = ArrayList<SelectorPositionChangeListener>()
+    private val selectorListeners = ArrayList<SelectorListener>()
 
     private var listenersEnabled = true
 
     // True selector value (set from outside by setters or by touch events)
     var selectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
-            for (selectorPositionChangeListener in selectorPositionChangeListeners) {
-                selectorPositionChangeListener.onValueChanged(new)
-            }
+            selectorListeners.dispatchOnValueChangedEvent(new)
         }
     }
         private set
@@ -137,9 +134,6 @@ class GraphEnd @JvmOverloads constructor(
             selectedGraphColor = attributes.getColor(
                     R.styleable.pg__GraphEnd_pg__selected_graph_color,
                     ContextCompat.getColor(getContext(), R.color.pg__default_selected_graph_color))
-            animateSelectorChanges = attributes.getBoolean(
-                    R.styleable.pg__GraphEnd_pg__animate_selector_changes,
-                    resources.getBoolean(R.bool.pg__default_animate_selector_changes))
         } finally {
             attributes.recycle()
         }
@@ -229,7 +223,7 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
-    fun setSelectorValue(value: Float?) {
+    fun setSelectorValue(value: Float?, animateSelectorChanges: Boolean = false) {
         // if user is interacting with the view, do not set values from outside
         if (selectorSelected) {
             return
@@ -249,12 +243,12 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
-    fun addSelectorChangeListener(selectorPositionChangeListener: SelectorPositionChangeListener) {
-        selectorPositionChangeListeners.add(selectorPositionChangeListener)
+    fun addSelectorListener(selectorListener: SelectorListener) {
+        selectorListeners.add(selectorListener)
     }
 
-    fun removeSelectorChangeListener(selectorPositionChangeListener: SelectorPositionChangeListener) {
-        selectorPositionChangeListeners.remove(selectorPositionChangeListener)
+    fun removeSelectorListener(selectorListener: SelectorListener) {
+        selectorListeners.remove(selectorListener)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -315,10 +309,14 @@ class GraphEnd @JvmOverloads constructor(
                     actionDownYValue = event.y
                     if (selectorTouchField.contains(actionDownXValue, actionDownYValue)) {
                         selectorSelected = true
+                        selectorListeners.dispatchOnSelectorPressedEvent()
                     }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    selectorSelected = false
+                    if (selectorSelected) {
+                        selectorSelected = false
+                        selectorListeners.dispatchOnSelectorReleasedEvent()
+                    }
                 }
             }
 
@@ -327,7 +325,7 @@ class GraphEnd @JvmOverloads constructor(
                 newXPosition = Math.max(newXPosition, graphMinXPosition)
                 newXPosition = Math.min(newXPosition, graphMaxXPosition)
                 setSelectorXPosition(newXPosition)
-                dispatchOnSelectorPositionChanged(pointsData)
+                updateSelectorValue(pointsData)
             }
 
             // If selector is selected, then user must be able to move his finger anywhere
@@ -430,10 +428,6 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
-    private fun dispatchOnSelectorPositionChanged(pointsData: PointsData) {
-        updateSelectorValue(pointsData)
-    }
-
     private fun updateSelectorValue(pointsData: PointsData) {
         selectorValue = getXValueFromXGraphPosition(pointsData, selector.getXPosition())
     }
@@ -497,8 +491,25 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
-    interface SelectorPositionChangeListener {
+    interface SelectorListener {
+
+        fun onSelectorPressed()
+
         fun onValueChanged(newValue: Float)
+
+        fun onSelectorReleased()
+    }
+
+    private fun ArrayList<SelectorListener>.dispatchOnSelectorPressedEvent() {
+        this.forEach { it.onSelectorPressed() }
+    }
+
+    private fun ArrayList<SelectorListener>.dispatchOnValueChangedEvent(newValue: Float) {
+        this.forEach { it.onValueChanged(newValue) }
+    }
+
+    private fun ArrayList<SelectorListener>.dispatchOnSelectorReleasedEvent() {
+        this.forEach { it.onSelectorReleased() }
     }
 
     class SavedState : BaseSavedState {
