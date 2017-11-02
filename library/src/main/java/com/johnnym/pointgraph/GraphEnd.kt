@@ -36,7 +36,7 @@ class GraphEnd @JvmOverloads constructor(
         private val LINE_Y_POSITION_FROM_BOTTOM: Int = 50
         private val X_AXIS_LEFT_RIGHT_PADDING: Int = 16
         private val SELECTOR_DIAMETER: Int = 16
-        private val SELECTOR_TOUCH_DIAMETER: Int = 64
+        private val SELECTION_FIELD_HEIGHT: Int = 64
 
         // Graph Y Axis Scale Factor
         private val GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE: Float = 0f
@@ -60,7 +60,7 @@ class GraphEnd @JvmOverloads constructor(
     private val lineYPositionFromBottom: Float
     private val xAxisLeftRightPadding: Float
     private val selectorDiameter: Float
-    private val selectorTouchDiameter: Float
+    private val selectionFieldHeight: Float
 
     // Graph drawing objects
     private val xAxisRectPaint: Paint
@@ -71,7 +71,7 @@ class GraphEnd @JvmOverloads constructor(
     private val selectedGraphPaint: Paint
 
     private val selector: RectF
-    private val selectorTouchField: RectF
+    private val selectionField: RectF
     private val xAxisRect: RectF
     private val graphBoundsRect: RectF
     private val selectedGraphBoundsRect: RectF
@@ -152,7 +152,7 @@ class GraphEnd @JvmOverloads constructor(
         lineYPositionFromBottom = convertDpToPixel(LINE_Y_POSITION_FROM_BOTTOM.toFloat(), context)
         xAxisLeftRightPadding = convertDpToPixel(X_AXIS_LEFT_RIGHT_PADDING.toFloat(), context)
         selectorDiameter = convertDpToPixel(SELECTOR_DIAMETER.toFloat(), context)
-        selectorTouchDiameter = convertDpToPixel(SELECTOR_TOUCH_DIAMETER.toFloat(), context)
+        selectionFieldHeight = convertDpToPixel(SELECTION_FIELD_HEIGHT.toFloat(), context)
 
         // Init drawing objects
         selector = RectF(
@@ -160,13 +160,13 @@ class GraphEnd @JvmOverloads constructor(
                 0f,
                 selectorDiameter,
                 selectorDiameter)
-        selectorTouchField = RectF(
-                0f,
-                0f,
-                selectorTouchDiameter,
-                selectorTouchDiameter)
 
         xAxisRect = RectF(0f, 0f, 0f, lineThickness)
+        selectionField = RectF(
+                0f,
+                0f,
+                0f,
+                selectionFieldHeight)
 
         graphBoundsRect = RectF()
         selectedGraphBoundsRect = RectF()
@@ -303,6 +303,10 @@ class GraphEnd @JvmOverloads constructor(
         xAxisRect.right = viewEndX - xAxisLeftRightPadding
         xAxisRect.setYMiddle(lineYPosition)
 
+        selectionField.left = xAxisRect.left - selectionFieldHeight / 2
+        selectionField.right = xAxisRect.right + selectionFieldHeight / 2
+        selectionField.setYMiddle(lineYPosition)
+
         graphMinXPosition = xAxisRect.left
         graphMaxXPosition = xAxisRect.right
 
@@ -315,7 +319,6 @@ class GraphEnd @JvmOverloads constructor(
         selectedLine.right = selectedGraphBoundsRect.right
 
         selector.setYMiddle(lineYPosition)
-        selectorTouchField.setYMiddle(lineYPosition)
         selectedLine.setYMiddle(lineYPosition)
 
         pointsData?.let { pointsData ->
@@ -336,7 +339,7 @@ class GraphEnd @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     actionDownXValue = event.x
                     actionDownYValue = event.y
-                    if (selectorTouchField.contains(actionDownXValue, actionDownYValue)) {
+                    if (selectionField.contains(actionDownXValue, actionDownYValue)) {
                         selectorSelected = true
                         selectorListeners.dispatchOnSelectorPressedEvent()
                     }
@@ -441,7 +444,6 @@ class GraphEnd @JvmOverloads constructor(
             selectedGraphBoundsRect.right = x
             selectedLine.right = x
             selector.setXMiddle(x)
-            selectorTouchField.setXMiddle(x)
         }
 
         if (animated) {
