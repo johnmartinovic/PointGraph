@@ -25,20 +25,6 @@ class LaGrange @JvmOverloads constructor(
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
-    companion object {
-        // LaGrange view settings
-        private val MIN_VIEW_WIDTH: Int = 200
-        private val MIN_VIEW_HEIGHT: Int = 150
-        private val GRAPH_TOP_DRAW_POSITION_FROM_TOP: Int = 0
-        private val GRAPH_TOP_POSITION_FROM_TOP: Int = 20
-        private val LINE_Y_POSITION_FROM_BOTTOM: Int = 50
-        private val NUMBERS_Y_POSITION_FROM_BOTTOM: Int = 20
-        private val X_AXIS_LEFT_RIGHT_PADDING: Int = 16
-        private val POINT_INDICATOR_LENGTH: Int = 11
-        private val SELECTOR_DIAMETER: Int = 30
-        private val SELECTOR_TOUCH_DIAMETER: Int = 60
-    }
-
     // Constant graph values
     private val lineColor: Int
     private val lineThickness: Float
@@ -179,16 +165,16 @@ class LaGrange @JvmOverloads constructor(
             attributes.recycle()
         }
 
-        minViewWidth = convertDpToPixel(MIN_VIEW_WIDTH.toFloat(), context)
-        minViewHeight = convertDpToPixel(MIN_VIEW_HEIGHT.toFloat(), context)
-        graphTopDrawPositionFromTop = convertDpToPixel(GRAPH_TOP_DRAW_POSITION_FROM_TOP.toFloat(), context)
-        graphTopPositionFromTop = convertDpToPixel(GRAPH_TOP_POSITION_FROM_TOP.toFloat(), context)
-        lineYPositionFromBottom = convertDpToPixel(LINE_Y_POSITION_FROM_BOTTOM.toFloat(), context)
-        numbersYPositionFromBottom = convertDpToPixel(NUMBERS_Y_POSITION_FROM_BOTTOM.toFloat(), context)
-        xAxisLeftRightPadding = convertDpToPixel(X_AXIS_LEFT_RIGHT_PADDING.toFloat(), context)
-        pointIndicatorLength = convertDpToPixel(POINT_INDICATOR_LENGTH.toFloat(), context)
-        selectorDiameter = convertDpToPixel(SELECTOR_DIAMETER.toFloat(), context)
-        selectorTouchDiameter = convertDpToPixel(SELECTOR_TOUCH_DIAMETER.toFloat(), context)
+        minViewWidth = resources.getDimension(R.dimen.pg__la_grange_min_view_width)
+        minViewHeight = resources.getDimension(R.dimen.pg__la_grange_min_view_height)
+        graphTopDrawPositionFromTop = resources.getDimension(R.dimen.pg__la_grange_graph_top_draw_position_from_top)
+        graphTopPositionFromTop = resources.getDimension(R.dimen.pg__la_grange_graph_top_position_from_top)
+        lineYPositionFromBottom = resources.getDimension(R.dimen.pg__la_grange_line_y_position_from_bottom)
+        numbersYPositionFromBottom = resources.getDimension(R.dimen.pg__la_grange_numbers_y_position_from_bottom)
+        xAxisLeftRightPadding = resources.getDimension(R.dimen.pg__la_grange_x_axis_left_right_padding)
+        pointIndicatorLength = resources.getDimension(R.dimen.pg__la_grange_point_indicator_length)
+        selectorDiameter = resources.getDimension(R.dimen.pg__la_grange_selector_diameter)
+        selectorTouchDiameter = resources.getDimension(R.dimen.pg__la_grange_selector_touch_diameter)
 
         numbersPositions = FloatArray(lineMiddlePointsNum + 2)
 

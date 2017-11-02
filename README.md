@@ -32,6 +32,7 @@ dependencies {
 - Modify graph data and range values with included animation
 
 ## Usage
+### LaGrange
 ```xml
 <com.johnnym.pointgraph.LaGrange
     android:id="@+id/la_grange"
@@ -57,6 +58,34 @@ laGrange.addMinSelectorChangeListener(minSelectorPositionChangeListener)
 laGrange.addMaxSelectorChangeListener(maxSelectorPositionChangeListener)
 
 laGrange.setSelectorsValues(minValue, maxValue)
+```
+
+### GraphEnd
+```xml
+<com.johnnym.pointgraph.GraphEnd
+    android:id="@+id/graph_end"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+```
+
+```kotlin
+private val graphEnd: GraphEnd by bindView(R.id.graph_end)
+
+val points = listOf(
+    Point(0f, 200f),
+    Point(1f, 300f),
+    Point(2f, 420f),
+    Point(3f, 400f),
+    Point(4f, 390f),
+    Point(5f, 385f),
+    Point(6f, 390f),
+    Point(7f, 380f))
+
+graphEnd.setPointsData(PointsData(points))
+
+graphEnd.addSelectorListener(selectorListener)
+
+graphEnd.toggleGraphVisibility()
 ```
 
 Also, check out a [sample app](https://github.com/johnnymartinovic/PointGraph/tree/master/sample) included in this project to see how to use this library in a more advanced way.

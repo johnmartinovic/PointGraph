@@ -28,19 +28,10 @@ class GraphEnd @JvmOverloads constructor(
 
     companion object {
 
-        // GraphEnd view settings
-        private val MIN_VIEW_WIDTH: Int = 200
-        private val MIN_VIEW_HEIGHT: Int = 150
-        private val GRAPH_TOP_DRAW_POSITION_FROM_TOP: Int = 0
-        private val GRAPH_TOP_POSITION_FROM_TOP: Int = 20
-        private val LINE_Y_POSITION_FROM_BOTTOM: Int = 50
-        private val X_AXIS_LEFT_RIGHT_PADDING: Int = 16
-        private val SELECTOR_DIAMETER: Int = 16
-        private val SELECTION_FIELD_HEIGHT: Int = 64
-
         // Graph Y Axis Scale Factor
         private val GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE: Float = 0f
         private val GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE: Float = 1f
+
     }
 
     // Constant graph values
@@ -145,14 +136,14 @@ class GraphEnd @JvmOverloads constructor(
             attributes.recycle()
         }
 
-        minViewWidth = convertDpToPixel(MIN_VIEW_WIDTH.toFloat(), context)
-        minViewHeight = convertDpToPixel(MIN_VIEW_HEIGHT.toFloat(), context)
-        graphTopDrawPositionFromTop = convertDpToPixel(GRAPH_TOP_DRAW_POSITION_FROM_TOP.toFloat(), context)
-        graphTopPositionFromTop = convertDpToPixel(GRAPH_TOP_POSITION_FROM_TOP.toFloat(), context)
-        lineYPositionFromBottom = convertDpToPixel(LINE_Y_POSITION_FROM_BOTTOM.toFloat(), context)
-        xAxisLeftRightPadding = convertDpToPixel(X_AXIS_LEFT_RIGHT_PADDING.toFloat(), context)
-        selectorDiameter = convertDpToPixel(SELECTOR_DIAMETER.toFloat(), context)
-        selectionFieldHeight = convertDpToPixel(SELECTION_FIELD_HEIGHT.toFloat(), context)
+        minViewWidth = resources.getDimension(R.dimen.pg__graph_end_min_view_width)
+        minViewHeight = resources.getDimension(R.dimen.pg__graph_end_min_view_height)
+        graphTopDrawPositionFromTop = resources.getDimension(R.dimen.pg__graph_end_graph_top_draw_position_from_top)
+        graphTopPositionFromTop = resources.getDimension(R.dimen.pg__graph_end_graph_top_position_from_top)
+        lineYPositionFromBottom = resources.getDimension(R.dimen.pg__graph_end_line_y_position_from_bottom)
+        xAxisLeftRightPadding = resources.getDimension(R.dimen.pg__graph_end_x_axis_left_right_padding)
+        selectorDiameter = resources.getDimension(R.dimen.pg__graph_end_selector_diameter)
+        selectionFieldHeight = resources.getDimension(R.dimen.pg__graph_end_selection_field_height)
 
         // Init drawing objects
         selector = RectF(
