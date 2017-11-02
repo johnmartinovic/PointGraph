@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="pg__sample_line_thickness">2dp</dimen>
-    <dimen name="pg__sample_selected_line_thickness">6dp</dimen>
+
+    <dimen name="main_demo_button_width">240dp</dimen>
+
+    <dimen name="la_grange_demo_line_thickness">2dp</dimen>
+    <dimen name="la_grange_demo_selected_line_thickness">6dp</dimen>
+
+    <dimen name="graph_end_demo_line_thickness">4dp</dimen>
+    <dimen name="graph_end_demo_selected_line_thickness">4dp</dimen>
+
 </resources>

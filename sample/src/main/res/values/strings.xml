@@ -1,6 +1,16 @@
 <resources>
-    <string name="app_name">LaGrange</string>
 
+    <!-- Main demo screen -->
+    <string name="app_name">PointGraph Demo</string>
+    <string name="la_grange_demo_label_text">LaGrange Demo</string>
+    <string name="graph_end_demo_label_text">GraphEnd Demo</string>
+
+    <!-- LaGrange demo screen -->
     <string name="set_data_button_text">Set data</string>
     <string name="reset_data_button_text">Reset data</string>
+
+    <!-- GraphEnd demo screen -->
+    <string name="start_time_button_text">Start time</string>
+    <string name="stop_time_button_text">Stop time</string>
+
 </resources>

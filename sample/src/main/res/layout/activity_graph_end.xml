@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/general_background_color"
+    tools:context="com.johnnym.pointgraph.sample.GraphEndActivity">
+
+    <TextView
+        android:id="@+id/tv_current_time_state"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:gravity="center"
+        android:textSize="48sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="16"/>
+
+    <com.johnnym.pointgraph.GraphEnd
+        android:id="@+id/graph_end"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="@id/tv_current_time_state"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:pg__graph_color="@color/graph_end_demo_graph_color"
+        app:pg__line_color="@color/graph_end_demo_line_color"
+        app:pg__line_thickness="@dimen/graph_end_demo_line_thickness"
+        app:pg__selected_graph_color="@color/graph_end_demo_selected_graph_color"
+        app:pg__selected_line_color="@color/graph_end_demo_selected_line_color"
+        app:pg__selected_line_thickness="@dimen/graph_end_demo_selected_line_thickness"
+        app:pg__selector_border_color="@color/graph_end_demo_selector_border_color"
+        app:pg__selector_color="@color/graph_end_demo_selector_color"/>
+
+    <Button
+        android:id="@+id/btn_start_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/start_time_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/btn_stop_time"/>
+
+    <Button
+        android:id="@+id/btn_stop_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_time_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/btn_start_time"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+</android.support.constraint.ConstraintLayout>

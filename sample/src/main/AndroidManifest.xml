@@ -9,13 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.johnnym.pointgraph.sample.LaGrangeActivity">
+        <activity android:name="com.johnnym.pointgraph.sample.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.johnnym.pointgraph.sample.LaGrangeActivity"
+            android:label="@string/la_grange_demo_label_text"/>
+        <activity
+            android:name="com.johnnym.pointgraph.sample.GraphEndActivity"
+            android:label="@string/graph_end_demo_label_text"/>
     </application>
 
 </manifest>

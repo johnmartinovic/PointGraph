@@ -1,5 +1,7 @@
 package com.johnnym.pointgraph.sample
 
+import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -12,6 +14,13 @@ import com.johnnym.pointgraph.RangeData
 import com.johnnym.pointgraph.sample.common.bindView
 
 class LaGrangeActivity : AppCompatActivity() {
+
+    companion object {
+
+        fun getIntent(context: Context): Intent {
+            return Intent(context, LaGrangeActivity::class.java)
+        }
+    }
 
     private val laGrange: LaGrange by bindView(R.id.la_grange)
     private val minValueEditText: EditText by bindView(R.id.et_min_value)
@@ -27,13 +36,13 @@ class LaGrangeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_la_grange)
 
         RxTextView.textChanges(minValueEditText)
                 .filter { !changingDoneByLaGrange }
                 .subscribe {
                     changingDoneByEditTexts = true
-                    updatePriceGraph()
+                    updateLaGrangeSelectorsValues()
                     changingDoneByEditTexts = false
                 }
 
@@ -41,7 +50,7 @@ class LaGrangeActivity : AppCompatActivity() {
                 .filter { !changingDoneByLaGrange }
                 .subscribe {
                     changingDoneByEditTexts = true
-                    updatePriceGraph()
+                    updateLaGrangeSelectorsValues()
                     changingDoneByEditTexts = false
                 }
 
@@ -77,7 +86,7 @@ class LaGrangeActivity : AppCompatActivity() {
                 Range(341f, 360f, 85f),
                 Range(361f, 380f, 80f),
                 Range(381f, 400f, 20f),
-                Range(400f, 420f, 10f),
+                Range(401f, 420f, 10f),
                 Range(421f, 440f, 1f),
                 Range(441f, 460f, 2f),
                 Range(461f, 480f, 0f),
@@ -104,7 +113,7 @@ class LaGrangeActivity : AppCompatActivity() {
         updateApproxResultsNumTextView()
     }
 
-    private fun updatePriceGraph() {
+    private fun updateLaGrangeSelectorsValues() {
         val minValue: Float? = minValueEditText.text.toString().toFloatOrNull()
         val maxValue: Float? = maxValueEditText.text.toString().toFloatOrNull()
 

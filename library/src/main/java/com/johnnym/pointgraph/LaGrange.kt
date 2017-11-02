@@ -68,7 +68,7 @@ class LaGrange @JvmOverloads constructor(
     private val textPaint: TextPaint
     private val selectorPaint: Paint
     private val selectorBorderPaint: Paint
-    private val selectorsConnectLinePaint: Paint
+    private val selectedLinePaint: Paint
     private val graphPaint: Paint
     private val selectedGraphPaint: Paint
 
@@ -82,7 +82,7 @@ class LaGrange @JvmOverloads constructor(
     private val xAxisMiddlePointsRects: List<RectF>
     private val graphBoundsRect: RectF
     private val selectedGraphBoundsRect: RectF
-    private val selectorConnectLine: RectF
+    private val selectedLine: RectF
     private val splineGraphPath: Path
     private val numbers: FloatArray
     private val minSelectorAnimator: ValueAnimator
@@ -150,7 +150,7 @@ class LaGrange @JvmOverloads constructor(
                     resources.getDimension(R.dimen.pg__default_line_thickness))
             selectedLineColor = attributes.getColor(
                     R.styleable.pg__LaGrange_pg__selected_line_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_selectors_connect_line_color))
+                    ContextCompat.getColor(getContext(), R.color.pg__default_selected_line_color))
             selectedLineThickness = attributes.getDimension(
                     R.styleable.pg__LaGrange_pg__selected_line_thickness,
                     resources.getDimension(R.dimen.pg__default_selected_line_thickness))
@@ -214,7 +214,7 @@ class LaGrange @JvmOverloads constructor(
 
         graphBoundsRect = RectF()
         selectedGraphBoundsRect = RectF()
-        selectorConnectLine = RectF(
+        selectedLine = RectF(
                 0f,
                 0f,
                 0f,
@@ -252,10 +252,10 @@ class LaGrange @JvmOverloads constructor(
         selectorBorderPaint.color = selectorBorderColor
         selectorBorderPaint.strokeWidth = convertDpToPixel(2f, context)
 
-        selectorsConnectLinePaint = Paint()
-        selectorsConnectLinePaint.isAntiAlias = true
-        selectorsConnectLinePaint.style = Paint.Style.FILL
-        selectorsConnectLinePaint.color = selectedLineColor
+        selectedLinePaint = Paint()
+        selectedLinePaint.isAntiAlias = true
+        selectedLinePaint.style = Paint.Style.FILL
+        selectedLinePaint.color = selectedLineColor
 
         graphPaint = Paint()
         graphPaint.isAntiAlias = true
@@ -356,7 +356,7 @@ class LaGrange @JvmOverloads constructor(
         xAxisFirstPointRect.set(xAxisRect.left, xAxisRect.top, xAxisRect.left + lineThickness, xAxisRect.top + pointIndicatorLength)
         xAxisLastPointRect.set(xAxisRect.right - lineThickness, xAxisRect.bottom - pointIndicatorLength, xAxisRect.right, xAxisRect.bottom)
 
-        // Caculate X axis number positions
+        // Calculate X axis number positions
         numbersPositions[0] = xAxisFirstPointRect.centerX()
         numbersPositions[numbersPositions.size - 1] = xAxisLastPointRect.centerX()
         pointsDistance = (xAxisRect.right - xAxisRect.left - (2 + lineMiddlePointsNum) * lineThickness) / (lineMiddlePointsNum + 1)
@@ -377,13 +377,16 @@ class LaGrange @JvmOverloads constructor(
         graphTopDrawYPosition = viewStartY
 
         graphBoundsRect.set(graphMinXPosition, graphTopDrawYPosition, graphMaxXPosition, lineYPosition - lineThickness / 2)
+
         selectedGraphBoundsRect.set(graphBoundsRect)
+        selectedLine.left = selectedGraphBoundsRect.left
+        selectedLine.right = selectedGraphBoundsRect.right
 
         minSelector.setYMiddle(lineYPosition)
         minSelectorTouchField.setYMiddle(lineYPosition)
         maxSelector.setYMiddle(lineYPosition)
         maxSelectorTouchField.setYMiddle(lineYPosition)
-        selectorConnectLine.setYMiddle(lineYPosition)
+        selectedLine.setYMiddle(lineYPosition)
 
         pointsData?.let { pointsData ->
             generateSplineGraphPath(pointsData)
@@ -533,8 +536,8 @@ class LaGrange @JvmOverloads constructor(
         canvas.drawPath(splineGraphPath, selectedGraphPaint)
         canvas.restore()
 
-        // draw selectors connect line and selectors
-        canvas.drawRect(selectorConnectLine, selectorsConnectLinePaint)
+        // draw selected line and selectors
+        canvas.drawRect(selectedLine, selectedLinePaint)
         canvas.drawOval(minSelector, selectorPaint)
         canvas.drawOval(minSelector, selectorBorderPaint)
         canvas.drawOval(maxSelector, selectorPaint)
@@ -557,7 +560,7 @@ class LaGrange @JvmOverloads constructor(
 
         fun setMinSelectorShapes(x: Float) {
             selectedGraphBoundsRect.left = x
-            selectorConnectLine.left = x
+            selectedLine.left = x
             minSelector.setXMiddle(x)
             minSelectorTouchField.setXMiddle(x)
         }
@@ -579,7 +582,7 @@ class LaGrange @JvmOverloads constructor(
 
         fun setMaxSelectorShapes(x: Float) {
             selectedGraphBoundsRect.right = x
-            selectorConnectLine.right = x
+            selectedLine.right = x
             maxSelector.setXMiddle(x)
             maxSelectorTouchField.setXMiddle(x)
         }
