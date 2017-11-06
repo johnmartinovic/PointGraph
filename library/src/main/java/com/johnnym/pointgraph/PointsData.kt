@@ -3,7 +3,16 @@ package com.johnnym.pointgraph
 import android.os.Parcel
 import android.os.Parcelable
 
-data class PointsData(val points: List<Point>) : Parcelable {
+/**
+ * Data class which defines a list of points in rectangular coordinate system.
+ * When connected, these points define a graph, whose min and max borders are defined
+ * by points themselves.
+ *
+ * @param points a list of points which represent a graph
+ */
+data class PointsData(
+        val points: List<Point>
+) : Parcelable {
 
     val minX: Float
     val maxX: Float

@@ -19,19 +19,21 @@ import com.johnnym.pointgraph.utils.setYMiddle
 import kotlin.properties.Delegates
 
 /**
- * Draws a Graph of Points in form of a spline.
+ * View that enables the user to select a value in a range defined by the
+ * [PointsData]'s minimum and maximum values, while having a graph presentation
+ * of [Point]s defined in the same [PointsData] object.
  */
 class GraphEnd @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
+        defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
 
     companion object {
 
         // Graph Y Axis Scale Factor
         private val GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE: Float = 0f
         private val GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE: Float = 1f
-
     }
 
     // Constant graph values
@@ -96,7 +98,9 @@ class GraphEnd @JvmOverloads constructor(
 
     private var listenersEnabled = true
 
-    // True selector value (set from outside by setters or by touch events)
+    /**
+     * True selector value (set from outside or by touch events)
+     */
     var selectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
             selectorListeners.dispatchOnValueChangedEvent(new)
@@ -212,6 +216,12 @@ class GraphEnd @JvmOverloads constructor(
         selectedGraphPaint.style = Paint.Style.FILL
     }
 
+    /**
+     * Set [GraphEnd] graph data
+     *
+     * @param pointsData [Point]s to be shown in form of a graph
+     * @param animated true if this set of data should be animated
+     */
     fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
         refreshGraphValues(pointsData)
         if (animated) {
@@ -221,6 +231,12 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Set [selectorValue] value
+     *
+     * @param value wanted [selectorValue]
+     * @param animateSelectorChanges true if the selector change should be animated
+     */
     fun setSelectorValue(value: Float?, animateSelectorChanges: Boolean = false) {
         // if user is interacting with the view, do not set values from outside
         if (selectorSelected) {
@@ -241,14 +257,30 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Add a listener which will be informed about [selector] interaction
+     * and [selectorValue] value change events.
+     *
+     * @param selectorListener listener to be added
+     */
     fun addSelectorListener(selectorListener: SelectorListener) {
         selectorListeners.add(selectorListener)
     }
 
+    /**
+     * Remove a listener which previously has been informed about
+     * [selector] interaction and [selectorValue] value change events.
+     *
+     * @param selectorListener listener to be removed
+     */
     fun removeSelectorListener(selectorListener: SelectorListener) {
         selectorListeners.remove(selectorListener)
     }
 
+    /**
+     * Toggle the [GraphEnd] graph visibility from visible to invisible
+     * and vice versa.
+     */
     fun toggleGraphVisibility() {
         if (graphIsShown) {
             hideGraph()
@@ -257,6 +289,9 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Show [GraphEnd] graph.
+     */
     fun showGraph() {
         graphScaleAnimator.cancel()
         graphScaleAnimator.setFloatValues(graphYAxisScaleFactor, GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE)
@@ -264,6 +299,9 @@ class GraphEnd @JvmOverloads constructor(
         graphIsShown = true
     }
 
+    /**
+     * Hide [GraphEnd] graph.
+     */
     fun hideGraph() {
         graphScaleAnimator.cancel()
         graphScaleAnimator.setFloatValues(graphYAxisScaleFactor, GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE)
@@ -513,12 +551,27 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Listener interface whose methods are called as a consequence of [selector] interaction
+     * and [selectorValue] value change events.
+     */
     interface SelectorListener {
 
+        /**
+         * Called when [selectionField] is pressed.
+         */
         fun onSelectorPressed()
 
+        /**
+         * Called when [selectorValue] is changed.
+         *
+         * @param newValue [selectorValue] new value
+         */
         fun onValueChanged(newValue: Float)
 
+        /**
+         * Called when [selectionField] is released.
+         */
         fun onSelectorReleased()
     }
 

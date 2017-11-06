@@ -3,7 +3,16 @@ package com.johnnym.pointgraph
 import android.os.Parcel
 import android.os.Parcelable
 
-data class RangeData(private val rangeList: List<Range>) : Parcelable {
+/**
+ * Data class which defines a list of ranges with their uniquely related values.
+ * When these range values are connected, graph is defined, whose min and max borders
+ * are defined by ranges and their related values.
+ *
+ * @param rangeList a list of ranges which, with their uniquely related values, represent a graph
+ */
+data class RangeData(
+        private val rangeList: List<Range>
+) : Parcelable {
 
     val pointsData: PointsData
 

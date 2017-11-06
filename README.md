@@ -1,6 +1,8 @@
 # PointGraph
 PointGraph library is a group of optimized and well-designed interactive Android Views whose main feature is graphical representation of list of points in form of a ["spline"](https://en.wikipedia.org/wiki/Spline_(mathematics)).
 
+And... it's written in Kotlin!
+
 [![Release](https://jitpack.io/v/johnnymartinovic/PointGraph.svg)](https://jitpack.io/#johnnymartinovic/PointGraph)
 
 ## Demos
@@ -31,7 +33,7 @@ dependencies {
 - Allow user to select range by moving graph selectors
 - Modify graph data and range values with included animation
 
-## Usage
+## Usage examples
 ### LaGrange
 ```xml
 <com.johnnym.pointgraph.LaGrange

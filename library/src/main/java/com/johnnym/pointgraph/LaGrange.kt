@@ -18,12 +18,15 @@ import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
 /**
- * Draws a Graph of Points in form of a spline.
+ * View that enables the user to select a subrange of a range defined by the
+ * [PointsData]'s minimum and maximum values, while having a graph presentation
+ * of [Point]s defined in the same [PointsData] object.
  */
 class LaGrange @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
+        defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
 
     // Constant graph values
     private val lineColor: Int
@@ -105,21 +108,22 @@ class LaGrange @JvmOverloads constructor(
 
     private var listenersEnabled = true
 
-    // True selectors values (set from outside by setters or by touch events)
+    /**
+     * True min selector value (set from outside or by touch events)
+     */
     var minSelectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
-            for (minSelectorPositionChangeListener in minSelectorPositionChangeListeners) {
-                minSelectorPositionChangeListener.onMinValueChanged(new)
-            }
+            minSelectorPositionChangeListeners.dispatchOnMinSelectorPositionChangeEvent(new)
         }
     }
         private set
 
+    /**
+     * True max selector value (set from outside or by touch events)
+     */
     var maxSelectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
-            for (maxSelectorPositionChangeListener in maxSelectorPositionChangeListeners) {
-                maxSelectorPositionChangeListener.onMaxValueChanged(new)
-            }
+            maxSelectorPositionChangeListeners.dispatchOnMaxSelectorPositionChangeEvent(new)
         }
     }
         private set
@@ -254,6 +258,12 @@ class LaGrange @JvmOverloads constructor(
         selectedGraphPaint.style = Paint.Style.FILL
     }
 
+    /**
+     * Set [LaGrange] graph data
+     *
+     * @param pointsData [Point]s to be shown in form of a graph
+     * @param animated true if this set of data should be animated
+     */
     fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
         refreshGraphValues(pointsData)
         if (animated) {
@@ -268,6 +278,15 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Set [minSelectorValue] and [maxSelectorValue] values
+     *
+     * Values will be normalized to fit the current [PointsData] value in [pointsData].
+     * Also, if [maxValue] is smaller than [minValue], its value will be changed to [minValue].
+     *
+     * @param minValue wanted [minSelectorValue]
+     * @param maxValue wanted [maxSelectorValue]
+     */
     fun setSelectorsValues(minValue: Float?, maxValue: Float?) {
         // if user is interacting with the view, do not set values from outside
         if (minSelectorSelected || maxSelectorSelected) {
@@ -300,18 +319,38 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Add a listener which will be informed about the changes of [minSelectorValue].
+     *
+     * @param minSelectorPositionChangeListener listener to be added
+     */
     fun addMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
         minSelectorPositionChangeListeners.add(minSelectorPositionChangeListener)
     }
 
+    /**
+     * Remove a listener which previously has been informed about the changes of [minSelectorValue].
+     *
+     * @param minSelectorPositionChangeListener listener to be removed
+     */
     fun removeMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
         minSelectorPositionChangeListeners.remove(minSelectorPositionChangeListener)
     }
 
+    /**
+     * Add a listener which will be informed about the changes of [maxSelectorValue].
+     *
+     * @param maxSelectorPositionChangeListener listener to be added
+     */
     fun addMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
         maxSelectorPositionChangeListeners.add(maxSelectorPositionChangeListener)
     }
 
+    /**
+     * Remove a listener which previously has been informed about the changes of [maxSelectorValue].
+     *
+     * @param maxSelectorPositionChangeListener listener to be removed
+     */
     fun removeMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
         maxSelectorPositionChangeListeners.remove(maxSelectorPositionChangeListener)
     }
@@ -656,12 +695,40 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Listener interface whose methods are called as a consequence of
+     * [minSelectorValue] value change events.
+     */
     interface MinSelectorPositionChangeListener {
+
+        /**
+         * Called when [minSelectorValue] is changed.
+         *
+         * @param newMinValue [minSelectorValue] new value
+         */
         fun onMinValueChanged(newMinValue: Float)
     }
 
+    /**
+     * Listener interface whose methods are called as a consequence of
+     * [minSelectorValue] value change events.
+     */
     interface MaxSelectorPositionChangeListener {
+
+        /**
+         * Called when [maxSelectorValue] is changed.
+         *
+         * @param newMaxValue [maxSelectorValue] new value
+         */
         fun onMaxValueChanged(newMaxValue: Float)
+    }
+
+    private fun ArrayList<MinSelectorPositionChangeListener>.dispatchOnMinSelectorPositionChangeEvent(newMinValue: Float) {
+        this.forEach { it.onMinValueChanged(newMinValue) }
+    }
+
+    private fun ArrayList<MaxSelectorPositionChangeListener>.dispatchOnMaxSelectorPositionChangeEvent(newMaxValue: Float) {
+        this.forEach { it.onMaxValueChanged(newMaxValue) }
     }
 
     class SavedState : BaseSavedState {
