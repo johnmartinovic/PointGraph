@@ -7,6 +7,7 @@ import android.os.Parcelable
  * Data class which defines a list of ranges with their uniquely related values.
  * When these range values are connected, graph is defined, whose min and max borders
  * are defined by ranges and their related values.
+ * It contains a [PointsData] instance which can be easily set as an argument for PointGraphs.
  *
  * @param rangeList a list of ranges which, with their uniquely related values, represent a graph
  */
@@ -14,6 +15,9 @@ data class RangeData(
         private val rangeList: List<Range>
 ) : Parcelable {
 
+    /**
+     * [PointsData] instance calculated out from [rangeList].
+     */
     val pointsData: PointsData
 
     init {
@@ -44,6 +48,13 @@ data class RangeData(
         pointsData = PointsData(points)
     }
 
+    /**
+     * Get a sum of all [rangeList] [Range.count]s
+     *
+     * @param minValue start of range
+     * @param maxValue end of range
+     * @return summed value of all [Range.count]s that are contained in range defined by [minValue] and [maxValue]
+     */
     fun getApproxCountInRange(minValue: Float, maxValue: Float): Float {
         return rangeList
                 .map { Math.max(0f, Math.min(it.to, maxValue) - Math.max(it.from, minValue)) * it.count / it.range }

@@ -5,9 +5,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <color name="general_background_color">#e7e7e7</color>
+    <color name="general_background_color">#ffffff</color>
 
-    <color name="la_grange_demo_line_color">#2b2b2b</color>
+    <color name="la_grange_demo_line_color">#8e8e8e</color>
     <color name="la_grange_demo_selected_line_color">#8c49ff2d</color>
     <color name="la_grange_demo_selector_color">#6088ff</color>
     <color name="la_grange_demo_selector_border_color">#0040ff</color>
@@ -17,7 +17,7 @@
 
     <color name="graph_end_demo_line_color">#69686868</color>
     <color name="graph_end_demo_selected_line_color">#0059ff</color>
-    <color name="graph_end_demo_selector_color">#ffffff</color>
+    <color name="graph_end_demo_selector_color">#e6e6e6</color>
     <color name="graph_end_demo_selector_border_color">@color/graph_end_demo_selector_color</color>
     <color name="graph_end_demo_graph_color">@color/graph_end_demo_line_color</color>
     <color name="graph_end_demo_selected_graph_color">#b34c8aff</color>

@@ -44,16 +44,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_approx_results_num"
-        app:pg__graph_color="@color/la_grange_demo_graph_color"
-        app:pg__line_color="@color/la_grange_demo_line_color"
-        app:pg__line_middle_points_num="@integer/la_grange_demo_line_middle_points_num"
-        app:pg__line_thickness="@dimen/la_grange_demo_line_thickness"
-        app:pg__selected_graph_color="@color/la_grange_demo_selected_graph_color"
-        app:pg__selected_line_color="@color/la_grange_demo_selected_line_color"
-        app:pg__selected_line_thickness="@dimen/la_grange_demo_selected_line_thickness"
-        app:pg__selector_border_color="@color/la_grange_demo_selector_border_color"
-        app:pg__selector_color="@color/la_grange_demo_selector_color"
-        app:pg__text_color="@color/la_grange_demo_text_color"/>
+        app:pg__line_color="@color/la_grange_demo_line_color"/>
 
     <Button
         android:id="@+id/btn_set_data"

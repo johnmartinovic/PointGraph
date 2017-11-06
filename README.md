@@ -23,7 +23,7 @@ allprojects {
 In your app level build.gradle add:
 ```groovy
 dependencies {
-    implementation 'com.github.johnnymartinovic:PointGraph:0.8.1'
+    implementation 'com.github.johnnymartinovic:PointGraph:0.8.3'
 }      
 ```
 
