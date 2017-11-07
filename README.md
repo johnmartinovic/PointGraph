@@ -17,14 +17,14 @@ allprojects {
     repositories {
         maven { url "https://jitpack.io" }
     }
-}       
+}
 ```
 
 In your app level build.gradle add:
 ```groovy
 dependencies {
-    implementation 'com.github.johnnymartinovic:PointGraph:0.8.3'
-}      
+    implementation 'com.github.johnnymartinovic:PointGraph:1.0.0'
+}
 ```
 
 ## Features
@@ -35,6 +35,12 @@ dependencies {
 
 ## Usage examples
 ### LaGrange
+
+- Change selector values by touch or programatically
+- Listen to selectors changes
+- Change custom attributes values
+- Get selected range min and max values
+
 ```xml
 <com.johnnym.pointgraph.LaGrange
     android:id="@+id/la_grange"
@@ -63,6 +69,12 @@ laGrange.setSelectorsValues(minValue, maxValue)
 ```
 
 ### GraphEnd
+
+- Change selector value by touch or programatically
+- Listen to selector changes
+- Change custom attributes values
+- Change graph visibility
+
 ```xml
 <com.johnnym.pointgraph.GraphEnd
     android:id="@+id/graph_end"
