@@ -2,17 +2,13 @@ package com.johnnym.pointgraph
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.RectF
+import android.graphics.*
 import android.os.Parcel
 import android.os.Parcelable
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.johnnym.pointgraph.utils.convertDpToPixel
 import com.johnnym.pointgraph.utils.getXPosition
 import com.johnnym.pointgraph.utils.setXMiddle
 import com.johnnym.pointgraph.utils.setYMiddle
@@ -42,7 +38,6 @@ class GraphEnd @JvmOverloads constructor(
     private val selectedLineColor: Int
     private val selectedLineThickness: Float
     private val selectorColor: Int
-    private val selectorBorderColor: Int
     private val graphColor: Int
     private val selectedGraphColor: Int
 
@@ -58,7 +53,6 @@ class GraphEnd @JvmOverloads constructor(
     // Graph drawing objects
     private val xAxisRectPaint: Paint
     private val selectorPaint: Paint
-    private val selectorBorderPaint: Paint
     private val selectedLinePaint: Paint
     private val graphPaint: Paint
     private val selectedGraphPaint: Paint
@@ -127,9 +121,6 @@ class GraphEnd @JvmOverloads constructor(
             selectorColor = attributes.getColor(
                     R.styleable.pg__GraphEnd_pg__selector_color,
                     ContextCompat.getColor(getContext(), R.color.pg__default_selector_color))
-            selectorBorderColor = attributes.getColor(
-                    R.styleable.pg__GraphEnd_pg__selector_border_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_selector_border_color))
             graphColor = attributes.getColor(
                     R.styleable.pg__GraphEnd_pg__graph_color,
                     ContextCompat.getColor(getContext(), R.color.pg__default_graph_color))
@@ -193,12 +184,8 @@ class GraphEnd @JvmOverloads constructor(
         selectorPaint.isAntiAlias = true
         selectorPaint.style = Paint.Style.FILL
         selectorPaint.color = selectorColor
-
-        selectorBorderPaint = Paint()
-        selectorBorderPaint.isAntiAlias = true
-        selectorBorderPaint.style = Paint.Style.STROKE
-        selectorBorderPaint.color = selectorBorderColor
-        selectorBorderPaint.strokeWidth = convertDpToPixel(2f, context)
+        selectorPaint.setShadowLayer(12f, 0f, 0f, Color.YELLOW)
+        setLayerType(LAYER_TYPE_SOFTWARE, selectorPaint)
 
         selectedLinePaint = Paint()
         selectedLinePaint.isAntiAlias = true
@@ -460,7 +447,6 @@ class GraphEnd @JvmOverloads constructor(
                 selectedLineThickness / 2,
                 selectedLinePaint)
         canvas.drawOval(selector, selectorPaint)
-        canvas.drawOval(selector, selectorBorderPaint)
     }
 
     private fun hasData(): Boolean {

@@ -31,7 +31,6 @@
         app:pg__selected_graph_color="@color/graph_end_demo_selected_graph_color"
         app:pg__selected_line_color="@color/graph_end_demo_selected_line_color"
         app:pg__selected_line_thickness="@dimen/graph_end_demo_selected_line_thickness"
-        app:pg__selector_border_color="@color/graph_end_demo_selector_border_color"
         app:pg__selector_color="@color/graph_end_demo_selector_color"/>
 
     <Button

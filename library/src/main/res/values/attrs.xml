@@ -8,6 +8,7 @@
     <attr name="pg__selector_color" format="color"/>
     <attr name="pg__selector_border_color" format="color"/>
     <attr name="pg__text_color" format="color"/>
+    <attr name="pg__text_size" format="dimension"/>
     <attr name="pg__graph_color" format="color"/>
     <attr name="pg__selected_graph_color" format="color"/>
     <attr name="pg__line_middle_points_num" format="integer"/>
@@ -19,8 +20,8 @@
         <attr name="pg__selected_line_color"/>
         <attr name="pg__selected_line_thickness"/>
         <attr name="pg__selector_color"/>
-        <attr name="pg__selector_border_color"/>
         <attr name="pg__text_color"/>
+        <attr name="pg__text_size"/>
         <attr name="pg__graph_color"/>
         <attr name="pg__selected_graph_color"/>
         <attr name="pg__line_middle_points_num"/>
@@ -33,7 +34,6 @@
         <attr name="pg__selected_line_color"/>
         <attr name="pg__selected_line_thickness"/>
         <attr name="pg__selector_color"/>
-        <attr name="pg__selector_border_color"/>
         <attr name="pg__graph_color"/>
         <attr name="pg__selected_graph_color"/>
     </declare-styleable>

@@ -10,7 +10,6 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.johnnym.pointgraph.utils.convertDpToPixel
 import com.johnnym.pointgraph.utils.getXPosition
 import com.johnnym.pointgraph.utils.setXMiddle
 import com.johnnym.pointgraph.utils.setYMiddle
@@ -34,8 +33,8 @@ class LaGrange @JvmOverloads constructor(
     private val selectedLineColor: Int
     private val selectedLineThickness: Float
     private val selectorColor: Int
-    private val selectorBorderColor: Int
     private val textColor: Int
+    private val textSize: Float
     private val graphColor: Int
     private val selectedGraphColor: Int
     private val lineMiddlePointsNum: Int
@@ -56,7 +55,6 @@ class LaGrange @JvmOverloads constructor(
     private val xAxisRectPaint: Paint
     private val textPaint: TextPaint
     private val selectorPaint: Paint
-    private val selectorBorderPaint: Paint
     private val selectedLinePaint: Paint
     private val graphPaint: Paint
     private val selectedGraphPaint: Paint
@@ -147,12 +145,12 @@ class LaGrange @JvmOverloads constructor(
             selectorColor = attributes.getColor(
                     R.styleable.pg__LaGrange_pg__selector_color,
                     ContextCompat.getColor(getContext(), R.color.pg__default_selector_color))
-            selectorBorderColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__selector_border_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_selector_border_color))
             textColor = attributes.getColor(
                     R.styleable.pg__LaGrange_pg__text_color,
                     ContextCompat.getColor(getContext(), R.color.pg__default_text_color))
+            textSize = attributes.getDimension(
+                    R.styleable.pg__LaGrange_pg__text_size,
+                    resources.getDimension(R.dimen.pg__default_text_size))
             graphColor = attributes.getColor(
                     R.styleable.pg__LaGrange_pg__graph_color,
                     ContextCompat.getColor(getContext(), R.color.pg__default_graph_color))
@@ -229,18 +227,12 @@ class LaGrange @JvmOverloads constructor(
         textPaint.isAntiAlias = true
         textPaint.color = textColor
         textPaint.textAlign = Paint.Align.CENTER
-        textPaint.textSize = convertDpToPixel(12f, context)
+        textPaint.textSize = textSize
 
         selectorPaint = Paint()
         selectorPaint.isAntiAlias = true
         selectorPaint.style = Paint.Style.FILL
         selectorPaint.color = selectorColor
-
-        selectorBorderPaint = Paint()
-        selectorBorderPaint.isAntiAlias = true
-        selectorBorderPaint.style = Paint.Style.STROKE
-        selectorBorderPaint.color = selectorBorderColor
-        selectorBorderPaint.strokeWidth = convertDpToPixel(2f, context)
 
         selectedLinePaint = Paint()
         selectedLinePaint.isAntiAlias = true
@@ -431,41 +423,27 @@ class LaGrange @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     actionDownXValue = event.x
                     actionDownYValue = event.y
-                    if (minSelectorTouchField.contains(actionDownXValue, actionDownYValue)
-                            && maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
-                        // variables that mark whether the touch is close to min/max selector center
-                        var minCenterIsClose = false
-                        var maxCenterIsClose = false
-                        if (Math.abs(minSelectorTouchField.centerX() - actionDownXValue) < 0.2 * minSelectorTouchField.width()) {
-                            minCenterIsClose = true
-                        }
-                        if (Math.abs(maxSelectorTouchField.centerX() - actionDownXValue) < 0.2 * maxSelectorTouchField.width()) {
-                            maxCenterIsClose = true
-                        }
-                        if (minCenterIsClose && !maxCenterIsClose) {
-                            minSelectorSelected = true
-                        } else if (!minCenterIsClose && maxCenterIsClose) {
-                            maxSelectorSelected = true
-                        } else {
-                            bothSelectorsSelected = true
-                        }
-                    } else if (minSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
+
+                    val minSelectorTouchFieldContainsTouch = minSelectorTouchField.contains(actionDownXValue, actionDownYValue)
+                    val maxSelectorTouchFieldContainsTouch = maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)
+
+                    if (minSelectorTouchFieldContainsTouch && maxSelectorTouchFieldContainsTouch) {
+                        bothSelectorsSelected = true
+                    } else if (minSelectorTouchFieldContainsTouch) {
                         minSelectorSelected = true
-                    } else if (maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)) {
+                    } else if (maxSelectorTouchFieldContainsTouch) {
                         maxSelectorSelected = true
                     }
                 }
                 MotionEvent.ACTION_MOVE -> {
                     actionMoveXValue = event.x
                     if (bothSelectorsSelected) {
-                        if (Math.abs(actionMoveXValue - actionDownXValue) > convertDpToPixel(1f, context)) {
-                            if (actionMoveXValue < actionDownXValue) {
-                                bothSelectorsSelected = false
-                                minSelectorSelected = true
-                            } else if (actionMoveXValue > actionDownXValue) {
-                                bothSelectorsSelected = false
-                                maxSelectorSelected = true
-                            }
+                        if (actionMoveXValue < actionDownXValue) {
+                            bothSelectorsSelected = false
+                            minSelectorSelected = true
+                        } else if (actionMoveXValue > actionDownXValue) {
+                            bothSelectorsSelected = false
+                            maxSelectorSelected = true
                         }
                     }
                 }
@@ -564,9 +542,7 @@ class LaGrange @JvmOverloads constructor(
         // draw selected line and selectors
         canvas.drawRect(selectedLine, selectedLinePaint)
         canvas.drawOval(minSelector, selectorPaint)
-        canvas.drawOval(minSelector, selectorBorderPaint)
         canvas.drawOval(maxSelector, selectorPaint)
-        canvas.drawOval(maxSelector, selectorBorderPaint)
 
         for (i in 0 until lineMiddlePointsNum + 2) {
             canvas.drawText(
