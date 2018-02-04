@@ -10,6 +10,7 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.johnnym.pointgraph.utils.affineTransformXToY
 import com.johnnym.pointgraph.utils.getXPosition
 import com.johnnym.pointgraph.utils.setXMiddle
 import com.johnnym.pointgraph.utils.setYMiddle
@@ -42,11 +43,10 @@ class LaGrange @JvmOverloads constructor(
 
     private val minViewWidth: Float
     private val minViewHeight: Float
-    private val graphTopDrawPositionFromTop: Float
-    private val graphTopPositionFromTop: Float
-    private val lineYPositionFromBottom: Float
+    private val graphTopFromTop: Float
+    private val graphBottomFromBottom: Float
+    private val graphLeftRightPadding: Float
     private val numbersYPositionFromBottom: Float
-    private val xAxisLeftRightPadding: Float
     private val pointIndicatorLength: Float
     private val selectorDiameter: Float
     private val selectorTouchDiameter: Float
@@ -67,20 +67,20 @@ class LaGrange @JvmOverloads constructor(
     private val xAxisFirstPointRect: RectF
     private val xAxisLastPointRect: RectF
     private val xAxisMiddlePointsRects: List<RectF>
+    private val graphPath: GraphPath
     private val graphBoundsRect: RectF
     private val selectedGraphBoundsRect: RectF
     private val selectedLine: RectF
-    private val splineGraphPath: Path
     private val numbers: FloatArray
     private val minSelectorAnimator: ValueAnimator
     private val maxSelectorAnimator: ValueAnimator
     private val graphScaleAnimator: ValueAnimator
-    private var graphYAxisScaleFactor: Float = 1f
 
     // View's dimensions and sizes, positions etc.
-    private var graphTopDrawYPosition: Float = 0f
-    private var graphTopYPosition: Float = 0f
-    private var lineYPosition: Float = 0f
+    private var graphTop: Float = 0f
+    private var graphBottom: Float = 0f
+    private var graphLeft: Float = 0f
+    private var graphRight: Float = 0f
     private var numbersYPosition: Float = 0f
     private var viewStartX: Float = 0f
     private var viewEndX: Float = 0f
@@ -88,8 +88,7 @@ class LaGrange @JvmOverloads constructor(
     private var viewEndY: Float = 0f
     private var pointsDistance: Float = 0f
     private var numbersPositions: FloatArray
-    private var graphMinXPosition: Float = 0f
-    private var graphMaxXPosition: Float = 0f
+    private var graphYAxisScaleFactor: Float = 1f
 
     // Touch event variables
     private var actionDownXValue: Float = 0f
@@ -169,11 +168,10 @@ class LaGrange @JvmOverloads constructor(
 
         minViewWidth = resources.getDimension(R.dimen.pg__la_grange_min_view_width)
         minViewHeight = resources.getDimension(R.dimen.pg__la_grange_min_view_height)
-        graphTopDrawPositionFromTop = resources.getDimension(R.dimen.pg__la_grange_graph_top_draw_position_from_top)
-        graphTopPositionFromTop = resources.getDimension(R.dimen.pg__la_grange_graph_top_position_from_top)
-        lineYPositionFromBottom = resources.getDimension(R.dimen.pg__la_grange_line_y_position_from_bottom)
+        graphTopFromTop = resources.getDimension(R.dimen.pg__la_grange_graph_top_from_top)
+        graphBottomFromBottom = resources.getDimension(R.dimen.pg__la_grange_graph_bottom_from_bottom)
+        graphLeftRightPadding = resources.getDimension(R.dimen.pg__la_grange_graph_left_right_padding)
         numbersYPositionFromBottom = resources.getDimension(R.dimen.pg__la_grange_numbers_y_position_from_bottom)
-        xAxisLeftRightPadding = resources.getDimension(R.dimen.pg__la_grange_x_axis_left_right_padding)
         pointIndicatorLength = resources.getDimension(R.dimen.pg__la_grange_point_indicator_length)
         selectorDiameter = resources.getDimension(R.dimen.pg__la_grange_selector_diameter)
         selectorTouchDiameter = resources.getDimension(R.dimen.pg__la_grange_selector_touch_diameter)
@@ -200,15 +198,15 @@ class LaGrange @JvmOverloads constructor(
         xAxisMiddlePointsRects = List(lineMiddlePointsNum) { RectF() }
         numbers = FloatArray(lineMiddlePointsNum + 2)
 
+        graphPath = GraphPath()
         graphBoundsRect = RectF()
         selectedGraphBoundsRect = RectF()
+
         selectedLine = RectF(
                 0f,
                 0f,
                 0f,
                 selectedLineThickness)
-
-        splineGraphPath = Path()
 
         minSelectorAnimator = ValueAnimator()
         minSelectorAnimator.duration = 150
@@ -302,11 +300,11 @@ class LaGrange @JvmOverloads constructor(
             this.maxSelectorValue = maxSelectorValue
 
             setMinSelectorXPosition(
-                    getXGraphPositionFromXValue(pointsData, minSelectorValue),
+                    affineTransformXToY(minSelectorValue, pointsData.minX, pointsData.maxX, graphLeft, graphRight),
                     animateSelectorChanges)
 
             setMaxSelectorXPosition(
-                    getXGraphPositionFromXValue(pointsData, maxSelectorValue),
+                    affineTransformXToY(maxSelectorValue, pointsData.minX, pointsData.maxX, graphLeft, graphRight),
                     animateSelectorChanges)
         }
     }
@@ -362,14 +360,16 @@ class LaGrange @JvmOverloads constructor(
         viewStartY = paddingTop.toFloat()
         viewEndY = (h - paddingBottom).toFloat()
 
-        graphTopDrawYPosition = viewStartY + graphTopDrawPositionFromTop
-        graphTopYPosition = viewStartY + graphTopPositionFromTop
-        lineYPosition = viewEndY - lineYPositionFromBottom
+        graphTop = viewStartY + graphTopFromTop
+        graphBottom = viewEndY - graphBottomFromBottom
+        graphLeft = viewStartX + graphLeftRightPadding
+        graphRight = viewEndX - graphLeftRightPadding
+
         numbersYPosition = viewEndY - numbersYPositionFromBottom
 
-        xAxisRect.left = viewStartX + xAxisLeftRightPadding
-        xAxisRect.right = viewEndX - xAxisLeftRightPadding
-        xAxisRect.setYMiddle(lineYPosition)
+        xAxisRect.left = graphLeft - lineThickness / 2
+        xAxisRect.right = graphRight + lineThickness / 2
+        xAxisRect.setYMiddle(graphBottom)
         xAxisFirstPointRect.set(xAxisRect.left, xAxisRect.top, xAxisRect.left + lineThickness, xAxisRect.top + pointIndicatorLength)
         xAxisLastPointRect.set(xAxisRect.right - lineThickness, xAxisRect.bottom - pointIndicatorLength, xAxisRect.right, xAxisRect.bottom)
 
@@ -388,25 +388,20 @@ class LaGrange @JvmOverloads constructor(
             numbersPositions[i + 1] = xAxisMiddlePointsRects[i].centerX()
         }
 
-        graphMinXPosition = xAxisRect.left + lineThickness / 2
-        graphMaxXPosition = xAxisRect.right - lineThickness / 2
-
-        graphTopDrawYPosition = viewStartY
-
-        graphBoundsRect.set(graphMinXPosition, graphTopDrawYPosition, graphMaxXPosition, lineYPosition - lineThickness / 2)
-
+        graphBoundsRect.set(graphLeft, graphTop, graphRight, graphBottom)
         selectedGraphBoundsRect.set(graphBoundsRect)
+
         selectedLine.left = selectedGraphBoundsRect.left
         selectedLine.right = selectedGraphBoundsRect.right
 
-        minSelector.setYMiddle(lineYPosition)
-        minSelectorTouchField.setYMiddle(lineYPosition)
-        maxSelector.setYMiddle(lineYPosition)
-        maxSelectorTouchField.setYMiddle(lineYPosition)
-        selectedLine.setYMiddle(lineYPosition)
+        minSelector.setYMiddle(graphBottom)
+        minSelectorTouchField.setYMiddle(graphBottom)
+        maxSelector.setYMiddle(graphBottom)
+        maxSelectorTouchField.setYMiddle(graphBottom)
+        selectedLine.setYMiddle(graphBottom)
 
         pointsData?.let { pointsData ->
-            generateSplineGraphPath(pointsData)
+            graphPath.generatePath(pointsData, graphLeft, graphBottom, graphRight, graphTop)
             refreshSelectorsPositions(pointsData)
         }
     }
@@ -456,16 +451,16 @@ class LaGrange @JvmOverloads constructor(
 
             var newXPosition = event.x
             if (minSelectorSelected) {
-                if (newXPosition < graphMinXPosition) {
-                    newXPosition = graphMinXPosition
+                if (newXPosition < graphLeft) {
+                    newXPosition = graphLeft
                 } else if (newXPosition > maxSelector.getXPosition()) {
                     newXPosition = maxSelector.getXPosition()
                 }
                 setMinSelectorXPosition(newXPosition)
                 updateSelectorValues(pointsData)
             } else if (maxSelectorSelected) {
-                if (newXPosition > graphMaxXPosition) {
-                    newXPosition = graphMaxXPosition
+                if (newXPosition > graphRight) {
+                    newXPosition = graphRight
                 } else if (newXPosition < minSelector.getXPosition()) {
                     newXPosition = minSelector.getXPosition()
                 }
@@ -532,11 +527,11 @@ class LaGrange @JvmOverloads constructor(
 
     private fun drawDataViewPart(canvas: Canvas) {
         canvas.save()
-        canvas.scale(1f, graphYAxisScaleFactor, 0f, lineYPosition)
+        canvas.scale(1f, graphYAxisScaleFactor, 0f, graphBottom)
         canvas.clipRect(graphBoundsRect)
-        canvas.drawPath(splineGraphPath, graphPaint)
+        canvas.drawPath(graphPath, graphPaint)
         canvas.clipRect(selectedGraphBoundsRect)
-        canvas.drawPath(splineGraphPath, selectedGraphPaint)
+        canvas.drawPath(graphPath, selectedGraphPaint)
         canvas.restore()
 
         // draw selected line and selectors
@@ -602,20 +597,8 @@ class LaGrange @JvmOverloads constructor(
     }
 
     private fun updateSelectorValues(pointsData: PointsData) {
-        minSelectorValue = getXValueFromXGraphPosition(pointsData, minSelector.getXPosition())
-        maxSelectorValue = getXValueFromXGraphPosition(pointsData, maxSelector.getXPosition())
-    }
-
-    private fun getXValueFromXGraphPosition(pointsData: PointsData, x: Float): Float {
-        return (x - graphMinXPosition) * pointsData.xRange / (graphMaxXPosition - graphMinXPosition) + pointsData.minX
-    }
-
-    private fun getXGraphPositionFromXValue(pointsData: PointsData, x: Float): Float {
-        return (graphMaxXPosition - graphMinXPosition) / pointsData.xRange * (x - pointsData.minX) + graphMinXPosition
-    }
-
-    private fun getYGraphPositionFromYValue(pointsData: PointsData, y: Float): Float {
-        return (lineYPosition - graphTopYPosition) / (pointsData.maxY - pointsData.minY) * (pointsData.maxY - y) + graphTopYPosition
+        minSelectorValue = affineTransformXToY(minSelector.getXPosition(), graphLeft, graphRight, pointsData.minX, pointsData.maxX)
+        maxSelectorValue = affineTransformXToY(maxSelector.getXPosition(), graphLeft, graphRight, pointsData.minX, pointsData.maxX)
     }
 
     private fun refreshGraphValues(newPointsData: PointsData?) {
@@ -636,39 +619,13 @@ class LaGrange @JvmOverloads constructor(
         this.minSelectorValue = minSelectorValue
         this.maxSelectorValue = maxSelectorValue
 
-        generateSplineGraphPath(pointsData)
+        graphPath.generatePath(pointsData, graphLeft, graphBottom, graphRight, graphTop)
         refreshSelectorsPositions(pointsData)
     }
 
-    private fun generateSplineGraphPath(pointsData: PointsData) {
-        val knotsArr = getGraphPointsFromPointsData(pointsData)
-        val (firstCP, secondCP) = BezierSplineUtil.getCurveControlPoints(knotsArr)
-        splineGraphPath.reset()
-        // move to the start of the graph
-        splineGraphPath.moveTo(graphMinXPosition, lineYPosition)
-        splineGraphPath.lineTo(knotsArr[0].x, knotsArr[0].y)
-        for (i in firstCP.indices) {
-            splineGraphPath.cubicTo(firstCP[i].x, firstCP[i].y,
-                    secondCP[i].x, secondCP[i].y,
-                    knotsArr[i + 1].x, knotsArr[i + 1].y)
-        }
-        // move to the end of the graph
-        splineGraphPath.lineTo(graphMaxXPosition, lineYPosition)
-    }
-
     private fun refreshSelectorsPositions(pointsData: PointsData) {
-        setMinSelectorXPosition(getXGraphPositionFromXValue(pointsData, minSelectorValue))
-        setMaxSelectorXPosition(getXGraphPositionFromXValue(pointsData, maxSelectorValue))
-    }
-
-    private fun getGraphPointsFromPointsData(pointsData: PointsData): List<Point> {
-        val points = pointsData.points
-
-        return List(points.size) {
-            Point(
-                    getXGraphPositionFromXValue(pointsData, points[it].x),
-                    getYGraphPositionFromYValue(pointsData, points[it].y))
-        }
+        setMinSelectorXPosition(affineTransformXToY(minSelectorValue, pointsData.minX, pointsData.maxX, graphLeft, graphRight))
+        setMaxSelectorXPosition(affineTransformXToY(maxSelectorValue, pointsData.minX, pointsData.maxX, graphLeft, graphRight))
     }
 
     /**

@@ -338,7 +338,6 @@ class GraphEnd @JvmOverloads constructor(
         selectedLine.setYMiddle(lineYPosition)
 
         pointsData?.let { pointsData ->
-            generateSplineGraphPath(pointsData)
             refreshSelectorPosition(pointsData)
         }
     }
@@ -503,24 +502,7 @@ class GraphEnd @JvmOverloads constructor(
 
         this.selectorValue = selectorValue
 
-        generateSplineGraphPath(pointsData)
         refreshSelectorPosition(pointsData)
-    }
-
-    private fun generateSplineGraphPath(pointsData: PointsData) {
-        val knotsArr = getGraphPointsFromPointsData(pointsData)
-        val (firstCP, secondCP) = BezierSplineUtil.getCurveControlPoints(knotsArr)
-        splineGraphPath.reset()
-        // move to the start of the graph
-        splineGraphPath.moveTo(graphMinXPosition, lineYPosition)
-        splineGraphPath.lineTo(knotsArr[0].x, knotsArr[0].y)
-        for (i in firstCP.indices) {
-            splineGraphPath.cubicTo(firstCP[i].x, firstCP[i].y,
-                    secondCP[i].x, secondCP[i].y,
-                    knotsArr[i + 1].x, knotsArr[i + 1].y)
-        }
-        // move to the end of the graph
-        splineGraphPath.lineTo(graphMaxXPosition, lineYPosition)
     }
 
     private fun refreshSelectorPosition(pointsData: PointsData) {
