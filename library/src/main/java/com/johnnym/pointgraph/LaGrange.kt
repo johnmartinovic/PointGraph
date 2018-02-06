@@ -194,6 +194,7 @@ class LaGrange @JvmOverloads constructor(
         }
         graphScaleAnimator = ValueAnimator().apply {
             duration = 300
+            setFloatValues(0f, 1f)
             addUpdateListener { animation ->
                 graphYAxisScaleFactor = animation.animatedValue as Float
                 invalidate()
@@ -242,9 +243,11 @@ class LaGrange @JvmOverloads constructor(
      * @param animated true if this set of data should be animated
      */
     fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
-        refreshGraphValues(pointsData)
+        this.pointsData = pointsData
+
+        refreshGraphValues()
+
         if (animated) {
-            graphScaleAnimator.setFloatValues(0f, 1f)
             graphScaleAnimator.start()
         } else {
             invalidate()
@@ -267,8 +270,8 @@ class LaGrange @JvmOverloads constructor(
         }
 
         pointsData?.let { pointsData ->
-            var minSelectorValue: Float = minValue ?: pointsData.minX
-            var maxSelectorValue: Float = maxValue ?: pointsData.maxX
+            var minSelectorValue = minValue ?: pointsData.minX
+            var maxSelectorValue = maxValue ?: pointsData.maxX
 
             minSelectorValue = Math.max(minSelectorValue, pointsData.minX)
             minSelectorValue = Math.min(minSelectorValue, pointsData.maxX)
@@ -386,72 +389,77 @@ class LaGrange @JvmOverloads constructor(
             return false
         }
 
-        pointsData?.let { pointsData ->
-            val action = event.actionMasked
+        pointsData
+                ?.let { pointsData ->
+                    handleTouchEvent(pointsData, event)
 
-            when (action) {
-                MotionEvent.ACTION_DOWN -> {
-                    actionDownXValue = event.x
-                    actionDownYValue = event.y
+                    return true
+                }
+                ?: return false
+    }
 
-                    val minSelectorTouchFieldContainsTouch = minSelectorTouchField.contains(actionDownXValue, actionDownYValue)
-                    val maxSelectorTouchFieldContainsTouch = maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)
+    private fun handleTouchEvent(pointsData: PointsData, event: MotionEvent) {
+        val action = event.actionMasked
 
-                    if (minSelectorTouchFieldContainsTouch && maxSelectorTouchFieldContainsTouch) {
-                        bothSelectorsSelected = true
-                    } else if (minSelectorTouchFieldContainsTouch) {
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                actionDownXValue = event.x
+                actionDownYValue = event.y
+
+                val minSelectorTouchFieldContainsTouch = minSelectorTouchField.contains(actionDownXValue, actionDownYValue)
+                val maxSelectorTouchFieldContainsTouch = maxSelectorTouchField.contains(actionDownXValue, actionDownYValue)
+
+                if (minSelectorTouchFieldContainsTouch && maxSelectorTouchFieldContainsTouch) {
+                    bothSelectorsSelected = true
+                } else if (minSelectorTouchFieldContainsTouch) {
+                    minSelectorSelected = true
+                } else if (maxSelectorTouchFieldContainsTouch) {
+                    maxSelectorSelected = true
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                actionMoveXValue = event.x
+                if (bothSelectorsSelected) {
+                    if (actionMoveXValue < actionDownXValue) {
+                        bothSelectorsSelected = false
                         minSelectorSelected = true
-                    } else if (maxSelectorTouchFieldContainsTouch) {
+                    } else if (actionMoveXValue > actionDownXValue) {
+                        bothSelectorsSelected = false
                         maxSelectorSelected = true
                     }
                 }
-                MotionEvent.ACTION_MOVE -> {
-                    actionMoveXValue = event.x
-                    if (bothSelectorsSelected) {
-                        if (actionMoveXValue < actionDownXValue) {
-                            bothSelectorsSelected = false
-                            minSelectorSelected = true
-                        } else if (actionMoveXValue > actionDownXValue) {
-                            bothSelectorsSelected = false
-                            maxSelectorSelected = true
-                        }
-                    }
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    bothSelectorsSelected = false
-                    minSelectorSelected = false
-                    maxSelectorSelected = false
-                }
             }
-
-            var newXPosition = event.x
-            if (minSelectorSelected) {
-                if (newXPosition < graphLeft) {
-                    newXPosition = graphLeft
-                } else if (newXPosition > maxSelector.getXPosition()) {
-                    newXPosition = maxSelector.getXPosition()
-                }
-                setMinSelectorXPosition(newXPosition)
-                updateSelectorValues(pointsData)
-            } else if (maxSelectorSelected) {
-                if (newXPosition > graphRight) {
-                    newXPosition = graphRight
-                } else if (newXPosition < minSelector.getXPosition()) {
-                    newXPosition = minSelector.getXPosition()
-                }
-                setMaxSelectorXPosition(newXPosition)
-                updateSelectorValues(pointsData)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                bothSelectorsSelected = false
+                minSelectorSelected = false
+                maxSelectorSelected = false
             }
-
-            // If any of the selectors is selected, then user must be able to move his finger anywhere
-            // on the screen and still have control of the selected selector.
-            if (bothSelectorsSelected || minSelectorSelected || maxSelectorSelected) {
-                parent.requestDisallowInterceptTouchEvent(true)
-            }
-
-            return true
         }
-                ?: return false
+
+        var newXPosition = event.x
+        if (minSelectorSelected) {
+            if (newXPosition < graphLeft) {
+                newXPosition = graphLeft
+            } else if (newXPosition > maxSelector.getXPosition()) {
+                newXPosition = maxSelector.getXPosition()
+            }
+            setMinSelectorXPosition(newXPosition)
+            updateSelectorValues(pointsData)
+        } else if (maxSelectorSelected) {
+            if (newXPosition > graphRight) {
+                newXPosition = graphRight
+            } else if (newXPosition < minSelector.getXPosition()) {
+                newXPosition = minSelector.getXPosition()
+            }
+            setMaxSelectorXPosition(newXPosition)
+            updateSelectorValues(pointsData)
+        }
+
+        // If any of the selectors is selected, then user must be able to move his finger anywhere
+        // on the screen and still have control of the selected selector.
+        if (bothSelectorsSelected || minSelectorSelected || maxSelectorSelected) {
+            parent.requestDisallowInterceptTouchEvent(true)
+        }
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -511,11 +519,10 @@ class LaGrange @JvmOverloads constructor(
         }
 
         listenersEnabled = false
-        state.pointsData
-                ?.let { pointsData ->
-                    refreshGraphValues(pointsData, state.minSelectorValue, state.maxSelectorValue)
-                }
-                ?: refreshGraphValues(state.pointsData)
+        pointsData = state.pointsData
+        this.minSelectorValue = state.minSelectorValue
+        this.maxSelectorValue = state.maxSelectorValue
+        refreshGraphValues()
         listenersEnabled = true
 
         super.onRestoreInstanceState(state.superState)
@@ -564,26 +571,19 @@ class LaGrange @JvmOverloads constructor(
         maxSelectorValue = affineTransformXToY(maxSelector.getXPosition(), graphLeft, graphRight, pointsData.minX, pointsData.maxX)
     }
 
-    private fun refreshGraphValues(newPointsData: PointsData?) {
-        pointsData = newPointsData
+    private fun refreshGraphValues() {
+        pointsData?.let {
+            for (i in numbers.indices) {
+                numbers[i] = i * it.xRange / (numbers.size - 1) + it.minX
+            }
 
-        pointsData?.let { pointsData ->
-            refreshGraphValues(pointsData, pointsData.minX, pointsData.maxX)
+            graphPath.generatePath(it, graphLeft, graphBottom, graphRight, graphTop)
+            minSelectorValue = it.minX
+            maxSelectorValue = it.maxX
+            refreshSelectorsPositions(it)
+
+            invalidate()
         }
-    }
-
-    private fun refreshGraphValues(pointsData: PointsData, minSelectorValue: Float, maxSelectorValue: Float) {
-        this.pointsData = pointsData
-
-        for (i in numbers.indices) {
-            numbers[i] = i * pointsData.xRange / (numbers.size - 1) + pointsData.minX
-        }
-
-        this.minSelectorValue = minSelectorValue
-        this.maxSelectorValue = maxSelectorValue
-
-        graphPath.generatePath(pointsData, graphLeft, graphBottom, graphRight, graphTop)
-        refreshSelectorsPositions(pointsData)
     }
 
     private fun refreshSelectorsPositions(pointsData: PointsData) {
