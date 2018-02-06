@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <attr name="pg__line_color" format="color"/>
-    <attr name="pg__line_thickness" format="dimension"/>
+    <attr name="pg__x_axis_color" format="color"/>
+    <attr name="pg__x_axis_thickness" format="dimension"/>
     <attr name="pg__selected_line_color" format="color"/>
     <attr name="pg__selected_line_thickness" format="dimension"/>
     <attr name="pg__selector_color" format="color"/>
@@ -11,12 +11,13 @@
     <attr name="pg__text_size" format="dimension"/>
     <attr name="pg__graph_color" format="color"/>
     <attr name="pg__selected_graph_color" format="color"/>
-    <attr name="pg__line_middle_points_num" format="integer"/>
+    <attr name="pg__x_axis_num_of_middle_points" format="integer"/>
     <attr name="pg__animate_selector_changes" format="boolean"/>
+    <attr name="pg__x_axis_indicator" format="boolean"/>
 
     <declare-styleable name="pg__LaGrange">
-        <attr name="pg__line_color"/>
-        <attr name="pg__line_thickness"/>
+        <attr name="pg__x_axis_color"/>
+        <attr name="pg__x_axis_thickness"/>
         <attr name="pg__selected_line_color"/>
         <attr name="pg__selected_line_thickness"/>
         <attr name="pg__selector_color"/>
@@ -24,13 +25,14 @@
         <attr name="pg__text_size"/>
         <attr name="pg__graph_color"/>
         <attr name="pg__selected_graph_color"/>
-        <attr name="pg__line_middle_points_num"/>
+        <attr name="pg__x_axis_number_of_middle_points"/>
         <attr name="pg__animate_selector_changes"/>
+        <attr name="pg__x_axis_indicator"/>
     </declare-styleable>
 
     <declare-styleable name="pg__GraphEnd">
-        <attr name="pg__line_color"/>
-        <attr name="pg__line_thickness"/>
+        <attr name="pg__x_axis_color"/>
+        <attr name="pg__x_axis_thickness"/>
         <attr name="pg__selected_line_color"/>
         <attr name="pg__selected_line_thickness"/>
         <attr name="pg__selector_color"/>

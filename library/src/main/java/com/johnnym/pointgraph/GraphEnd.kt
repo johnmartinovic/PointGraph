@@ -107,10 +107,10 @@ class GraphEnd @JvmOverloads constructor(
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.pg__GraphEnd, defStyleAttr, 0)
         try {
             lineColor = attributes.getColor(
-                    R.styleable.pg__GraphEnd_pg__line_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_line_color))
+                    R.styleable.pg__GraphEnd_pg__x_axis_color,
+                    ContextCompat.getColor(getContext(), R.color.pg__default_x_axis_color))
             lineThickness = attributes.getDimension(
-                    R.styleable.pg__GraphEnd_pg__line_thickness,
+                    R.styleable.pg__GraphEnd_pg__x_axis_thickness,
                     resources.getDimension(R.dimen.pg__default_line_thickness))
             selectedLineColor = attributes.getColor(
                     R.styleable.pg__GraphEnd_pg__selected_line_color,

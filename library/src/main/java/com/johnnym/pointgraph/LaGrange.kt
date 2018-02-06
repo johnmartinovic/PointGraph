@@ -3,6 +3,7 @@ package com.johnnym.pointgraph
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.os.Parcel
 import android.os.Parcelable
 import android.support.v4.content.ContextCompat
@@ -28,45 +29,16 @@ class LaGrange @JvmOverloads constructor(
         defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // Constant graph values
-    private val lineColor: Int
-    private val lineThickness: Float
-    private val selectedLineColor: Int
-    private val selectedLineThickness: Float
-    private val selectorColor: Int
-    private val textColor: Int
-    private val textSize: Float
-    private val graphColor: Int
-    private val selectedGraphColor: Int
-    private val lineMiddlePointsNum: Int
-    private val animateSelectorChanges: Boolean
-
-    private val minViewWidth: Float
-    private val minViewHeight: Float
-    private val graphTopFromTop: Float
-    private val graphBottomFromBottom: Float
-    private val graphLeftRightPadding: Float
-    private val numbersYPositionFromBottom: Float
-    private val pointIndicatorLength: Float
-    private val selectorDiameter: Float
-    private val selectorTouchDiameter: Float
-
-    // Graph drawing objects
-    private val xAxisRectPaint: Paint
-    private val textPaint: TextPaint
-    private val selectorPaint: Paint
-    private val selectedLinePaint: Paint
-    private val graphPaint: Paint
-    private val selectedGraphPaint: Paint
+    private val attributes: Attributes
+    private val drawObjects: DrawObjects
 
     private val minSelector: RectF
     private val maxSelector: RectF
     private val minSelectorTouchField: RectF
     private val maxSelectorTouchField: RectF
     private val xAxisRect: RectF
-    private val xAxisFirstPointRect: RectF
-    private val xAxisLastPointRect: RectF
-    private val xAxisMiddlePointsRects: List<RectF>
+    private val xAxisIndicatorsRects: List<Rect>
+    private val indicatorsXPositions: FloatArray
     private val graphPath: GraphPath
     private val graphBoundsRect: RectF
     private val selectedGraphBoundsRect: RectF
@@ -86,8 +58,6 @@ class LaGrange @JvmOverloads constructor(
     private var viewEndX: Float = 0f
     private var viewStartY: Float = 0f
     private var viewEndY: Float = 0f
-    private var pointsDistance: Float = 0f
-    private var numbersPositions: FloatArray
     private var graphYAxisScaleFactor: Float = 1f
 
     // Touch event variables
@@ -127,125 +97,142 @@ class LaGrange @JvmOverloads constructor(
 
     init {
         // Calculate view dimensions from the given attributes
-        val attributes = context.obtainStyledAttributes(attrs, R.styleable.pg__LaGrange, defStyleAttr, 0)
-        try {
-            lineColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__line_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_line_color))
-            lineThickness = attributes.getDimension(
-                    R.styleable.pg__LaGrange_pg__line_thickness,
-                    resources.getDimension(R.dimen.pg__default_line_thickness))
-            selectedLineColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__selected_line_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_selected_line_color))
-            selectedLineThickness = attributes.getDimension(
-                    R.styleable.pg__LaGrange_pg__selected_line_thickness,
-                    resources.getDimension(R.dimen.pg__default_selected_line_thickness))
-            selectorColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__selector_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_selector_color))
-            textColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__text_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_text_color))
-            textSize = attributes.getDimension(
-                    R.styleable.pg__LaGrange_pg__text_size,
-                    resources.getDimension(R.dimen.pg__default_text_size))
-            graphColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__graph_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_graph_color))
-            selectedGraphColor = attributes.getColor(
-                    R.styleable.pg__LaGrange_pg__selected_graph_color,
-                    ContextCompat.getColor(getContext(), R.color.pg__default_selected_graph_color))
-            lineMiddlePointsNum = attributes.getInteger(
-                    R.styleable.pg__LaGrange_pg__line_middle_points_num,
-                    resources.getInteger(R.integer.pg__default_line_middle_points_num))
-            animateSelectorChanges = attributes.getBoolean(
-                    R.styleable.pg__LaGrange_pg__animate_selector_changes,
-                    resources.getBoolean(R.bool.pg__default_animate_selector_changes))
-        } finally {
-            attributes.recycle()
-        }
+        val styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.pg__LaGrange, defStyleAttr, 0)
+        attributes = Attributes(
+                styledAttrs.getColor(
+                        R.styleable.pg__LaGrange_pg__x_axis_color,
+                        ContextCompat.getColor(getContext(), R.color.pg__default_x_axis_color)),
+                styledAttrs.getDimension(
+                        R.styleable.pg__LaGrange_pg__x_axis_thickness,
+                        resources.getDimension(R.dimen.pg__default_line_thickness)),
+                styledAttrs.getColor(
+                        R.styleable.pg__LaGrange_pg__selected_line_color,
+                        ContextCompat.getColor(getContext(), R.color.pg__default_selected_line_color)),
+                styledAttrs.getDimension(
+                        R.styleable.pg__LaGrange_pg__selected_line_thickness,
+                        resources.getDimension(R.dimen.pg__default_selected_line_thickness)),
+                styledAttrs.getColor(
+                        R.styleable.pg__LaGrange_pg__selector_color,
+                        ContextCompat.getColor(getContext(), R.color.pg__default_selector_color)),
+                styledAttrs.getColor(
+                        R.styleable.pg__LaGrange_pg__text_color,
+                        ContextCompat.getColor(getContext(), R.color.pg__default_text_color)),
+                styledAttrs.getDimension(
+                        R.styleable.pg__LaGrange_pg__text_size,
+                        resources.getDimension(R.dimen.pg__default_text_size)),
+                styledAttrs.getColor(
+                        R.styleable.pg__LaGrange_pg__graph_color,
+                        ContextCompat.getColor(getContext(), R.color.pg__default_graph_color)),
+                styledAttrs.getColor(
+                        R.styleable.pg__LaGrange_pg__selected_graph_color,
+                        ContextCompat.getColor(getContext(), R.color.pg__default_selected_graph_color)),
+                styledAttrs.getInteger(
+                        R.styleable.pg__LaGrange_pg__x_axis_number_of_middle_points,
+                        resources.getInteger(R.integer.pg__default_line_middle_points_num)),
+                styledAttrs.getBoolean(
+                        R.styleable.pg__LaGrange_pg__animate_selector_changes,
+                        resources.getBoolean(R.bool.pg__default_animate_selector_changes)),
+                styledAttrs.getDrawable(R.styleable.pg__LaGrange_pg__x_axis_indicator)
+                        ?: ContextCompat.getDrawable(context, R.drawable.pg__circle_point_indicator)!!,
+                resources.getDimension(R.dimen.pg__la_grange_min_view_width),
+                resources.getDimension(R.dimen.pg__la_grange_min_view_height),
+                resources.getDimension(R.dimen.pg__la_grange_graph_top_from_top),
+                resources.getDimension(R.dimen.pg__la_grange_graph_bottom_from_bottom),
+                resources.getDimension(R.dimen.pg__la_grange_graph_left_right_padding),
+                resources.getDimension(R.dimen.pg__la_grange_numbers_y_position_from_bottom),
+                resources.getDimension(R.dimen.pg__la_grange_selector_diameter),
+                resources.getDimension(R.dimen.pg__la_grange_selector_touch_diameter))
+        styledAttrs.recycle()
 
-        minViewWidth = resources.getDimension(R.dimen.pg__la_grange_min_view_width)
-        minViewHeight = resources.getDimension(R.dimen.pg__la_grange_min_view_height)
-        graphTopFromTop = resources.getDimension(R.dimen.pg__la_grange_graph_top_from_top)
-        graphBottomFromBottom = resources.getDimension(R.dimen.pg__la_grange_graph_bottom_from_bottom)
-        graphLeftRightPadding = resources.getDimension(R.dimen.pg__la_grange_graph_left_right_padding)
-        numbersYPositionFromBottom = resources.getDimension(R.dimen.pg__la_grange_numbers_y_position_from_bottom)
-        pointIndicatorLength = resources.getDimension(R.dimen.pg__la_grange_point_indicator_length)
-        selectorDiameter = resources.getDimension(R.dimen.pg__la_grange_selector_diameter)
-        selectorTouchDiameter = resources.getDimension(R.dimen.pg__la_grange_selector_touch_diameter)
-
-        numbersPositions = FloatArray(lineMiddlePointsNum + 2)
-
-        // Init drawing objects
         minSelector = RectF(
                 0f,
                 0f,
-                selectorDiameter,
-                selectorDiameter)
+                attributes.selectorDiameter,
+                attributes.selectorDiameter)
         maxSelector = RectF(minSelector)
         minSelectorTouchField = RectF(
                 0f,
                 0f,
-                selectorTouchDiameter,
-                selectorTouchDiameter)
+                attributes.selectorTouchDiameter,
+                attributes.selectorTouchDiameter)
         maxSelectorTouchField = RectF(minSelectorTouchField)
 
-        xAxisRect = RectF(0f, 0f, 0f, lineThickness)
-        xAxisFirstPointRect = RectF()
-        xAxisLastPointRect = RectF()
-        xAxisMiddlePointsRects = List(lineMiddlePointsNum) { RectF() }
-        numbers = FloatArray(lineMiddlePointsNum + 2)
-
-        graphPath = GraphPath()
-        graphBoundsRect = RectF()
-        selectedGraphBoundsRect = RectF()
+        xAxisRect = RectF(0f, 0f, 0f, attributes.xAxisThickness)
+        val xAxisNumberOfPoints = attributes.xAxisNumberOfMiddlePoints + 2
+        val xAxisIndicatorRect = Rect(
+                0,
+                0,
+                attributes.xAxisIndicatorDrawable.intrinsicWidth,
+                attributes.xAxisIndicatorDrawable.intrinsicHeight)
+        xAxisIndicatorsRects = List(xAxisNumberOfPoints) { Rect(xAxisIndicatorRect) }
+        indicatorsXPositions = FloatArray(xAxisNumberOfPoints)
+        numbers = FloatArray(xAxisNumberOfPoints)
 
         selectedLine = RectF(
                 0f,
                 0f,
                 0f,
-                selectedLineThickness)
+                attributes.selectedLineThickness)
 
-        minSelectorAnimator = ValueAnimator()
-        minSelectorAnimator.duration = 150
-        maxSelectorAnimator = ValueAnimator()
-        maxSelectorAnimator.duration = 150
-        graphScaleAnimator = ValueAnimator()
-        graphScaleAnimator.duration = 300
+        graphPath = GraphPath()
+        graphBoundsRect = RectF()
+        selectedGraphBoundsRect = RectF()
 
-        // Init draw settings
-        xAxisRectPaint = Paint()
-        xAxisRectPaint.isAntiAlias = true
-        xAxisRectPaint.color = lineColor
-        xAxisRectPaint.style = Paint.Style.FILL
+        minSelectorAnimator = ValueAnimator().apply {
+            duration = 150
+            addUpdateListener { animation ->
+                updateMinSelectorDependantShapes(animation.animatedValue as Float)
+                invalidate()
+            }
+        }
+        maxSelectorAnimator = ValueAnimator().apply {
+            duration = 150
+            addUpdateListener { animation ->
+                updateMaxSelectorDependantShapes(animation.animatedValue as Float)
+                invalidate()
+            }
+        }
+        graphScaleAnimator = ValueAnimator().apply {
+            duration = 300
+            addUpdateListener { animation ->
+                graphYAxisScaleFactor = animation.animatedValue as Float
+                invalidate()
+            }
+        }
 
-        textPaint = TextPaint()
-        textPaint.isAntiAlias = true
-        textPaint.color = textColor
-        textPaint.textAlign = Paint.Align.CENTER
-        textPaint.textSize = textSize
-
-        selectorPaint = Paint()
-        selectorPaint.isAntiAlias = true
-        selectorPaint.style = Paint.Style.FILL
-        selectorPaint.color = selectorColor
-
-        selectedLinePaint = Paint()
-        selectedLinePaint.isAntiAlias = true
-        selectedLinePaint.style = Paint.Style.FILL
-        selectedLinePaint.color = selectedLineColor
-
-        graphPaint = Paint()
-        graphPaint.isAntiAlias = true
-        graphPaint.color = graphColor
-        graphPaint.style = Paint.Style.FILL
-
-        selectedGraphPaint = Paint()
-        selectedGraphPaint.isAntiAlias = true
-        selectedGraphPaint.color = selectedGraphColor
-        selectedGraphPaint.style = Paint.Style.FILL
+        drawObjects = DrawObjects(
+                Paint().apply {
+                    isAntiAlias = true
+                    color = attributes.xAxisColor
+                    style = Paint.Style.FILL
+                },
+                TextPaint().apply {
+                    isAntiAlias = true
+                    color = attributes.textColor
+                    textAlign = Paint.Align.CENTER
+                    textSize = attributes.textSize
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    style = Paint.Style.FILL
+                    color = attributes.selectorColor
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    style = Paint.Style.FILL
+                    color = attributes.selectedLineColor
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    color = attributes.graphColor
+                    style = Paint.Style.FILL
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    color = attributes.selectedGraphColor
+                    style = Paint.Style.FILL
+                }
+        )
     }
 
     /**
@@ -258,10 +245,6 @@ class LaGrange @JvmOverloads constructor(
         refreshGraphValues(pointsData)
         if (animated) {
             graphScaleAnimator.setFloatValues(0f, 1f)
-            graphScaleAnimator.addUpdateListener { animation ->
-                graphYAxisScaleFactor = animation.animatedValue as Float
-                invalidate()
-            }
             graphScaleAnimator.start()
         } else {
             invalidate()
@@ -301,11 +284,11 @@ class LaGrange @JvmOverloads constructor(
 
             setMinSelectorXPosition(
                     affineTransformXToY(minSelectorValue, pointsData.minX, pointsData.maxX, graphLeft, graphRight),
-                    animateSelectorChanges)
+                    attributes.animateSelectorChanges)
 
             setMaxSelectorXPosition(
                     affineTransformXToY(maxSelectorValue, pointsData.minX, pointsData.maxX, graphLeft, graphRight),
-                    animateSelectorChanges)
+                    attributes.animateSelectorChanges)
         }
     }
 
@@ -346,8 +329,8 @@ class LaGrange @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = resolveSizeAndState(minViewWidth.toInt(), widthMeasureSpec, 0)
-        val height = resolveSizeAndState(minViewHeight.toInt(), heightMeasureSpec, 0)
+        val width = resolveSizeAndState(attributes.minViewWidth.toInt(), widthMeasureSpec, 0)
+        val height = resolveSizeAndState(attributes.minViewHeight.toInt(), heightMeasureSpec, 0)
 
         setMeasuredDimension(width, height)
     }
@@ -360,32 +343,24 @@ class LaGrange @JvmOverloads constructor(
         viewStartY = paddingTop.toFloat()
         viewEndY = (h - paddingBottom).toFloat()
 
-        graphTop = viewStartY + graphTopFromTop
-        graphBottom = viewEndY - graphBottomFromBottom
-        graphLeft = viewStartX + graphLeftRightPadding
-        graphRight = viewEndX - graphLeftRightPadding
+        graphTop = viewStartY + attributes.graphTopFromTop
+        graphBottom = viewEndY - attributes.graphBottomFromBottom
+        graphLeft = viewStartX + attributes.graphLeftRightPadding
+        graphRight = viewEndX - attributes.graphLeftRightPadding
 
-        numbersYPosition = viewEndY - numbersYPositionFromBottom
+        numbersYPosition = viewEndY - attributes.numbersYPositionFromBottom
 
-        xAxisRect.left = graphLeft - lineThickness / 2
-        xAxisRect.right = graphRight + lineThickness / 2
+        xAxisRect.left = graphLeft - attributes.xAxisThickness / 2
+        xAxisRect.right = graphRight + attributes.xAxisThickness / 2
         xAxisRect.setYMiddle(graphBottom)
-        xAxisFirstPointRect.set(xAxisRect.left, xAxisRect.top, xAxisRect.left + lineThickness, xAxisRect.top + pointIndicatorLength)
-        xAxisLastPointRect.set(xAxisRect.right - lineThickness, xAxisRect.bottom - pointIndicatorLength, xAxisRect.right, xAxisRect.bottom)
 
         // Calculate X axis number positions
-        numbersPositions[0] = xAxisFirstPointRect.centerX()
-        numbersPositions[numbersPositions.size - 1] = xAxisLastPointRect.centerX()
-        pointsDistance = (xAxisRect.right - xAxisRect.left - (2 + lineMiddlePointsNum) * lineThickness) / (lineMiddlePointsNum + 1)
-        var middlePointIndicatorX: Float
-        for (i in xAxisMiddlePointsRects.indices) {
-            middlePointIndicatorX = xAxisFirstPointRect.left + (i + 1) * (pointsDistance + lineThickness)
-            xAxisMiddlePointsRects[i].set(
-                    middlePointIndicatorX,
-                    xAxisRect.top,
-                    middlePointIndicatorX + lineThickness,
-                    xAxisRect.top + pointIndicatorLength)
-            numbersPositions[i + 1] = xAxisMiddlePointsRects[i].centerX()
+        val pointsDistance = (xAxisRect.right - xAxisRect.left) / (attributes.xAxisNumberOfMiddlePoints + 1)
+        for (i in indicatorsXPositions.indices) {
+            val indicatorXPosition = xAxisRect.left + i * pointsDistance
+            indicatorsXPositions[i] = indicatorXPosition
+            xAxisIndicatorsRects[i].setXMiddle(indicatorXPosition.toInt())
+            xAxisIndicatorsRects[i].setYMiddle(graphBottom.toInt())
         }
 
         graphBoundsRect.set(graphLeft, graphTop, graphRight, graphBottom)
@@ -486,16 +461,37 @@ class LaGrange @JvmOverloads constructor(
             return
         }
 
-        // draw X axis line
-        canvas.drawRect(xAxisRect, xAxisRectPaint)
-        canvas.drawRect(xAxisFirstPointRect, xAxisRectPaint)
-        canvas.drawRect(xAxisLastPointRect, xAxisRectPaint)
-        for (xAxisMiddlePointsRect in xAxisMiddlePointsRects) {
-            canvas.drawRect(xAxisMiddlePointsRect, xAxisRectPaint)
+        if (hasData()) {
+            // draw graph and selected part of graph
+            canvas.save()
+            canvas.scale(1f, graphYAxisScaleFactor, 0f, graphBottom)
+            canvas.clipRect(graphBoundsRect)
+            canvas.drawPath(graphPath, drawObjects.graphPaint)
+            canvas.clipRect(selectedGraphBoundsRect)
+            canvas.drawPath(graphPath, drawObjects.selectedGraphPaint)
+            canvas.restore()
+        }
+
+        // draw X axis line and indicators
+        canvas.drawRect(xAxisRect, drawObjects.xAxisRectPaint)
+        for (xAxisIndicatorsRect in xAxisIndicatorsRects) {
+            attributes.xAxisIndicatorDrawable.bounds = xAxisIndicatorsRect
+            attributes.xAxisIndicatorDrawable.draw(canvas)
         }
 
         if (hasData()) {
-            drawDataViewPart(canvas)
+            // draw selected line and selectors
+            canvas.drawRect(selectedLine, drawObjects.selectedLinePaint)
+            canvas.drawOval(minSelector, drawObjects.selectorPaint)
+            canvas.drawOval(maxSelector, drawObjects.selectorPaint)
+
+            for (i in 0 until attributes.xAxisNumberOfMiddlePoints + 2) {
+                canvas.drawText(
+                        String.format("%.0f", numbers[i]),
+                        indicatorsXPositions[i],
+                        numbersYPosition,
+                        drawObjects.textPaint)
+            }
         }
     }
 
@@ -525,75 +521,42 @@ class LaGrange @JvmOverloads constructor(
         super.onRestoreInstanceState(state.superState)
     }
 
-    private fun drawDataViewPart(canvas: Canvas) {
-        canvas.save()
-        canvas.scale(1f, graphYAxisScaleFactor, 0f, graphBottom)
-        canvas.clipRect(graphBoundsRect)
-        canvas.drawPath(graphPath, graphPaint)
-        canvas.clipRect(selectedGraphBoundsRect)
-        canvas.drawPath(graphPath, selectedGraphPaint)
-        canvas.restore()
-
-        // draw selected line and selectors
-        canvas.drawRect(selectedLine, selectedLinePaint)
-        canvas.drawOval(minSelector, selectorPaint)
-        canvas.drawOval(maxSelector, selectorPaint)
-
-        for (i in 0 until lineMiddlePointsNum + 2) {
-            canvas.drawText(
-                    String.format("%.0f", numbers[i]),
-                    numbersPositions[i],
-                    numbersYPosition,
-                    textPaint)
-        }
-    }
-
     private fun hasData(): Boolean {
         return pointsData != null
     }
 
     private fun setMinSelectorXPosition(x: Float, animated: Boolean = false) {
-
-        fun setMinSelectorShapes(x: Float) {
-            selectedGraphBoundsRect.left = x
-            selectedLine.left = x
-            minSelector.setXMiddle(x)
-            minSelectorTouchField.setXMiddle(x)
-        }
-
         if (animated) {
             minSelectorAnimator.setFloatValues(minSelector.getXPosition(), x)
-            minSelectorAnimator.addUpdateListener { animation ->
-                setMinSelectorShapes(animation.animatedValue as Float)
-                invalidate()
-            }
             minSelectorAnimator.start()
         } else {
-            setMinSelectorShapes(x)
+            updateMinSelectorDependantShapes(x)
             invalidate()
         }
     }
 
+    private fun updateMinSelectorDependantShapes(minSelectorX: Float) {
+        selectedGraphBoundsRect.left = minSelectorX
+        selectedLine.left = minSelectorX
+        minSelector.setXMiddle(minSelectorX)
+        minSelectorTouchField.setXMiddle(minSelectorX)
+    }
+
     private fun setMaxSelectorXPosition(x: Float, animated: Boolean = false) {
-
-        fun setMaxSelectorShapes(x: Float) {
-            selectedGraphBoundsRect.right = x
-            selectedLine.right = x
-            maxSelector.setXMiddle(x)
-            maxSelectorTouchField.setXMiddle(x)
-        }
-
         if (animated) {
             maxSelectorAnimator.setFloatValues(maxSelector.getXPosition(), x)
-            maxSelectorAnimator.addUpdateListener { animation ->
-                setMaxSelectorShapes(animation.animatedValue as Float)
-                invalidate()
-            }
             maxSelectorAnimator.start()
         } else {
-            setMaxSelectorShapes(x)
+            updateMaxSelectorDependantShapes(x)
             invalidate()
         }
+    }
+
+    private fun updateMaxSelectorDependantShapes(maxSelectorX: Float) {
+        selectedGraphBoundsRect.right = maxSelectorX
+        selectedLine.right = maxSelectorX
+        maxSelector.setXMiddle(maxSelectorX)
+        maxSelectorTouchField.setXMiddle(maxSelectorX)
     }
 
     private fun updateSelectorValues(pointsData: PointsData) {
@@ -695,4 +658,34 @@ class LaGrange @JvmOverloads constructor(
             }
         }
     }
+
+    class Attributes(
+            val xAxisColor: Int,
+            val xAxisThickness: Float,
+            val selectedLineColor: Int,
+            val selectedLineThickness: Float,
+            val selectorColor: Int,
+            val textColor: Int,
+            val textSize: Float,
+            val graphColor: Int,
+            val selectedGraphColor: Int,
+            val xAxisNumberOfMiddlePoints: Int,
+            val animateSelectorChanges: Boolean,
+            val xAxisIndicatorDrawable: Drawable,
+            val minViewWidth: Float,
+            val minViewHeight: Float,
+            val graphTopFromTop: Float,
+            val graphBottomFromBottom: Float,
+            val graphLeftRightPadding: Float,
+            val numbersYPositionFromBottom: Float,
+            val selectorDiameter: Float,
+            val selectorTouchDiameter: Float)
+
+    class DrawObjects(
+            val xAxisRectPaint: Paint,
+            val textPaint: TextPaint,
+            val selectorPaint: Paint,
+            val selectedLinePaint: Paint,
+            val graphPaint: Paint,
+            val selectedGraphPaint: Paint)
 }
