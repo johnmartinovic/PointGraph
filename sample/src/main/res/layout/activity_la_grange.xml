@@ -37,7 +37,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/et_min_value"/>
 
-    <com.johnnym.pointgraph.LaGrange
+    <com.johnnym.pointgraph.lagrange.LaGrange
         android:id="@+id/la_grange"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

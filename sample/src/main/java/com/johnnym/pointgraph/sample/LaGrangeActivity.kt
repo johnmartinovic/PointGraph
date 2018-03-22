@@ -8,9 +8,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import com.jakewharton.rxbinding2.widget.RxTextView
-import com.johnnym.pointgraph.LaGrange
 import com.johnnym.pointgraph.Range
 import com.johnnym.pointgraph.RangeData
+import com.johnnym.pointgraph.lagrange.LaGrange
 import com.johnnym.pointgraph.sample.common.bindView
 
 class LaGrangeActivity : AppCompatActivity() {

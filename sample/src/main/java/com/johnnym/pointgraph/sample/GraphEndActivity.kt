@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
 import com.johnnym.pointgraph.*
+import com.johnnym.pointgraph.graphend.GraphEnd
 import com.johnnym.pointgraph.sample.common.bindView
 import com.johnnym.pointgraph.utils.S_TO_MS_FACTOR
 

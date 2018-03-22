@@ -1,4 +1,4 @@
-package com.johnnym.pointgraph
+package com.johnnym.pointgraph.graphend
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -9,6 +9,9 @@ import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.johnnym.pointgraph.Point
+import com.johnnym.pointgraph.PointsData
+import com.johnnym.pointgraph.R
 import com.johnnym.pointgraph.utils.getXPosition
 import com.johnnym.pointgraph.utils.setXMiddle
 import com.johnnym.pointgraph.utils.setYMiddle
