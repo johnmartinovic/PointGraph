@@ -9,16 +9,14 @@ import android.widget.Button
 import android.widget.TextView
 import com.johnnym.pointgraph.*
 import com.johnnym.pointgraph.sample.common.bindView
+import com.johnnym.pointgraph.utils.S_TO_MS_FACTOR
 
 class GraphEndActivity : AppCompatActivity() {
 
     companion object {
 
-        private val TOTAL_TIME: Long = 20
-
-        private val S_TO_MS_FACTOR: Long = 1000
-
-        private val REFRESH_TIME_MS: Long = 50
+        private const val TOTAL_TIME: Long = 20
+        private const val REFRESH_TIME_MS: Long = 50
 
         fun getIntent(context: Context): Intent {
             return Intent(context, GraphEndActivity::class.java)

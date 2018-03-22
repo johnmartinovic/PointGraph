@@ -11,10 +11,7 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.johnnym.pointgraph.utils.affineTransformXToY
-import com.johnnym.pointgraph.utils.getXPosition
-import com.johnnym.pointgraph.utils.setXMiddle
-import com.johnnym.pointgraph.utils.setYMiddle
+import com.johnnym.pointgraph.utils.*
 import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
@@ -37,13 +34,12 @@ class LaGrange @JvmOverloads constructor(
     private val minSelectorTouchField: RectF
     private val maxSelectorTouchField: RectF
     private val xAxisRect: RectF
-    private val xAxisIndicatorsRects: List<Rect>
-    private val indicatorsXPositions: FloatArray
+    private val xAxisIndicators: AxisIndicators
+    private val xAxisIndicatorLabels: AxisIndicatorLabels
     private val graphPath: GraphPath
     private val graphBoundsRect: RectF
     private val selectedGraphBoundsRect: RectF
     private val selectedLine: RectF
-    private val numbers: FloatArray
     private val minSelectorAnimator: ValueAnimator
     private val maxSelectorAnimator: ValueAnimator
     private val graphScaleAnimator: ValueAnimator
@@ -144,6 +140,39 @@ class LaGrange @JvmOverloads constructor(
                 resources.getDimension(R.dimen.pg__la_grange_selector_touch_diameter))
         styledAttrs.recycle()
 
+        drawObjects = DrawObjects(
+                Paint().apply {
+                    isAntiAlias = true
+                    color = attributes.xAxisColor
+                    style = Paint.Style.FILL
+                },
+                TextPaint().apply {
+                    isAntiAlias = true
+                    color = attributes.textColor
+                    textAlign = Paint.Align.CENTER
+                    textSize = attributes.textSize
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    style = Paint.Style.FILL
+                    color = attributes.selectorColor
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    style = Paint.Style.FILL
+                    color = attributes.selectedLineColor
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    color = attributes.graphColor
+                    style = Paint.Style.FILL
+                },
+                Paint().apply {
+                    isAntiAlias = true
+                    color = attributes.selectedGraphColor
+                    style = Paint.Style.FILL
+                })
+
         minSelector = RectF(
                 0f,
                 0f,
@@ -158,15 +187,12 @@ class LaGrange @JvmOverloads constructor(
         maxSelectorTouchField = RectF(minSelectorTouchField)
 
         xAxisRect = RectF(0f, 0f, 0f, attributes.xAxisThickness)
-        val xAxisNumberOfPoints = attributes.xAxisNumberOfMiddlePoints + 2
-        val xAxisIndicatorRect = Rect(
-                0,
-                0,
-                attributes.xAxisIndicatorDrawable.intrinsicWidth,
-                attributes.xAxisIndicatorDrawable.intrinsicHeight)
-        xAxisIndicatorsRects = List(xAxisNumberOfPoints) { Rect(xAxisIndicatorRect) }
-        indicatorsXPositions = FloatArray(xAxisNumberOfPoints)
-        numbers = FloatArray(xAxisNumberOfPoints)
+        xAxisIndicators = AxisIndicators(
+                attributes.xAxisNumberOfMiddlePoints,
+                attributes.xAxisIndicatorDrawable)
+        xAxisIndicatorLabels = AxisIndicatorLabels(
+                attributes.xAxisNumberOfMiddlePoints,
+                drawObjects.textPaint)
 
         selectedLine = RectF(
                 0f,
@@ -200,40 +226,6 @@ class LaGrange @JvmOverloads constructor(
                 invalidate()
             }
         }
-
-        drawObjects = DrawObjects(
-                Paint().apply {
-                    isAntiAlias = true
-                    color = attributes.xAxisColor
-                    style = Paint.Style.FILL
-                },
-                TextPaint().apply {
-                    isAntiAlias = true
-                    color = attributes.textColor
-                    textAlign = Paint.Align.CENTER
-                    textSize = attributes.textSize
-                },
-                Paint().apply {
-                    isAntiAlias = true
-                    style = Paint.Style.FILL
-                    color = attributes.selectorColor
-                },
-                Paint().apply {
-                    isAntiAlias = true
-                    style = Paint.Style.FILL
-                    color = attributes.selectedLineColor
-                },
-                Paint().apply {
-                    isAntiAlias = true
-                    color = attributes.graphColor
-                    style = Paint.Style.FILL
-                },
-                Paint().apply {
-                    isAntiAlias = true
-                    color = attributes.selectedGraphColor
-                    style = Paint.Style.FILL
-                }
-        )
     }
 
     /**
@@ -358,13 +350,8 @@ class LaGrange @JvmOverloads constructor(
         xAxisRect.setYMiddle(graphBottom)
 
         // Calculate X axis number positions
-        val pointsDistance = (xAxisRect.right - xAxisRect.left) / (attributes.xAxisNumberOfMiddlePoints + 1)
-        for (i in indicatorsXPositions.indices) {
-            val indicatorXPosition = xAxisRect.left + i * pointsDistance
-            indicatorsXPositions[i] = indicatorXPosition
-            xAxisIndicatorsRects[i].setXMiddle(indicatorXPosition.toInt())
-            xAxisIndicatorsRects[i].setYMiddle(graphBottom.toInt())
-        }
+        xAxisIndicators.setLimitValues(xAxisRect.left, xAxisRect.right, graphBottom)
+        xAxisIndicatorLabels.setLimitValues(xAxisRect.left, xAxisRect.right, numbersYPosition)
 
         graphBoundsRect.set(graphLeft, graphTop, graphRight, graphBottom)
         selectedGraphBoundsRect.set(graphBoundsRect)
@@ -392,7 +379,6 @@ class LaGrange @JvmOverloads constructor(
         pointsData
                 ?.let { pointsData ->
                     handleTouchEvent(pointsData, event)
-
                     return true
                 }
                 ?: return false
@@ -482,24 +468,14 @@ class LaGrange @JvmOverloads constructor(
 
         // draw X axis line and indicators
         canvas.drawRect(xAxisRect, drawObjects.xAxisRectPaint)
-        for (xAxisIndicatorsRect in xAxisIndicatorsRects) {
-            attributes.xAxisIndicatorDrawable.bounds = xAxisIndicatorsRect
-            attributes.xAxisIndicatorDrawable.draw(canvas)
-        }
+        xAxisIndicators.draw(canvas)
 
         if (hasData()) {
             // draw selected line and selectors
             canvas.drawRect(selectedLine, drawObjects.selectedLinePaint)
             canvas.drawOval(minSelector, drawObjects.selectorPaint)
             canvas.drawOval(maxSelector, drawObjects.selectorPaint)
-
-            for (i in 0 until attributes.xAxisNumberOfMiddlePoints + 2) {
-                canvas.drawText(
-                        String.format("%.0f", numbers[i]),
-                        indicatorsXPositions[i],
-                        numbersYPosition,
-                        drawObjects.textPaint)
-            }
+            xAxisIndicatorLabels.draw(canvas)
         }
     }
 
@@ -573,9 +549,7 @@ class LaGrange @JvmOverloads constructor(
 
     private fun refreshGraphValues() {
         pointsData?.let {
-            for (i in numbers.indices) {
-                numbers[i] = i * it.xRange / (numbers.size - 1) + it.minX
-            }
+            xAxisIndicatorLabels.updateNumbers(it.minX, it.maxX)
 
             graphPath.generatePath(it, graphLeft, graphBottom, graphRight, graphTop)
             minSelectorValue = it.minX
