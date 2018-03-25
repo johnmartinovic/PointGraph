@@ -61,11 +61,13 @@ class LaGrange @JvmOverloads constructor(
                 xPosition > drawObjects.getMaxSelectorXPosition() -> drawObjects.getMaxSelectorXPosition()
                 else -> xPosition
             }
+
+            pointsData?.let {
+                minSelectorValue = transformSelectorXPositionToValue(it, newXPosition)
+            }
+
             drawObjects.updateMinSelectorDependantShapes(newXPosition)
             invalidate()
-            pointsData?.let {
-                minSelectorValue = transformSelectorXPositionToValue(it, drawObjects.getMinSelectorXPosition())
-            }
         }
 
         override fun maxSelectorChanged(xPosition: Float) {
@@ -74,11 +76,13 @@ class LaGrange @JvmOverloads constructor(
                 xPosition < drawObjects.getMinSelectorXPosition() -> drawObjects.getMinSelectorXPosition()
                 else -> xPosition
             }
+
+            pointsData?.let {
+                maxSelectorValue = transformSelectorXPositionToValue(it, newXPosition)
+            }
+
             drawObjects.updateMaxSelectorDependantShapes(newXPosition)
             invalidate()
-            pointsData?.let {
-                maxSelectorValue = transformSelectorXPositionToValue(it, drawObjects.getMaxSelectorXPosition())
-            }
         }
     }
 
@@ -100,6 +104,7 @@ class LaGrange @JvmOverloads constructor(
             minSelectorPositionChangeListeners.dispatchOnMinSelectorPositionChangeEvent(new)
         }
     }
+        private set
 
     /**
      * True max selector value (set from outside or by touch events)
@@ -109,6 +114,7 @@ class LaGrange @JvmOverloads constructor(
             maxSelectorPositionChangeListeners.dispatchOnMaxSelectorPositionChangeEvent(new)
         }
     }
+        private set
 
     /**
      * Set [LaGrange] graph data
@@ -123,7 +129,7 @@ class LaGrange @JvmOverloads constructor(
             this.maxSelectorValue = pointsData.maxX
         }
 
-        resetDataDrawObjects()
+        resetDataAndSelectorDrawObjects()
 
         if (animated) {
             graphScaleAnimator.start()
@@ -148,29 +154,33 @@ class LaGrange @JvmOverloads constructor(
         }
 
         this.pointsData?.let { pointsData ->
-            var minSelectorValue = minValue ?: pointsData.minX
-            var maxSelectorValue = maxValue ?: pointsData.maxX
-
-            minSelectorValue = Math.max(minSelectorValue, pointsData.minX)
-            minSelectorValue = Math.min(minSelectorValue, pointsData.maxX)
-            maxSelectorValue = Math.max(maxSelectorValue, pointsData.minX)
-            maxSelectorValue = Math.min(maxSelectorValue, pointsData.maxX)
-
-            if (minSelectorValue > maxSelectorValue) {
-                maxSelectorValue = minSelectorValue
-            }
-
-            this.minSelectorValue = minSelectorValue
-            this.maxSelectorValue = maxSelectorValue
+            normalizeAndSetSelectorsValues(pointsData, minValue, maxValue)
 
             moveMinSelectorXPosition(
-                    affineTransformXToY(minSelectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight),
+                    transformSelectorValueToXPosition(pointsData, minSelectorValue),
                     attributes.animateSelectorChanges)
 
             moveMaxSelectorXPosition(
-                    affineTransformXToY(maxSelectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight),
+                    transformSelectorValueToXPosition(pointsData, maxSelectorValue),
                     attributes.animateSelectorChanges)
         }
+    }
+
+    private fun normalizeAndSetSelectorsValues(pointsData: PointsData, minValue: Float?, maxValue: Float?) {
+        var minSelectorValue = minValue ?: pointsData.minX
+        var maxSelectorValue = maxValue ?: pointsData.maxX
+
+        minSelectorValue = Math.max(minSelectorValue, pointsData.minX)
+        minSelectorValue = Math.min(minSelectorValue, pointsData.maxX)
+        maxSelectorValue = Math.max(maxSelectorValue, pointsData.minX)
+        maxSelectorValue = Math.min(maxSelectorValue, pointsData.maxX)
+
+        if (minSelectorValue > maxSelectorValue) {
+            maxSelectorValue = minSelectorValue
+        }
+
+        this.minSelectorValue = minSelectorValue
+        this.maxSelectorValue = maxSelectorValue
     }
 
     /**
@@ -226,7 +236,7 @@ class LaGrange @JvmOverloads constructor(
                 h - paddingBottom)
         drawObjects.updateObjects()
 
-        resetDataDrawObjects()
+        resetDataAndSelectorDrawObjects()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -271,7 +281,7 @@ class LaGrange @JvmOverloads constructor(
         this.pointsData = state.pointsData
         this.minSelectorValue = state.minSelectorValue
         this.maxSelectorValue = state.maxSelectorValue
-        resetDataDrawObjects()
+        resetDataAndSelectorDrawObjects()
         this.listenersEnabled = true
 
         super.onRestoreInstanceState(state.superState)
@@ -297,7 +307,7 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
-    private fun resetDataDrawObjects() {
+    private fun resetDataAndSelectorDrawObjects() {
         pointsData?.let {
             drawObjects.refreshDataShapes(it)
             drawObjects.updateMinSelectorDependantShapes(transformSelectorValueToXPosition(it, this.minSelectorValue))
