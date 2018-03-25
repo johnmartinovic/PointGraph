@@ -3,7 +3,6 @@ package com.johnnym.pointgraph.lagrange
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
-import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -47,26 +46,6 @@ class LaGrange @JvmOverloads constructor(
     }
 
     private var graphYAxisScaleFactor = 1f
-
-    private fun moveMinSelectorXPosition(x: Float, animated: Boolean = false) {
-        if (animated) {
-            minSelectorAnimator.setFloatValues(drawObjects.getMinSelectorXPosition(), x)
-            minSelectorAnimator.start()
-        } else {
-            drawObjects.updateMinSelectorDependantShapes(x)
-            invalidate()
-        }
-    }
-
-    private fun moveMaxSelectorXPosition(x: Float, animated: Boolean = false) {
-        if (animated) {
-            maxSelectorAnimator.setFloatValues(drawObjects.getMaxSelectorXPosition(), x)
-            maxSelectorAnimator.start()
-        } else {
-            drawObjects.updateMaxSelectorDependantShapes(x)
-            invalidate()
-        }
-    }
 
     private val touchHandlerListener = object : LaGrangeTouchHandler.Listener {
 
@@ -139,8 +118,12 @@ class LaGrange @JvmOverloads constructor(
      */
     fun setPointsData(pointsData: PointsData?, animated: Boolean = true) {
         this.pointsData = pointsData
+        if (pointsData != null) {
+            this.minSelectorValue = pointsData.minX
+            this.maxSelectorValue = pointsData.maxX
+        }
 
-        refreshGraphValues()
+        resetDataDrawObjects()
 
         if (animated) {
             graphScaleAnimator.start()
@@ -243,11 +226,7 @@ class LaGrange @JvmOverloads constructor(
                 h - paddingBottom)
         drawObjects.updateObjects()
 
-        this.pointsData?.let { pointsData ->
-            drawObjects.refreshDataShapes(pointsData)
-            drawObjects.updateMinSelectorDependantShapes(transformSelectorValueToXPosition(pointsData, this.minSelectorValue))
-            drawObjects.updateMaxSelectorDependantShapes(transformSelectorValueToXPosition(pointsData, this.maxSelectorValue))
-        }
+        resetDataDrawObjects()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -292,22 +271,37 @@ class LaGrange @JvmOverloads constructor(
         this.pointsData = state.pointsData
         this.minSelectorValue = state.minSelectorValue
         this.maxSelectorValue = state.maxSelectorValue
-        refreshGraphValues()
+        resetDataDrawObjects()
         this.listenersEnabled = true
 
         super.onRestoreInstanceState(state.superState)
     }
 
-    private fun refreshGraphValues() {
-        this.pointsData?.let {
-            this.minSelectorValue = it.minX
-            this.maxSelectorValue = it.maxX
+    private fun moveMinSelectorXPosition(x: Float, animated: Boolean = false) {
+        if (animated) {
+            minSelectorAnimator.setFloatValues(drawObjects.getMinSelectorXPosition(), x)
+            minSelectorAnimator.start()
+        } else {
+            drawObjects.updateMinSelectorDependantShapes(x)
+            invalidate()
+        }
+    }
 
+    private fun moveMaxSelectorXPosition(x: Float, animated: Boolean = false) {
+        if (animated) {
+            maxSelectorAnimator.setFloatValues(drawObjects.getMaxSelectorXPosition(), x)
+            maxSelectorAnimator.start()
+        } else {
+            drawObjects.updateMaxSelectorDependantShapes(x)
+            invalidate()
+        }
+    }
+
+    private fun resetDataDrawObjects() {
+        pointsData?.let {
             drawObjects.refreshDataShapes(it)
             drawObjects.updateMinSelectorDependantShapes(transformSelectorValueToXPosition(it, this.minSelectorValue))
             drawObjects.updateMaxSelectorDependantShapes(transformSelectorValueToXPosition(it, this.maxSelectorValue))
-
-            invalidate()
         }
     }
 
@@ -343,37 +337,5 @@ class LaGrange @JvmOverloads constructor(
          * @param newMaxValue [maxSelectorValue] new value
          */
         fun onMaxValueChanged(newMaxValue: Float)
-    }
-
-    class SavedState : BaseSavedState {
-
-        var pointsData: PointsData? = null
-        var minSelectorValue: Float = 0f
-        var maxSelectorValue: Float = 0f
-
-        constructor(superState: Parcelable) : super(superState)
-
-        override fun writeToParcel(out: Parcel, flags: Int) {
-            super.writeToParcel(out, flags)
-            out.writeParcelable(pointsData, flags)
-            out.writeFloat(minSelectorValue)
-            out.writeFloat(maxSelectorValue)
-        }
-
-        private constructor(parcel: Parcel) : super(parcel) {
-            pointsData = parcel.readParcelable(PointsData::class.java.classLoader)
-            minSelectorValue = parcel.readFloat()
-            maxSelectorValue = parcel.readFloat()
-        }
-
-        companion object CREATOR : Parcelable.Creator<SavedState> {
-            override fun createFromParcel(parcel: Parcel): SavedState {
-                return SavedState(parcel)
-            }
-
-            override fun newArray(size: Int): Array<SavedState?> {
-                return arrayOfNulls(size)
-            }
-        }
     }
 }
