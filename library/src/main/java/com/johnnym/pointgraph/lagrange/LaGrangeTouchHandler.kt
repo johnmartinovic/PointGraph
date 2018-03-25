@@ -1,20 +1,19 @@
 package com.johnnym.pointgraph.lagrange
 
 import android.view.MotionEvent
-import android.view.View
-import com.johnnym.pointgraph.utils.getXPosition
 
 class LaGrangeTouchHandler(
-        private val view: View,
-        private val dimensions: LaGrangeDimensions,
-        private val drawObjects: LaGrangeDraw,
         private val listener: Listener) {
 
     interface Listener {
 
-        fun minSelectorChanged()
+        fun isInMinSelectorTouchField(x: Float, y: Float): Boolean
 
-        fun maxSelectorChanged()
+        fun isInMaxSelectorTouchField(x: Float, y: Float): Boolean
+
+        fun minSelectorChanged(xPosition: Float)
+
+        fun maxSelectorChanged(xPosition: Float)
     }
 
     private var actionDownXValue: Float = 0f
@@ -32,8 +31,10 @@ class LaGrangeTouchHandler(
                 actionDownXValue = event.x
                 actionDownYValue = event.y
 
-                val minSelectorTouchFieldContainsTouch = drawObjects.isInMinSelectorTouchField(actionDownXValue, actionDownYValue)
-                val maxSelectorTouchFieldContainsTouch = drawObjects.isInMaxSelectorTouchField(actionDownXValue, actionDownYValue)
+                val minSelectorTouchFieldContainsTouch = listener.isInMinSelectorTouchField(
+                        actionDownXValue, actionDownYValue)
+                val maxSelectorTouchFieldContainsTouch = listener.isInMaxSelectorTouchField(
+                        actionDownXValue, actionDownYValue)
 
                 if (minSelectorTouchFieldContainsTouch && maxSelectorTouchFieldContainsTouch) {
                     bothSelectorsSelected = true
@@ -62,31 +63,13 @@ class LaGrangeTouchHandler(
             }
         }
 
-        var newXPosition = event.x
+        val newXPosition = event.x
         if (minSelectorSelected) {
-            if (newXPosition < dimensions.graphLeft) {
-                newXPosition = dimensions.graphLeft
-            } else if (newXPosition > drawObjects.getMaxSelectorXPosition()) {
-                newXPosition = drawObjects.getMaxSelectorXPosition()
-            }
-            drawObjects.setMinSelectorXPosition(newXPosition)
-            listener.minSelectorChanged()
+            listener.minSelectorChanged(newXPosition)
         } else if (maxSelectorSelected) {
-            if (newXPosition > dimensions.graphRight) {
-                newXPosition = dimensions.graphRight
-            } else if (newXPosition < drawObjects.getMinSelectorXPosition()) {
-                newXPosition = drawObjects.getMinSelectorXPosition()
-            }
-            drawObjects.setMaxSelectorXPosition(newXPosition)
-            listener.maxSelectorChanged()
-        }
-
-        // If any of the selectors is selected, then user must be able to move his finger anywhere
-        // on the screen and still have control of the selected selector.
-        if (bothSelectorsSelected || minSelectorSelected || maxSelectorSelected) {
-            view.parent.requestDisallowInterceptTouchEvent(true)
+            listener.maxSelectorChanged(newXPosition)
         }
     }
 
-    fun isAnySelectorSelected() = minSelectorSelected || maxSelectorSelected
+    fun isAnySelectorSelected() = bothSelectorsSelected || minSelectorSelected || maxSelectorSelected
 }

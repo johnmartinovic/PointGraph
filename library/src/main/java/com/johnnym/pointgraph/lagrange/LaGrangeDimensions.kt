@@ -1,6 +1,6 @@
 package com.johnnym.pointgraph.lagrange
 
-class LaGrangeDimensions(
+data class LaGrangeDimensions(
         private val attributes: LaGrangeAttrs) {
 
     var graphTop: Float = 0f
@@ -14,7 +14,7 @@ class LaGrangeDimensions(
     var numbersYPosition: Float = 0f
         private set
 
-    fun onSizeChanged(viewStartX: Int, viewEndX: Int, viewStartY: Int, viewEndY: Int) {
+    fun update(viewStartX: Int, viewEndX: Int, viewStartY: Int, viewEndY: Int) {
         graphTop = viewStartY + attributes.graphTopFromTop
         graphBottom = viewEndY - attributes.graphBottomFromBottom
         graphLeft = viewStartX + attributes.graphLeftRightPadding

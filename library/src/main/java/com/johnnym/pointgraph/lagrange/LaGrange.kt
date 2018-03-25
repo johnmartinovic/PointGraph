@@ -1,5 +1,6 @@
 package com.johnnym.pointgraph.lagrange
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.os.Parcel
@@ -22,38 +23,94 @@ class LaGrange @JvmOverloads constructor(
         defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val attributes: LaGrangeAttrs = LaGrangeAttrs(context, attrs, defStyleAttr)
+    private val minSelectorAnimator = ValueAnimator().apply {
+        duration = 150
+        addUpdateListener { animation ->
+            drawObjects.updateMinSelectorDependantShapes(animation.animatedValue as Float)
+            invalidate()
+        }
+    }
+    private val maxSelectorAnimator = ValueAnimator().apply {
+        duration = 150
+        addUpdateListener { animation ->
+            drawObjects.updateMaxSelectorDependantShapes(animation.animatedValue as Float)
+            invalidate()
+        }
+    }
+    private val graphScaleAnimator = ValueAnimator().apply {
+        duration = 300
+        setFloatValues(0f, 1f)
+        addUpdateListener { animation ->
+            graphYAxisScaleFactor = animation.animatedValue as Float
+            invalidate()
+        }
+    }
+
+    private var graphYAxisScaleFactor = 1f
+
+    private fun moveMinSelectorXPosition(x: Float, animated: Boolean = false) {
+        if (animated) {
+            minSelectorAnimator.setFloatValues(drawObjects.getMinSelectorXPosition(), x)
+            minSelectorAnimator.start()
+        } else {
+            drawObjects.updateMinSelectorDependantShapes(x)
+            invalidate()
+        }
+    }
+
+    private fun moveMaxSelectorXPosition(x: Float, animated: Boolean = false) {
+        if (animated) {
+            maxSelectorAnimator.setFloatValues(drawObjects.getMaxSelectorXPosition(), x)
+            maxSelectorAnimator.start()
+        } else {
+            drawObjects.updateMaxSelectorDependantShapes(x)
+            invalidate()
+        }
+    }
+
+    private val touchHandlerListener = object : LaGrangeTouchHandler.Listener {
+
+        override fun isInMinSelectorTouchField(x: Float, y: Float): Boolean =
+                drawObjects.isInMinSelectorTouchField(x, y)
+
+        override fun isInMaxSelectorTouchField(x: Float, y: Float): Boolean =
+                drawObjects.isInMaxSelectorTouchField(x, y)
+
+        override fun minSelectorChanged(xPosition: Float) {
+            val newXPosition: Float = when {
+                xPosition < dimensions.graphLeft -> dimensions.graphLeft
+                xPosition > drawObjects.getMaxSelectorXPosition() -> drawObjects.getMaxSelectorXPosition()
+                else -> xPosition
+            }
+            drawObjects.updateMinSelectorDependantShapes(newXPosition)
+            invalidate()
+            pointsData?.let {
+                minSelectorValue = transformSelectorXPositionToValue(it, drawObjects.getMinSelectorXPosition())
+            }
+        }
+
+        override fun maxSelectorChanged(xPosition: Float) {
+            val newXPosition: Float = when {
+                xPosition > dimensions.graphRight -> dimensions.graphRight
+                xPosition < drawObjects.getMinSelectorXPosition() -> drawObjects.getMinSelectorXPosition()
+                else -> xPosition
+            }
+            drawObjects.updateMaxSelectorDependantShapes(newXPosition)
+            invalidate()
+            pointsData?.let {
+                maxSelectorValue = transformSelectorXPositionToValue(it, drawObjects.getMaxSelectorXPosition())
+            }
+        }
+    }
+
+    private val attributes: LaGrangeAttrs = LaGrangeAttrs.create(context, attrs, defStyleAttr)
     private val dimensions: LaGrangeDimensions = LaGrangeDimensions(attributes)
-    private val paints: LaGrangePaints = LaGrangePaints(attributes)
-    private val drawObjects: LaGrangeDraw = LaGrangeDraw(attributes, dimensions, paints, object : LaGrangeDraw.Listener {
+    private val drawObjects: LaGrangeDraw = LaGrangeDraw(attributes, dimensions)
+    private val touchHandler: LaGrangeTouchHandler = LaGrangeTouchHandler(touchHandlerListener)
 
-        override fun minSelectorDependantShapesChanged() {
-            invalidate()
-        }
-
-        override fun maxSelectorDependantShapesChanged() {
-            invalidate()
-        }
-
-        override fun graphYAxisScaleFactorChanged() {
-            invalidate()
-        }
-
-    })
-    private val touchHandler: LaGrangeTouchHandler = LaGrangeTouchHandler(this, dimensions, drawObjects, object : LaGrangeTouchHandler.Listener {
-
-        override fun minSelectorChanged() {
-            updateSelectorValues()
-        }
-
-        override fun maxSelectorChanged() {
-            updateSelectorValues()
-        }
-    })
-
-    private var pointsData: PointsData? = null
     private val minSelectorPositionChangeListeners = ArrayList<LaGrange.MinSelectorPositionChangeListener>()
     private val maxSelectorPositionChangeListeners = ArrayList<LaGrange.MaxSelectorPositionChangeListener>()
+    private var pointsData: PointsData? = null
     private var listenersEnabled = true
 
     /**
@@ -74,14 +131,6 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
-    private fun ArrayList<LaGrange.MinSelectorPositionChangeListener>.dispatchOnMinSelectorPositionChangeEvent(newMinValue: Float) {
-        this.forEach { it.onMinValueChanged(newMinValue) }
-    }
-
-    private fun ArrayList<LaGrange.MaxSelectorPositionChangeListener>.dispatchOnMaxSelectorPositionChangeEvent(newMaxValue: Float) {
-        this.forEach { it.onMaxValueChanged(newMaxValue) }
-    }
-
     /**
      * Set [LaGrange] graph data
      *
@@ -94,7 +143,7 @@ class LaGrange @JvmOverloads constructor(
         refreshGraphValues()
 
         if (animated) {
-            drawObjects.graphScaleAnimator.start()
+            graphScaleAnimator.start()
         } else {
             invalidate()
         }
@@ -131,11 +180,11 @@ class LaGrange @JvmOverloads constructor(
             this.minSelectorValue = minSelectorValue
             this.maxSelectorValue = maxSelectorValue
 
-            drawObjects.setMinSelectorXPosition(
+            moveMinSelectorXPosition(
                     affineTransformXToY(minSelectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight),
                     attributes.animateSelectorChanges)
 
-            drawObjects.setMaxSelectorXPosition(
+            moveMaxSelectorXPosition(
                     affineTransformXToY(maxSelectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight),
                     attributes.animateSelectorChanges)
         }
@@ -177,13 +226,6 @@ class LaGrange @JvmOverloads constructor(
         this.maxSelectorPositionChangeListeners.remove(maxSelectorPositionChangeListener)
     }
 
-    private fun updateSelectorValues() {
-        pointsData?.let {
-            this.minSelectorValue = affineTransformXToY(drawObjects.getMinSelectorXPosition(), dimensions.graphLeft, dimensions.graphRight, it.minX, it.maxX)
-            this.maxSelectorValue = affineTransformXToY(drawObjects.getMaxSelectorXPosition(), dimensions.graphLeft, dimensions.graphRight, it.minX, it.maxX)
-        }
-    }
-
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = resolveSizeAndState(attributes.minViewWidth.toInt(), widthMeasureSpec, 0)
         val height = resolveSizeAndState(attributes.minViewHeight.toInt(), heightMeasureSpec, 0)
@@ -194,7 +236,7 @@ class LaGrange @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        dimensions.onSizeChanged(
+        dimensions.update(
                 paddingLeft,
                 w - paddingRight,
                 paddingTop,
@@ -202,8 +244,9 @@ class LaGrange @JvmOverloads constructor(
         drawObjects.updateObjects()
 
         this.pointsData?.let { pointsData ->
-            drawObjects.refreshGraph(pointsData)
-            drawObjects.refreshSelectors(pointsData, minSelectorValue, maxSelectorValue)
+            drawObjects.refreshDataShapes(pointsData)
+            drawObjects.updateMinSelectorDependantShapes(transformSelectorValueToXPosition(pointsData, this.minSelectorValue))
+            drawObjects.updateMaxSelectorDependantShapes(transformSelectorValueToXPosition(pointsData, this.maxSelectorValue))
         }
     }
 
@@ -211,6 +254,12 @@ class LaGrange @JvmOverloads constructor(
         this.pointsData
                 ?.let {
                     touchHandler.handleTouchEvent(event)
+
+                    // If any of the selectors is selected, then user must be able to move his finger anywhere
+                    // on the screen and still have control of the selected selector.
+                    if (touchHandler.isAnySelectorSelected()) {
+                        parent.requestDisallowInterceptTouchEvent(true)
+                    }
                     return true
                 }
                 ?: return false
@@ -220,8 +269,8 @@ class LaGrange @JvmOverloads constructor(
         super.onDraw(canvas)
 
         this.pointsData
-                ?.let { drawObjects.draw(canvas, true) }
-                ?: drawObjects.draw(canvas, false)
+                ?.let { drawObjects.drawWithData(canvas, graphYAxisScaleFactor) }
+                ?: drawObjects.drawWithoutData(canvas)
     }
 
     override fun onSaveInstanceState(): Parcelable {
@@ -254,13 +303,19 @@ class LaGrange @JvmOverloads constructor(
             this.minSelectorValue = it.minX
             this.maxSelectorValue = it.maxX
 
-            drawObjects.updateNumbers(it.minX, it.maxX)
-            drawObjects.refreshGraph(it)
-            drawObjects.refreshSelectors(it, this.minSelectorValue, this.maxSelectorValue)
+            drawObjects.refreshDataShapes(it)
+            drawObjects.updateMinSelectorDependantShapes(transformSelectorValueToXPosition(it, this.minSelectorValue))
+            drawObjects.updateMaxSelectorDependantShapes(transformSelectorValueToXPosition(it, this.maxSelectorValue))
 
             invalidate()
         }
     }
+
+    private fun transformSelectorXPositionToValue(pointsData: PointsData, selectorXPosition: Float): Float =
+            affineTransformXToY(selectorXPosition, dimensions.graphLeft, dimensions.graphRight, pointsData.minX, pointsData.maxX)
+
+    private fun transformSelectorValueToXPosition(pointsData: PointsData, selectorValue: Float): Float =
+            affineTransformXToY(selectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight)
 
     /**
      * Listener interface whose methods are called as a consequence of

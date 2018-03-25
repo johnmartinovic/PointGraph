@@ -1,26 +1,16 @@
 package com.johnnym.pointgraph.lagrange
 
-import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.RectF
 import com.johnnym.pointgraph.GraphPath
 import com.johnnym.pointgraph.PointsData
 import com.johnnym.pointgraph.utils.*
 
-class LaGrangeDraw(
+data class LaGrangeDraw(
         private val attributes: LaGrangeAttrs,
-        private val dimensions: LaGrangeDimensions,
-        private val paints: LaGrangePaints,
-        private val listener: Listener) {
+        private val dimensions: LaGrangeDimensions) {
 
-    interface Listener {
-
-        fun minSelectorDependantShapesChanged()
-
-        fun maxSelectorDependantShapesChanged()
-
-        fun graphYAxisScaleFactorChanged()
-    }
+    private val paints: LaGrangePaints = LaGrangePaints.create(attributes)
 
     private val minSelector = RectF(
             0f,
@@ -50,45 +40,18 @@ class LaGrangeDraw(
     private val graphBoundsRect = RectF()
     private val selectedGraphBoundsRect = RectF()
 
-    private val minSelectorAnimator = ValueAnimator().apply {
-        duration = 150
-        addUpdateListener { animation ->
-            updateMinSelectorDependantShapes(animation.animatedValue as Float)
-        }
-    }
-    private val maxSelectorAnimator = ValueAnimator().apply {
-        duration = 150
-        addUpdateListener { animation ->
-            updateMaxSelectorDependantShapes(animation.animatedValue as Float)
-        }
-    }
-    val graphScaleAnimator = ValueAnimator().apply {
-        duration = 300
-        setFloatValues(0f, 1f)
-        addUpdateListener { animation ->
-            graphYAxisScaleFactor = animation.animatedValue as Float
-            listener.graphYAxisScaleFactorChanged()
-        }
-    }
-
-    private var graphYAxisScaleFactor = 1f
-
-    private fun updateMinSelectorDependantShapes(minSelectorX: Float) {
+    fun updateMinSelectorDependantShapes(minSelectorX: Float) {
         selectedGraphBoundsRect.left = minSelectorX
         selectedLine.left = minSelectorX
         minSelector.setXMiddle(minSelectorX)
         minSelectorTouchField.setXMiddle(minSelectorX)
-
-        listener.minSelectorDependantShapesChanged()
     }
 
-    private fun updateMaxSelectorDependantShapes(maxSelectorX: Float) {
+    fun updateMaxSelectorDependantShapes(maxSelectorX: Float) {
         selectedGraphBoundsRect.right = maxSelectorX
         selectedLine.right = maxSelectorX
         maxSelector.setXMiddle(maxSelectorX)
         maxSelectorTouchField.setXMiddle(maxSelectorX)
-
-        listener.maxSelectorDependantShapesChanged()
     }
 
     fun updateObjects() {
@@ -113,44 +76,17 @@ class LaGrangeDraw(
         selectedLine.setYMiddle(dimensions.graphBottom)
     }
 
-    fun refreshGraph(pointsData: PointsData) {
-        graphPath.generatePath(pointsData, dimensions.graphLeft, dimensions.graphBottom, dimensions.graphRight, dimensions.graphTop)
-    }
-
-    fun refreshSelectors(pointsData: PointsData, minSelectorValue: Float, maxSelectorValue: Float) {
-        setMinSelectorXPosition(affineTransformXToY(minSelectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight))
-        setMaxSelectorXPosition(affineTransformXToY(maxSelectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight))
-    }
-
-    fun draw(canvas: Canvas, shouldDrawDataObjects: Boolean) {
-        if (shouldDrawDataObjects) drawGraph(canvas)
-
+    fun drawWithData(canvas: Canvas, graphYAxisScaleFactor: Float) {
+        drawGraph(canvas, graphYAxisScaleFactor)
         drawXAxisAndIndicators(canvas)
-
-        if (shouldDrawDataObjects) {
-            drawSelectedLineAndSelectors(canvas)
-        }
+        drawSelectedLineAndSelectors(canvas)
     }
 
-    fun setMinSelectorXPosition(x: Float, animated: Boolean = false) {
-        if (animated) {
-            minSelectorAnimator.setFloatValues(minSelector.getXPosition(), x)
-            minSelectorAnimator.start()
-        } else {
-            updateMinSelectorDependantShapes(x)
-        }
+    fun drawWithoutData(canvas: Canvas) {
+        drawXAxisAndIndicators(canvas)
     }
 
-    fun setMaxSelectorXPosition(x: Float, animated: Boolean = false) {
-        if (animated) {
-            maxSelectorAnimator.setFloatValues(maxSelector.getXPosition(), x)
-            maxSelectorAnimator.start()
-        } else {
-            updateMaxSelectorDependantShapes(x)
-        }
-    }
-
-    private fun drawGraph(canvas: Canvas) {
+    private fun drawGraph(canvas: Canvas, graphYAxisScaleFactor: Float) {
         // draw graph and selected part of graph
         canvas.save()
         canvas.scale(1f, graphYAxisScaleFactor, 0f, dimensions.graphBottom)
@@ -177,13 +113,14 @@ class LaGrangeDraw(
 
     fun getMaxSelectorXPosition(): Float = maxSelector.getXPosition()
 
-    fun updateNumbers(minValue: Float, maxValue: Float) {
-        xAxisIndicatorLabels.updateNumbers(minValue, maxValue)
-    }
-
     fun isInMinSelectorTouchField(x: Float, y: Float): Boolean =
             minSelectorTouchField.contains(x, y)
 
     fun isInMaxSelectorTouchField(x: Float, y: Float): Boolean =
             maxSelectorTouchField.contains(x, y)
+
+    fun refreshDataShapes(pointsData: PointsData) {
+        xAxisIndicatorLabels.updateNumbers(pointsData.minX, pointsData.maxX)
+        graphPath.generatePath(pointsData, dimensions.graphLeft, dimensions.graphBottom, dimensions.graphRight, dimensions.graphTop)
+    }
 }
