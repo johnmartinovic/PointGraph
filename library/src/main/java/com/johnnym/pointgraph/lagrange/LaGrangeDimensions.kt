@@ -14,7 +14,7 @@ data class LaGrangeDimensions(
     var numbersYPosition: Float = 0f
         private set
 
-    fun update(viewStartX: Int, viewEndX: Int, viewStartY: Int, viewEndY: Int) {
+    fun updateDimensions(viewStartX: Int, viewEndX: Int, viewStartY: Int, viewEndY: Int) {
         graphTop = viewStartY + attributes.graphTopFromTop
         graphBottom = viewEndY - attributes.graphBottomFromBottom
         graphLeft = viewStartX + attributes.graphLeftRightPadding

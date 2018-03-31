@@ -229,13 +229,12 @@ class LaGrange @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        dimensions.update(
+        dimensions.updateDimensions(
                 paddingLeft,
                 w - paddingRight,
                 paddingTop,
                 h - paddingBottom)
-        drawObjects.updateObjects()
-
+        drawObjects.refreshStaticObjects()
         resetDataAndSelectorDrawObjects()
     }
 
@@ -309,7 +308,7 @@ class LaGrange @JvmOverloads constructor(
 
     private fun resetDataAndSelectorDrawObjects() {
         pointsData?.let {
-            drawObjects.refreshDataShapes(it)
+            drawObjects.refreshDataObjects(it)
             drawObjects.updateMinSelectorDependantShapes(transformSelectorValueToXPosition(it, this.minSelectorValue))
             drawObjects.updateMaxSelectorDependantShapes(transformSelectorValueToXPosition(it, this.maxSelectorValue))
         }
