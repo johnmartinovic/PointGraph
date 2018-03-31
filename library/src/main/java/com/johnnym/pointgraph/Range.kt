@@ -1,7 +1,7 @@
 package com.johnnym.pointgraph
 
-import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Helping data class which defines a range (with its start and end values) and some value
@@ -13,6 +13,7 @@ import android.os.Parcelable
  * @param to range end value
  * @param count some value uniquely related to  the range between [from] and [to]
  */
+@Parcelize
 data class Range(
         val from: Float,
         val to: Float,
@@ -24,27 +25,4 @@ data class Range(
 
     val range: Float
         get() = to - from
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeFloat(from)
-        parcel.writeFloat(to)
-        parcel.writeFloat(count)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Range> {
-        override fun createFromParcel(parcel: Parcel): Range {
-            return Range(
-                    parcel.readFloat(),
-                    parcel.readFloat(),
-                    parcel.readFloat())
-        }
-
-        override fun newArray(size: Int): Array<Range?> {
-            return arrayOfNulls(size)
-        }
-    }
 }

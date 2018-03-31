@@ -1,7 +1,8 @@
 package com.johnnym.pointgraph
 
-import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.android.parcel.IgnoredOnParcel
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Data class which defines a list of ranges with their uniquely related values.
@@ -11,6 +12,7 @@ import android.os.Parcelable
  *
  * @param rangeList a list of ranges which, with their uniquely related values, represent a graph
  */
+@Parcelize
 data class RangeData(
         private val rangeList: List<Range>
 ) : Parcelable {
@@ -18,7 +20,7 @@ data class RangeData(
     /**
      * [PointsData] instance calculated out from [rangeList].
      */
-    val pointsData: PointsData
+    @IgnoredOnParcel val pointsData: PointsData
 
     init {
         var x: Float
@@ -59,23 +61,5 @@ data class RangeData(
         return rangeList
                 .map { Math.max(0f, Math.min(it.to, maxValue) - Math.max(it.from, minValue)) * it.count / it.range }
                 .sum()
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeList(rangeList)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<RangeData> {
-        override fun createFromParcel(parcel: Parcel): RangeData {
-            return RangeData(parcel.createTypedArrayList(Range.CREATOR))
-        }
-
-        override fun newArray(size: Int): Array<RangeData?> {
-            return arrayOfNulls(size)
-        }
     }
 }

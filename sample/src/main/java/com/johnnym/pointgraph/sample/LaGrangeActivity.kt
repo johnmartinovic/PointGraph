@@ -17,6 +17,8 @@ class LaGrangeActivity : AppCompatActivity() {
 
     companion object {
 
+        private const val RANGE_DATA = "rangeData"
+
         fun getIntent(context: Context): Intent {
             return Intent(context, LaGrangeActivity::class.java)
         }
@@ -29,14 +31,17 @@ class LaGrangeActivity : AppCompatActivity() {
     private val setDataButton: Button by bindView(R.id.btn_set_data)
     private val resetDataButton: Button by bindView(R.id.btn_reset_data)
 
-    private var changingDoneByLaGrange: Boolean = false
-    private var changingDoneByEditTexts: Boolean = false
+    private var changingDoneByLaGrange: Boolean = true
+    private var changingDoneByEditTexts: Boolean = true
 
     private var rangeData: RangeData? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_la_grange)
+
+        changingDoneByLaGrange = true
+        changingDoneByEditTexts = true
 
         RxTextView.textChanges(minValueEditText)
                 .filter { !changingDoneByLaGrange }
@@ -62,6 +67,28 @@ class LaGrangeActivity : AppCompatActivity() {
         resetDataButton.setOnClickListener {
             resetLaGrangeData()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        changingDoneByLaGrange = false
+        changingDoneByEditTexts = false
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        savedInstanceState?.let {
+            rangeData = it.getParcelable(RANGE_DATA)
+            updateApproxResultsNumTextView()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putParcelable(RANGE_DATA, rangeData)
+
+        super.onSaveInstanceState(outState)
     }
 
     private fun setLaGrangeData() {
