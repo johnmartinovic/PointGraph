@@ -64,8 +64,12 @@ class LaGrangeActivity : AppCompatActivity() {
         setDataButton.setOnClickListener {
             setLaGrangeData()
         }
+
         resetDataButton.setOnClickListener {
             resetLaGrangeData()
+            minValueEditText.text.clear()
+            maxValueEditText.text.clear()
+            approxResultsNumTextView.text = ""
         }
     }
 

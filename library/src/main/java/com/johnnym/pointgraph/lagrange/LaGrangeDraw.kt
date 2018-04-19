@@ -46,10 +46,20 @@ data class LaGrangeDraw(
         xAxisRect.setYMiddle(dimensions.graphBottom)
 
         // Calculate X axis number positions
-        xAxisIndicators.setLimitValues(xAxisRect.left, xAxisRect.right, dimensions.graphBottom)
-        xAxisIndicatorLabels.setLimitValues(xAxisRect.left, xAxisRect.right, dimensions.numbersYPosition)
+        xAxisIndicators.setLimitValues(
+                dimensions.graphLeft,
+                dimensions.graphRight,
+                dimensions.graphBottom)
+        xAxisIndicatorLabels.setLimitValues(
+                dimensions.graphLeft,
+                dimensions.graphRight,
+                dimensions.numbersYPosition)
 
-        graphBoundsRect.set(dimensions.graphLeft, dimensions.graphTop, dimensions.graphRight, dimensions.graphBottom)
+        graphBoundsRect.set(
+                dimensions.graphLeft,
+                dimensions.graphTop,
+                dimensions.graphRight,
+                dimensions.graphBottom)
         selectedGraphBoundsRect.set(graphBoundsRect)
 
         selectedLine.left = selectedGraphBoundsRect.left
@@ -113,7 +123,7 @@ data class LaGrangeDraw(
     }
 
     private fun drawXAxisAndIndicators(canvas: Canvas) {
-        canvas.drawRect(xAxisRect, paints.xAxisRectPaint)
+        canvas.drawRoundRect(xAxisRect, attributes.xAxisThickness, attributes.xAxisThickness, paints.xAxisRectPaint)
         xAxisIndicators.draw(canvas)
     }
 

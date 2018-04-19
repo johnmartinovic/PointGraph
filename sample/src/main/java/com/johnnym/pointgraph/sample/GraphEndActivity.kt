@@ -19,6 +19,8 @@ class GraphEndActivity : AppCompatActivity() {
         private const val TOTAL_TIME: Long = 20
         private const val REFRESH_TIME_MS: Long = 50
 
+        private const val POINTS_DATA = "pointsData"
+
         fun getIntent(context: Context): Intent {
             return Intent(context, GraphEndActivity::class.java)
         }
@@ -29,7 +31,7 @@ class GraphEndActivity : AppCompatActivity() {
     private val startTimeButton: Button by bindView(R.id.btn_start_time)
     private val stopTimeButton: Button by bindView(R.id.btn_stop_time)
 
-    private lateinit var pointsData: PointsData
+    private var pointsData: PointsData? = null
 
     private var countDownTimer: CountDownTimer? = null
 
@@ -39,7 +41,7 @@ class GraphEndActivity : AppCompatActivity() {
 
         initGraphEndSelectorListener()
 
-        setGraphEndData()
+        if (savedInstanceState == null) setGraphEndData()
 
         currentTimerStateTextView.setOnClickListener {
             graphEnd.toggleGraphVisibility()
@@ -53,6 +55,21 @@ class GraphEndActivity : AppCompatActivity() {
         stopTimeButton.setOnClickListener {
             countDownTimer?.cancel()
         }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        savedInstanceState?.let {
+            pointsData = it.getParcelable(POINTS_DATA)
+            updateCurrentTimerStateTextView(graphEnd.selectorValue)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putParcelable(POINTS_DATA, pointsData)
+
+        super.onSaveInstanceState(outState)
     }
 
     private fun initCountDownTimer() {

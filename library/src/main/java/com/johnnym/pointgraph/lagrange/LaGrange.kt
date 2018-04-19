@@ -56,11 +56,7 @@ class LaGrange @JvmOverloads constructor(
                 drawObjects.isInMaxSelectorTouchField(x, y)
 
         override fun minSelectorChanged(xPosition: Float) {
-            val newXPosition: Float = when {
-                xPosition < dimensions.graphLeft -> dimensions.graphLeft
-                xPosition > drawObjects.getMaxSelectorXPosition() -> drawObjects.getMaxSelectorXPosition()
-                else -> xPosition
-            }
+            val newXPosition: Float = constrainToRange(xPosition, dimensions.graphLeft, drawObjects.getMaxSelectorXPosition())
 
             pointsData?.let {
                 minSelectorValue = transformSelectorXPositionToValue(it, newXPosition)
@@ -71,11 +67,7 @@ class LaGrange @JvmOverloads constructor(
         }
 
         override fun maxSelectorChanged(xPosition: Float) {
-            val newXPosition: Float = when {
-                xPosition > dimensions.graphRight -> dimensions.graphRight
-                xPosition < drawObjects.getMinSelectorXPosition() -> drawObjects.getMinSelectorXPosition()
-                else -> xPosition
-            }
+            val newXPosition: Float = constrainToRange(xPosition, drawObjects.getMinSelectorXPosition(), dimensions.graphRight)
 
             pointsData?.let {
                 maxSelectorValue = transformSelectorXPositionToValue(it, newXPosition)
