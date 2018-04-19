@@ -38,14 +38,14 @@ class LaGrange @JvmOverloads constructor(
     }
     private val graphScaleAnimator = ValueAnimator().apply {
         duration = 300
-        setFloatValues(0f, 1f)
+        setFloatValues(GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE, GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE)
         addUpdateListener { animation ->
             graphYAxisScaleFactor = animation.animatedValue as Float
             invalidate()
         }
     }
 
-    private var graphYAxisScaleFactor = 1f
+    private var graphYAxisScaleFactor = GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE
 
     private val touchHandlerListener = object : LaGrangeTouchHandler.Listener {
 

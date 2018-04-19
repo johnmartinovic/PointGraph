@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="16"/>
 
-    <com.johnnym.pointgraph.GraphEnd
+    <com.johnnym.pointgraph.graphend.GraphEnd
         android:id="@+id/graph_end"
         android:layout_width="match_parent"
         android:layout_height="200dp"
@@ -26,12 +26,12 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:pg__graph_color="@color/graph_end_demo_graph_color"
-        app:pg__x_axis_color="@color/graph_end_demo_line_color"
-        app:pg__x_axis_thickness="@dimen/graph_end_demo_line_thickness"
         app:pg__selected_graph_color="@color/graph_end_demo_selected_graph_color"
         app:pg__selected_line_color="@color/graph_end_demo_selected_line_color"
         app:pg__selected_line_thickness="@dimen/graph_end_demo_selected_line_thickness"
-        app:pg__selector_color="@color/graph_end_demo_selector_color"/>
+        app:pg__selector_color="@color/graph_end_demo_selector_color"
+        app:pg__x_axis_color="@color/graph_end_demo_line_color"
+        app:pg__x_axis_thickness="@dimen/graph_end_demo_line_thickness"/>
 
     <Button
         android:id="@+id/btn_start_time"

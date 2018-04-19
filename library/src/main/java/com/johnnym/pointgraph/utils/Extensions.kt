@@ -2,6 +2,7 @@ package com.johnnym.pointgraph.utils
 
 import android.graphics.Rect
 import android.graphics.RectF
+import com.johnnym.pointgraph.graphend.GraphEnd
 import com.johnnym.pointgraph.lagrange.LaGrange
 
 fun RectF.setMiddle(x: Float, y: Float) {
@@ -36,6 +37,18 @@ fun Rect.setYMiddle(y: Int) {
 
 fun Rect.getXPosition(): Int {
     return this.centerX()
+}
+
+fun ArrayList<GraphEnd.SelectorListener>.dispatchOnSelectorPressedEvent() {
+    this.forEach { it.onSelectorPressed() }
+}
+
+fun ArrayList<GraphEnd.SelectorListener>.dispatchOnValueChangedEvent(newValue: Float) {
+    this.forEach { it.onValueChanged(newValue) }
+}
+
+fun ArrayList<GraphEnd.SelectorListener>.dispatchOnSelectorReleasedEvent() {
+    this.forEach { it.onSelectorReleased() }
 }
 
 fun ArrayList<LaGrange.MinSelectorPositionChangeListener>.dispatchOnMinSelectorPositionChangeEvent(newMinValue: Float) {
