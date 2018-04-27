@@ -148,7 +148,7 @@ class LaGrangeActivity : AppCompatActivity() {
         val minValue: Float? = minValueEditText.text.toString().toFloatOrNull()
         val maxValue: Float? = maxValueEditText.text.toString().toFloatOrNull()
 
-        laGrange.setSelectorsValues(minValue, maxValue)
+        laGrange.setSelectorsValues(minValue, maxValue, true)
     }
 
     private fun updateApproxResultsNumTextView() {

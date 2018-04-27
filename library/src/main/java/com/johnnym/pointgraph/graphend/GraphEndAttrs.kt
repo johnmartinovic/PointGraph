@@ -13,7 +13,6 @@ data class GraphEndAttrs(
         val selectorColor: Int,
         val graphColor: Int,
         val selectedGraphColor: Int,
-        val animateSelectorChanges: Boolean,
         val minViewWidth: Float,
         val minViewHeight: Float,
         val graphTopFromTop: Float,
@@ -52,9 +51,6 @@ data class GraphEndAttrs(
                     styledAttrs.getColor(
                             R.styleable.pg__GraphEnd_pg__selected_graph_color,
                             ContextCompat.getColor(context, R.color.pg__default_selected_graph_color)),
-                    styledAttrs.getBoolean(
-                            R.styleable.pg__GraphEnd_pg__animate_selector_changes,
-                            resources.getBoolean(R.bool.pg__default_animate_selector_changes)),
                     resources.getDimension(R.dimen.pg__graph_end_min_view_width),
                     resources.getDimension(R.dimen.pg__graph_end_min_view_height),
                     resources.getDimension(R.dimen.pg__graph_end_graph_top_from_top),

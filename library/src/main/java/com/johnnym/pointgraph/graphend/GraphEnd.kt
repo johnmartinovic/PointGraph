@@ -120,7 +120,7 @@ class GraphEnd @JvmOverloads constructor(
      *
      * @param value wanted [selectorValue]
      */
-    fun setSelectorValue(value: Float?) {
+    fun setSelectorValue(value: Float?, animated: Boolean) {
         // if user is interacting with the view, do not set values from outside
         if (touchHandler.isSelectorSelected()) {
             return
@@ -131,7 +131,7 @@ class GraphEnd @JvmOverloads constructor(
 
             moveSelectorXPosition(
                     transformSelectorValueToXPosition(pointsData, selectorValue),
-                    attributes.animateSelectorChanges)
+                    animated)
         }
     }
 
@@ -284,7 +284,7 @@ class GraphEnd @JvmOverloads constructor(
             affineTransformXToY(selectorValue, pointsData.minX, pointsData.maxX, dimensions.graphLeft, dimensions.graphRight)
 
     /**
-     * Listener interface whose methods are called as a consequence of [selector] interaction
+     * Listener interface whose methods are called as a consequence of selector's interaction
      * and [selectorValue] value change events.
      */
     interface SelectorListener {

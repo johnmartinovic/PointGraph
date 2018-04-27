@@ -139,7 +139,7 @@ class LaGrange @JvmOverloads constructor(
      * @param minValue wanted [minSelectorValue]
      * @param maxValue wanted [maxSelectorValue]
      */
-    fun setSelectorsValues(minValue: Float?, maxValue: Float?) {
+    fun setSelectorsValues(minValue: Float?, maxValue: Float?, animated: Boolean) {
         // if user is interacting with the view, do not set values from outside
         if (touchHandler.isAnySelectorSelected()) {
             return
@@ -150,11 +150,11 @@ class LaGrange @JvmOverloads constructor(
 
             moveMinSelectorXPosition(
                     transformSelectorValueToXPosition(pointsData, minSelectorValue),
-                    attributes.animateSelectorChanges)
+                    animated)
 
             moveMaxSelectorXPosition(
                     transformSelectorValueToXPosition(pointsData, maxSelectorValue),
-                    attributes.animateSelectorChanges)
+                    animated)
         }
     }
 

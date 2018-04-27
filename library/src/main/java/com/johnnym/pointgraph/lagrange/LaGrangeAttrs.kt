@@ -17,7 +17,6 @@ data class LaGrangeAttrs(
         val graphColor: Int,
         val selectedGraphColor: Int,
         val xAxisNumberOfMiddlePoints: Int,
-        val animateSelectorChanges: Boolean,
         val xAxisIndicatorDrawable: Drawable,
         val minViewWidth: Float,
         val minViewHeight: Float,
@@ -67,9 +66,6 @@ data class LaGrangeAttrs(
                     styledAttrs.getInteger(
                             R.styleable.pg__LaGrange_pg__x_axis_number_of_middle_points,
                             resources.getInteger(R.integer.pg__default_line_middle_points_num)),
-                    styledAttrs.getBoolean(
-                            R.styleable.pg__LaGrange_pg__animate_selector_changes,
-                            resources.getBoolean(R.bool.pg__default_animate_selector_changes)),
                     styledAttrs.getDrawable(R.styleable.pg__LaGrange_pg__x_axis_indicator)
                             ?: ContextCompat.getDrawable(context, R.drawable.pg__circle_point_indicator)!!,
                     resources.getDimension(R.dimen.pg__la_grange_min_view_width),

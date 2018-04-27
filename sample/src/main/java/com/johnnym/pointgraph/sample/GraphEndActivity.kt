@@ -17,7 +17,7 @@ class GraphEndActivity : AppCompatActivity() {
     companion object {
 
         private const val TOTAL_TIME: Long = 20
-        private const val REFRESH_TIME_MS: Long = 50
+        private const val REFRESH_TIME_MS: Long = 1000 / 60
 
         private const val POINTS_DATA = "pointsData"
 
@@ -74,21 +74,22 @@ class GraphEndActivity : AppCompatActivity() {
 
     private fun initCountDownTimer() {
         countDownTimer = object : CountDownTimer(
-                (TOTAL_TIME.toFloat() * S_TO_MS_FACTOR - graphEnd.selectorValue * S_TO_MS_FACTOR).toLong(),
+                ((TOTAL_TIME.toFloat() - graphEnd.selectorValue) * S_TO_MS_FACTOR).toLong(),
                 REFRESH_TIME_MS) {
+
             override fun onFinish() {
                 setGraphEndSelectorValue(TOTAL_TIME.toFloat())
             }
 
             override fun onTick(millisUntilFinished: Long) {
                 setGraphEndSelectorValue(
-                        (TOTAL_TIME.toFloat() * S_TO_MS_FACTOR - millisUntilFinished.toFloat()) / S_TO_MS_FACTOR)
+                        TOTAL_TIME.toFloat() - millisUntilFinished.toFloat() / S_TO_MS_FACTOR)
             }
         }
     }
 
     private fun setGraphEndSelectorValue(value: Float) {
-        graphEnd.setSelectorValue(value)
+        graphEnd.setSelectorValue(value, false)
     }
 
     private fun setGraphEndData() {
