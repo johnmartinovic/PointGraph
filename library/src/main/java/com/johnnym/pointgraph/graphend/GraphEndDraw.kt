@@ -12,16 +12,12 @@ data class GraphEndDraw(
 
     val paints: GraphEndPaints = GraphEndPaints.create(attributes)
 
+
     private val selector = RectF(
             0f,
             0f,
-            attributes.selectorDiameter,
-            attributes.selectorDiameter)
-    private val selectorTouchField = RectF(
-            0f,
-            0f,
-            attributes.selectorTouchDiameter,
-            attributes.selectorTouchDiameter)
+            attributes.selector.intrinsicWidth.toFloat(),
+            attributes.selector.intrinsicHeight.toFloat())
     private val xAxisRect = RectF(0f, 0f, 0f, attributes.xAxisThickness)
     private val selectedLine = RectF(
             0f,
@@ -33,9 +29,6 @@ data class GraphEndDraw(
     private val selectedGraphBoundsRect = RectF()
 
     fun refreshStaticObjects() {
-        selector.setYMiddle(dimensions.graphBottom)
-        selectorTouchField.setYMiddle(dimensions.graphBottom)
-
         xAxisRect.left = dimensions.graphLeft - attributes.xAxisThickness / 2
         xAxisRect.right = dimensions.graphRight + attributes.xAxisThickness / 2
         xAxisRect.setYMiddle(dimensions.graphBottom)
@@ -49,6 +42,8 @@ data class GraphEndDraw(
 
         selectedLine.left = dimensions.graphLeft
         selectedLine.setYMiddle(dimensions.graphBottom)
+
+        selector.setYMiddle(dimensions.graphBottom)
     }
 
     fun refreshDataObjects(pointsData: PointsData) {
@@ -59,13 +54,12 @@ data class GraphEndDraw(
         selectedGraphBoundsRect.right = selectorX
         selectedLine.right = selectorX
         selector.setXMiddle(selectorX)
-        selectorTouchField.setXMiddle(selectorX)
     }
 
     fun getSelectorXPosition(): Float = selector.getXPosition()
 
-    fun isInSelectorTouchField(x: Float, y: Float): Boolean =
-            selectorTouchField.contains(x, y)
+    fun isInSelector(x: Float, y: Float): Boolean =
+            selector.contains(x, y)
 
     fun drawWithData(canvas: Canvas, graphYAxisScaleFactor: Float) {
         drawGraph(canvas, graphYAxisScaleFactor)
@@ -94,6 +88,7 @@ data class GraphEndDraw(
 
     private fun drawSelectedLineAndSelector(canvas: Canvas) {
         canvas.drawRect(selectedLine, paints.selectedLinePaint)
-        canvas.drawOval(selector, paints.selectorPaint)
+        attributes.selector.bounds = selector.toRect()
+        attributes.selector.draw(canvas)
     }
 }

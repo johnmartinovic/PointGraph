@@ -11,7 +11,7 @@ data class LaGrangeAttrs(
         val xAxisThickness: Float,
         val selectedLineColor: Int,
         val selectedLineThickness: Float,
-        val selectorColor: Int,
+        val selector: Drawable,
         val textColor: Int,
         val textSize: Float,
         val graphColor: Int,
@@ -23,9 +23,7 @@ data class LaGrangeAttrs(
         val graphTopFromTop: Float,
         val graphBottomFromBottom: Float,
         val graphLeftRightPadding: Float,
-        val numbersYPositionFromBottom: Float,
-        val selectorDiameter: Float,
-        val selectorTouchDiameter: Float) {
+        val numbersYPositionFromBottom: Float) {
 
     companion object {
 
@@ -48,9 +46,8 @@ data class LaGrangeAttrs(
                     styledAttrs.getDimension(
                             R.styleable.pg__LaGrange_pg__selected_line_thickness,
                             resources.getDimension(R.dimen.pg__default_selected_line_thickness)),
-                    styledAttrs.getColor(
-                            R.styleable.pg__LaGrange_pg__selector_color,
-                            ContextCompat.getColor(context, R.color.pg__default_selector_color)),
+                    styledAttrs.getDrawable(R.styleable.pg__LaGrange_pg__selector)
+                            ?: ContextCompat.getDrawable(context, R.drawable.pg__ring_selector)!!,
                     styledAttrs.getColor(
                             R.styleable.pg__LaGrange_pg__text_color,
                             ContextCompat.getColor(context, R.color.pg__default_text_color)),
@@ -73,9 +70,7 @@ data class LaGrangeAttrs(
                     resources.getDimension(R.dimen.pg__la_grange_graph_top_from_top),
                     resources.getDimension(R.dimen.pg__la_grange_graph_bottom_from_bottom),
                     resources.getDimension(R.dimen.pg__la_grange_graph_left_right_padding),
-                    resources.getDimension(R.dimen.pg__la_grange_numbers_y_position_from_bottom),
-                    resources.getDimension(R.dimen.pg__la_grange_selector_diameter),
-                    resources.getDimension(R.dimen.pg__la_grange_selector_touch_diameter))
+                    resources.getDimension(R.dimen.pg__la_grange_numbers_y_position_from_bottom))
 
             styledAttrs.recycle()
 

@@ -12,9 +12,6 @@
     <dimen name="pg__la_grange_graph_bottom_from_bottom">50dp</dimen>
     <dimen name="pg__la_grange_numbers_y_position_from_bottom">20dp</dimen>
     <dimen name="pg__la_grange_graph_left_right_padding">16dp</dimen>
-    <dimen name="pg__la_grange_point_indicator_diameter">4dp</dimen>
-    <dimen name="pg__la_grange_selector_diameter">16dp</dimen>
-    <dimen name="pg__la_grange_selector_touch_diameter">48dp</dimen>
 
     <!-- GraphEnd values -->
     <dimen name="pg__graph_end_min_view_width">200dp</dimen>
@@ -22,7 +19,5 @@
     <dimen name="pg__graph_end_graph_top_from_top">0dp</dimen>
     <dimen name="pg__graph_end_graph_bottom_from_bottom">50dp</dimen>
     <dimen name="pg__graph_end_graph_left_right_padding">16dp</dimen>
-    <dimen name="pg__graph_end_selector_diameter">16dp</dimen>
-    <dimen name="pg__graph_end_selector_touch_diameter">48dp</dimen>
 
 </resources>

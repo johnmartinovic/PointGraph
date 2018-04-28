@@ -32,8 +32,8 @@ class GraphEnd @JvmOverloads constructor(
 
     private val touchHandlerListener = object : GraphEndTouchHandler.Listener {
 
-        override fun isInSelectorTouchField(x: Float, y: Float): Boolean =
-                drawObjects.isInSelectorTouchField(x, y)
+        override fun isInSelector(x: Float, y: Float): Boolean =
+                drawObjects.isInSelector(x, y)
 
         override fun selectorChanged(xPosition: Float) {
             val newXPosition: Float = constrainToRange(xPosition, dimensions.graphLeft, dimensions.graphRight)
@@ -81,11 +81,6 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
         private set
-
-    // TODO remove this when any selector can be added
-    init {
-        setLayerType(LAYER_TYPE_SOFTWARE, drawObjects.paints.selectorPaint)
-    }
 
     /**
      * Set [GraphEnd] graph data

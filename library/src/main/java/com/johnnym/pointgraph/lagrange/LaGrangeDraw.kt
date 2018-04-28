@@ -15,15 +15,9 @@ data class LaGrangeDraw(
     private val minSelector = RectF(
             0f,
             0f,
-            attributes.selectorDiameter,
-            attributes.selectorDiameter)
+            attributes.selector.intrinsicWidth.toFloat(),
+            attributes.selector.intrinsicHeight.toFloat())
     private val maxSelector = RectF(minSelector)
-    private val minSelectorTouchField = RectF(
-            0f,
-            0f,
-            attributes.selectorTouchDiameter,
-            attributes.selectorTouchDiameter)
-    private val maxSelectorTouchField = RectF(minSelectorTouchField)
     private val xAxisRect = RectF(0f, 0f, 0f, attributes.xAxisThickness)
     private val xAxisIndicators = AxisIndicators(
             attributes.xAxisNumberOfMiddlePoints,
@@ -66,9 +60,7 @@ data class LaGrangeDraw(
         selectedLine.right = selectedGraphBoundsRect.right
 
         minSelector.setYMiddle(dimensions.graphBottom)
-        minSelectorTouchField.setYMiddle(dimensions.graphBottom)
         maxSelector.setYMiddle(dimensions.graphBottom)
-        maxSelectorTouchField.setYMiddle(dimensions.graphBottom)
         selectedLine.setYMiddle(dimensions.graphBottom)
     }
 
@@ -81,25 +73,23 @@ data class LaGrangeDraw(
         selectedGraphBoundsRect.left = minSelectorX
         selectedLine.left = minSelectorX
         minSelector.setXMiddle(minSelectorX)
-        minSelectorTouchField.setXMiddle(minSelectorX)
     }
 
     fun updateMaxSelectorDependantShapes(maxSelectorX: Float) {
         selectedGraphBoundsRect.right = maxSelectorX
         selectedLine.right = maxSelectorX
         maxSelector.setXMiddle(maxSelectorX)
-        maxSelectorTouchField.setXMiddle(maxSelectorX)
     }
 
     fun getMinSelectorXPosition(): Float = minSelector.getXPosition()
 
     fun getMaxSelectorXPosition(): Float = maxSelector.getXPosition()
 
-    fun isInMinSelectorTouchField(x: Float, y: Float): Boolean =
-            minSelectorTouchField.contains(x, y)
+    fun isInMinSelector(x: Float, y: Float): Boolean =
+            minSelector.contains(x, y)
 
-    fun isInMaxSelectorTouchField(x: Float, y: Float): Boolean =
-            maxSelectorTouchField.contains(x, y)
+    fun isInMaxSelector(x: Float, y: Float): Boolean =
+            maxSelector.contains(x, y)
 
     fun drawWithData(canvas: Canvas, graphYAxisScaleFactor: Float) {
         drawGraph(canvas, graphYAxisScaleFactor)
@@ -129,8 +119,10 @@ data class LaGrangeDraw(
 
     private fun drawSelectedLineAndSelectors(canvas: Canvas) {
         canvas.drawRect(selectedLine, paints.selectedLinePaint)
-        canvas.drawOval(minSelector, paints.selectorPaint)
-        canvas.drawOval(maxSelector, paints.selectorPaint)
+        attributes.selector.bounds = minSelector.toRect()
+        attributes.selector.draw(canvas)
+        attributes.selector.bounds = maxSelector.toRect()
+        attributes.selector.draw(canvas)
         xAxisIndicatorLabels.draw(canvas)
     }
 }

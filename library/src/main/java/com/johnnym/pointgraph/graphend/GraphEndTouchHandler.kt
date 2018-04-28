@@ -7,7 +7,7 @@ class GraphEndTouchHandler(
 
     interface Listener {
 
-        fun isInSelectorTouchField(x: Float, y: Float): Boolean
+        fun isInSelector(x: Float, y: Float): Boolean
 
         fun selectorChanged(xPosition: Float)
 
@@ -29,7 +29,7 @@ class GraphEndTouchHandler(
                 actionDownXValue = event.x
                 actionDownYValue = event.y
 
-                val selectorTouchFieldContainsTouch = listener.isInSelectorTouchField(
+                val selectorTouchFieldContainsTouch = listener.isInSelector(
                         actionDownXValue, actionDownYValue)
 
                 if (selectorTouchFieldContainsTouch) {

@@ -39,6 +39,12 @@ fun Rect.getXPosition(): Int {
     return this.centerX()
 }
 
+fun RectF.toRect(): Rect = Rect(
+        this.left.toInt(),
+        this.top.toInt(),
+        this.right.toInt(),
+        this.bottom.toInt())
+
 fun ArrayList<GraphEnd.SelectorListener>.dispatchOnSelectorPressedEvent() {
     this.forEach { it.onSelectorPressed() }
 }

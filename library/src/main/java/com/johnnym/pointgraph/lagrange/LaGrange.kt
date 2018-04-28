@@ -38,11 +38,11 @@ class LaGrange @JvmOverloads constructor(
     }
     private val touchHandlerListener = object : LaGrangeTouchHandler.Listener {
 
-        override fun isInMinSelectorTouchField(x: Float, y: Float): Boolean =
-                drawObjects.isInMinSelectorTouchField(x, y)
+        override fun isInMinSelector(x: Float, y: Float): Boolean =
+                drawObjects.isInMinSelector(x, y)
 
-        override fun isInMaxSelectorTouchField(x: Float, y: Float): Boolean =
-                drawObjects.isInMaxSelectorTouchField(x, y)
+        override fun isInMaxSelector(x: Float, y: Float): Boolean =
+                drawObjects.isInMaxSelector(x, y)
 
         override fun minSelectorChanged(xPosition: Float) {
             val newXPosition: Float = constrainToRange(xPosition, dimensions.graphLeft, drawObjects.getMaxSelectorXPosition())

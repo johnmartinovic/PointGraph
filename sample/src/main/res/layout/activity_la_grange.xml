@@ -44,8 +44,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_approx_results_num"
-        app:pg__x_axis_color="@color/la_grange_demo_line_color"
-        app:pg__selector_color="@color/la_grange_demo_selector_color"/>
+        app:pg__x_axis_color="@color/la_grange_demo_line_color"/>
 
     <Button
         android:id="@+id/btn_set_data"

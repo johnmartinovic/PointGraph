@@ -6,7 +6,6 @@ import android.text.TextPaint
 data class LaGrangePaints(
         val xAxisRectPaint: Paint,
         val textPaint: TextPaint,
-        val selectorPaint: Paint,
         val selectedLinePaint: Paint,
         val graphPaint: Paint,
         val selectedGraphPaint: Paint) {
@@ -25,11 +24,6 @@ data class LaGrangePaints(
                             color = attributes.textColor
                             textAlign = Paint.Align.CENTER
                             textSize = attributes.textSize
-                        },
-                        Paint().apply {
-                            isAntiAlias = true
-                            style = Paint.Style.FILL
-                            color = attributes.selectorColor
                         },
                         Paint().apply {
                             isAntiAlias = true

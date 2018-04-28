@@ -3,7 +3,6 @@
 
     <color name="pg__default_x_axis_color">#e0e0e0</color>
     <color name="pg__default_selected_line_color">#1787ae</color>
-    <color name="pg__default_selector_color">#ffffff</color>
     <color name="pg__default_text_color">#1787ae</color>
     <color name="pg__default_graph_color">#80e0e0e0</color>
     <color name="pg__default_selected_graph_color">#c4e1eb</color>

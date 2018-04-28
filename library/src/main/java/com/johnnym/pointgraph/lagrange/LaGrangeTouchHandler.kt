@@ -7,9 +7,9 @@ class LaGrangeTouchHandler(
 
     interface Listener {
 
-        fun isInMinSelectorTouchField(x: Float, y: Float): Boolean
+        fun isInMinSelector(x: Float, y: Float): Boolean
 
-        fun isInMaxSelectorTouchField(x: Float, y: Float): Boolean
+        fun isInMaxSelector(x: Float, y: Float): Boolean
 
         fun minSelectorChanged(xPosition: Float)
 
@@ -31,16 +31,16 @@ class LaGrangeTouchHandler(
                 actionDownXValue = event.x
                 actionDownYValue = event.y
 
-                val minSelectorTouchFieldContainsTouch = listener.isInMinSelectorTouchField(
+                val minSelectorContainsTouch = listener.isInMinSelector(
                         actionDownXValue, actionDownYValue)
-                val maxSelectorTouchFieldContainsTouch = listener.isInMaxSelectorTouchField(
+                val maxSelectorContainsTouch = listener.isInMaxSelector(
                         actionDownXValue, actionDownYValue)
 
-                if (minSelectorTouchFieldContainsTouch && maxSelectorTouchFieldContainsTouch) {
+                if (minSelectorContainsTouch && maxSelectorContainsTouch) {
                     bothSelectorsSelected = true
-                } else if (minSelectorTouchFieldContainsTouch) {
+                } else if (minSelectorContainsTouch) {
                     minSelectorSelected = true
-                } else if (maxSelectorTouchFieldContainsTouch) {
+                } else if (maxSelectorContainsTouch) {
                     maxSelectorSelected = true
                 }
             }
