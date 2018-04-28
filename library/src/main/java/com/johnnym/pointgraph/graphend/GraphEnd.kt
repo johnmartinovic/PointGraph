@@ -29,16 +29,6 @@ class GraphEnd @JvmOverloads constructor(
             invalidate()
         }
     }
-    private val graphScaleAnimator = ValueAnimator().apply {
-        duration = 300
-        setFloatValues(GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE, GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE)
-        addUpdateListener { animation ->
-            graphYAxisScaleFactor = animation.animatedValue as Float
-            invalidate()
-        }
-    }
-
-    private var graphYAxisScaleFactor = GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE
 
     private val touchHandlerListener = object : GraphEndTouchHandler.Listener {
 
@@ -69,15 +59,22 @@ class GraphEnd @JvmOverloads constructor(
         }
     }
 
+    private val graphUtilsListener = object : GraphOps.Listener {
+
+        override fun onGraphYAxisScaleFactor() {
+            invalidate()
+        }
+    }
+
     private val attributes: GraphEndAttrs = GraphEndAttrs.create(context, attrs, defStyleAttr)
     private val dimensions: GraphEndDimensions = GraphEndDimensions(attributes)
     private val drawObjects: GraphEndDraw = GraphEndDraw(attributes, dimensions)
     private val touchHandler: GraphEndTouchHandler = GraphEndTouchHandler(touchHandlerListener)
+    private val graphUtils = GraphOps(graphUtilsListener)
 
     private val selectorListeners = ArrayList<GraphEnd.SelectorListener>()
     private var pointsData: PointsData? = null
     private var listenersEnabled = true
-    private var graphIsShown = true
 
     /**
      * True selector value (set from outside or by touch events)
@@ -108,7 +105,8 @@ class GraphEnd @JvmOverloads constructor(
         resetDataAndSelectorDrawObjects()
 
         if (animated) {
-            showGraph()
+            graphUtils.hideGraph(false)
+            graphUtils.showGraph(animated)
         } else {
             invalidate()
         }
@@ -167,32 +165,22 @@ class GraphEnd @JvmOverloads constructor(
      * Toggle the [GraphEnd] graph visibility from visible to invisible
      * and vice versa.
      */
-    fun toggleGraphVisibility() {
-        if (graphIsShown) {
-            hideGraph()
-        } else {
-            showGraph()
-        }
+    fun toggleGraphVisibility(animated: Boolean) {
+        graphUtils.toggleGraphVisibility(animated)
     }
 
     /**
      * Show [GraphEnd] graph.
      */
-    fun showGraph() {
-        graphScaleAnimator.cancel()
-        graphScaleAnimator.setFloatValues(graphYAxisScaleFactor, GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE)
-        graphScaleAnimator.start()
-        graphIsShown = true
+    fun showGraph(animated: Boolean) {
+        graphUtils.showGraph(animated)
     }
 
     /**
      * Hide [GraphEnd] graph.
      */
-    fun hideGraph() {
-        graphScaleAnimator.cancel()
-        graphScaleAnimator.setFloatValues(graphYAxisScaleFactor, GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE)
-        graphScaleAnimator.start()
-        graphIsShown = false
+    fun hideGraph(animated: Boolean) {
+        graphUtils.hideGraph(animated)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -233,7 +221,7 @@ class GraphEnd @JvmOverloads constructor(
         super.onDraw(canvas)
 
         this.pointsData
-                ?.let { drawObjects.drawWithData(canvas, graphYAxisScaleFactor) }
+                ?.let { drawObjects.drawWithData(canvas, graphUtils.graphYAxisScaleFactor) }
                 ?: drawObjects.drawWithoutData(canvas)
     }
 

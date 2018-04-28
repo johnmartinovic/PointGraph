@@ -36,17 +36,6 @@ class LaGrange @JvmOverloads constructor(
             invalidate()
         }
     }
-    private val graphScaleAnimator = ValueAnimator().apply {
-        duration = 300
-        setFloatValues(GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE, GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE)
-        addUpdateListener { animation ->
-            graphYAxisScaleFactor = animation.animatedValue as Float
-            invalidate()
-        }
-    }
-
-    private var graphYAxisScaleFactor = GRAPH_Y_AXIS_SCALE_FACTOR_MAX_VALUE
-
     private val touchHandlerListener = object : LaGrangeTouchHandler.Listener {
 
         override fun isInMinSelectorTouchField(x: Float, y: Float): Boolean =
@@ -78,10 +67,18 @@ class LaGrange @JvmOverloads constructor(
         }
     }
 
+    private val graphUtilsListener = object : GraphOps.Listener {
+
+        override fun onGraphYAxisScaleFactor() {
+            invalidate()
+        }
+    }
+
     private val attributes: LaGrangeAttrs = LaGrangeAttrs.create(context, attrs, defStyleAttr)
     private val dimensions: LaGrangeDimensions = LaGrangeDimensions(attributes)
     private val drawObjects: LaGrangeDraw = LaGrangeDraw(attributes, dimensions)
     private val touchHandler: LaGrangeTouchHandler = LaGrangeTouchHandler(touchHandlerListener)
+    private val graphUtils = GraphOps(graphUtilsListener)
 
     private val minSelectorPositionChangeListeners = ArrayList<LaGrange.MinSelectorPositionChangeListener>()
     private val maxSelectorPositionChangeListeners = ArrayList<LaGrange.MaxSelectorPositionChangeListener>()
@@ -124,7 +121,8 @@ class LaGrange @JvmOverloads constructor(
         resetDataAndSelectorDrawObjects()
 
         if (animated) {
-            graphScaleAnimator.start()
+            graphUtils.hideGraph(false)
+            graphUtils.showGraph(animated)
         } else {
             invalidate()
         }
@@ -211,6 +209,28 @@ class LaGrange @JvmOverloads constructor(
         this.maxSelectorPositionChangeListeners.remove(maxSelectorPositionChangeListener)
     }
 
+    /**
+     * Toggle the [LaGrange] graph visibility from visible to invisible
+     * and vice versa.
+     */
+    fun toggleGraphVisibility(animated: Boolean) {
+        graphUtils.toggleGraphVisibility(animated)
+    }
+
+    /**
+     * Show [LaGrange] graph.
+     */
+    fun showGraph(animated: Boolean) {
+        graphUtils.showGraph(animated)
+    }
+
+    /**
+     * Hide [LaGrange] graph.
+     */
+    fun hideGraph(animated: Boolean) {
+        graphUtils.hideGraph(animated)
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = resolveSizeAndState(attributes.minViewWidth.toInt(), widthMeasureSpec, 0)
         val height = resolveSizeAndState(attributes.minViewHeight.toInt(), heightMeasureSpec, 0)
@@ -249,7 +269,7 @@ class LaGrange @JvmOverloads constructor(
         super.onDraw(canvas)
 
         this.pointsData
-                ?.let { drawObjects.drawWithData(canvas, graphYAxisScaleFactor) }
+                ?.let { drawObjects.drawWithData(canvas, graphUtils.graphYAxisScaleFactor) }
                 ?: drawObjects.drawWithoutData(canvas)
     }
 

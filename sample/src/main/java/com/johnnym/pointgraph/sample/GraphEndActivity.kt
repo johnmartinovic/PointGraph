@@ -44,7 +44,7 @@ class GraphEndActivity : AppCompatActivity() {
         if (savedInstanceState == null) setGraphEndData()
 
         currentTimerStateTextView.setOnClickListener {
-            graphEnd.toggleGraphVisibility()
+            graphEnd.toggleGraphVisibility(true)
         }
 
         startTimeButton.setOnClickListener {
