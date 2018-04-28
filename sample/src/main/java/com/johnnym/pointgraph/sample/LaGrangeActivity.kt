@@ -59,7 +59,7 @@ class LaGrangeActivity : AppCompatActivity() {
                     changingDoneByEditTexts = false
                 }
 
-        initLaGrangeSelectorListeners()
+        initLaGrangeSelectorsListeners()
 
         setDataButton.setOnClickListener {
             setLaGrangeData()
@@ -129,14 +129,12 @@ class LaGrangeActivity : AppCompatActivity() {
         }
     }
 
-    private fun initLaGrangeSelectorListeners() {
-        laGrange.addMinSelectorChangeListener(minSelectorPositionChangeListener)
-        laGrange.addMaxSelectorChangeListener(maxSelectorPositionChangeListener)
+    private fun initLaGrangeSelectorsListeners() {
+        laGrange.addSelectorsListener(selectorsListener)
     }
 
     private fun removeLaGrangeSelectorListeners() {
-        laGrange.removeMinSelectorChangeListener(minSelectorPositionChangeListener)
-        laGrange.removeMaxSelectorChangeListener(maxSelectorPositionChangeListener)
+        laGrange.removeSelectorsListener(selectorsListener)
     }
 
     private fun resetLaGrangeData() {
@@ -159,7 +157,8 @@ class LaGrangeActivity : AppCompatActivity() {
                         laGrange.maxSelectorValue))
     }
 
-    private val minSelectorPositionChangeListener = object : LaGrange.MinSelectorPositionChangeListener {
+    private val selectorsListener = object : LaGrange.SelectorsListener {
+
         override fun onMinValueChanged(newMinValue: Float) {
             changingDoneByLaGrange = true
             if (!changingDoneByEditTexts) {
@@ -171,9 +170,7 @@ class LaGrangeActivity : AppCompatActivity() {
             updateApproxResultsNumTextView()
             changingDoneByLaGrange = false
         }
-    }
 
-    private val maxSelectorPositionChangeListener = object : LaGrange.MaxSelectorPositionChangeListener {
         override fun onMaxValueChanged(newMaxValue: Float) {
             changingDoneByLaGrange = true
             if (!changingDoneByEditTexts) {

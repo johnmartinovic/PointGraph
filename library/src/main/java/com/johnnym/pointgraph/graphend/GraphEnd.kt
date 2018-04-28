@@ -36,11 +36,7 @@ class GraphEnd @JvmOverloads constructor(
                 drawObjects.isInSelectorTouchField(x, y)
 
         override fun selectorChanged(xPosition: Float) {
-            val newXPosition: Float = when {
-                xPosition < dimensions.graphLeft -> dimensions.graphLeft
-                xPosition > dimensions.graphRight -> dimensions.graphRight
-                else -> xPosition
-            }
+            val newXPosition: Float = constrainToRange(xPosition, dimensions.graphLeft, dimensions.graphRight)
 
             pointsData?.let {
                 selectorValue = transformSelectorXPositionToValue(it, newXPosition)
@@ -86,6 +82,7 @@ class GraphEnd @JvmOverloads constructor(
     }
         private set
 
+    // TODO remove this when any selector can be added
     init {
         setLayerType(LAYER_TYPE_SOFTWARE, drawObjects.paints.selectorPaint)
     }
@@ -136,8 +133,7 @@ class GraphEnd @JvmOverloads constructor(
     private fun normalizeAndSetSelectorValue(pointsData: PointsData, value: Float?) {
         var selectorValue = value ?: pointsData.minX
 
-        selectorValue = Math.max(selectorValue, pointsData.minX)
-        selectorValue = Math.min(selectorValue, pointsData.maxX)
+        selectorValue = constrainToRange(selectorValue, pointsData.minX, pointsData.maxX)
 
         this.selectorValue = selectorValue
     }

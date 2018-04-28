@@ -80,8 +80,7 @@ class LaGrange @JvmOverloads constructor(
     private val touchHandler: LaGrangeTouchHandler = LaGrangeTouchHandler(touchHandlerListener)
     private val graphUtils = GraphOps(graphUtilsListener)
 
-    private val minSelectorPositionChangeListeners = ArrayList<LaGrange.MinSelectorPositionChangeListener>()
-    private val maxSelectorPositionChangeListeners = ArrayList<LaGrange.MaxSelectorPositionChangeListener>()
+    private val selectorsListeners = ArrayList<LaGrange.SelectorsListener>()
     private var pointsData: PointsData? = null
     private var listenersEnabled = true
 
@@ -90,7 +89,7 @@ class LaGrange @JvmOverloads constructor(
      */
     var minSelectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
-            minSelectorPositionChangeListeners.dispatchOnMinSelectorPositionChangeEvent(new)
+            selectorsListeners.dispatchOnMinSelectorValueChangeEvent(new)
         }
     }
         private set
@@ -100,7 +99,7 @@ class LaGrange @JvmOverloads constructor(
      */
     var maxSelectorValue: Float by Delegates.observable(0f) { _, _, new: Float ->
         if (listenersEnabled) {
-            maxSelectorPositionChangeListeners.dispatchOnMaxSelectorPositionChangeEvent(new)
+            selectorsListeners.dispatchOnMaxSelectorValueChangeEvent(new)
         }
     }
         private set
@@ -160,53 +159,29 @@ class LaGrange @JvmOverloads constructor(
         var minSelectorValue = minValue ?: pointsData.minX
         var maxSelectorValue = maxValue ?: pointsData.maxX
 
-        minSelectorValue = Math.max(minSelectorValue, pointsData.minX)
-        minSelectorValue = Math.min(minSelectorValue, pointsData.maxX)
-        maxSelectorValue = Math.max(maxSelectorValue, pointsData.minX)
-        maxSelectorValue = Math.min(maxSelectorValue, pointsData.maxX)
-
-        if (minSelectorValue > maxSelectorValue) {
-            maxSelectorValue = minSelectorValue
-        }
+        minSelectorValue = constrainToRange(minSelectorValue, pointsData.minX, pointsData.maxX)
+        maxSelectorValue = constrainToRange(maxSelectorValue, minSelectorValue, pointsData.maxX)
 
         this.minSelectorValue = minSelectorValue
         this.maxSelectorValue = maxSelectorValue
     }
 
     /**
-     * Add a listener which will be informed about the changes of [minSelectorValue].
+     * Add a listener which will be informed about selectors changes.
      *
-     * @param minSelectorPositionChangeListener listener to be added
+     * @param selectorsListener listener to be added
      */
-    fun addMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
-        this.minSelectorPositionChangeListeners.add(minSelectorPositionChangeListener)
+    fun addSelectorsListener(selectorsListener: SelectorsListener) {
+        this.selectorsListeners.add(selectorsListener)
     }
 
     /**
-     * Remove a listener which previously has been informed about the changes of [minSelectorValue].
+     * Remove a listener which previously has been informed about selectors changes.
      *
-     * @param minSelectorPositionChangeListener listener to be removed
+     * @param selectorsListener listener to be removed
      */
-    fun removeMinSelectorChangeListener(minSelectorPositionChangeListener: MinSelectorPositionChangeListener) {
-        this.minSelectorPositionChangeListeners.remove(minSelectorPositionChangeListener)
-    }
-
-    /**
-     * Add a listener which will be informed about the changes of [maxSelectorValue].
-     *
-     * @param maxSelectorPositionChangeListener listener to be added
-     */
-    fun addMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
-        this.maxSelectorPositionChangeListeners.add(maxSelectorPositionChangeListener)
-    }
-
-    /**
-     * Remove a listener which previously has been informed about the changes of [maxSelectorValue].
-     *
-     * @param maxSelectorPositionChangeListener listener to be removed
-     */
-    fun removeMaxSelectorChangeListener(maxSelectorPositionChangeListener: MaxSelectorPositionChangeListener) {
-        this.maxSelectorPositionChangeListeners.remove(maxSelectorPositionChangeListener)
+    fun removeSelectorsListener(selectorsListener: SelectorsListener) {
+        this.selectorsListeners.remove(selectorsListener)
     }
 
     /**
@@ -334,9 +309,9 @@ class LaGrange @JvmOverloads constructor(
 
     /**
      * Listener interface whose methods are called as a consequence of
-     * [minSelectorValue] value change events.
+     * selectors value change events.
      */
-    interface MinSelectorPositionChangeListener {
+    interface SelectorsListener {
 
         /**
          * Called when [minSelectorValue] is changed.
@@ -344,13 +319,6 @@ class LaGrange @JvmOverloads constructor(
          * @param newMinValue [minSelectorValue] new value
          */
         fun onMinValueChanged(newMinValue: Float)
-    }
-
-    /**
-     * Listener interface whose methods are called as a consequence of
-     * [minSelectorValue] value change events.
-     */
-    interface MaxSelectorPositionChangeListener {
 
         /**
          * Called when [maxSelectorValue] is changed.

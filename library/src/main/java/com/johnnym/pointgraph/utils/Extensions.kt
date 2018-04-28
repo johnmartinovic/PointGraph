@@ -51,10 +51,10 @@ fun ArrayList<GraphEnd.SelectorListener>.dispatchOnSelectorReleasedEvent() {
     this.forEach { it.onSelectorReleased() }
 }
 
-fun ArrayList<LaGrange.MinSelectorPositionChangeListener>.dispatchOnMinSelectorPositionChangeEvent(newMinValue: Float) {
+fun ArrayList<LaGrange.SelectorsListener>.dispatchOnMinSelectorValueChangeEvent(newMinValue: Float) {
     this.forEach { it.onMinValueChanged(newMinValue) }
 }
 
-fun ArrayList<LaGrange.MaxSelectorPositionChangeListener>.dispatchOnMaxSelectorPositionChangeEvent(newMaxValue: Float) {
+fun ArrayList<LaGrange.SelectorsListener>.dispatchOnMaxSelectorValueChangeEvent(newMaxValue: Float) {
     this.forEach { it.onMaxValueChanged(newMaxValue) }
 }
