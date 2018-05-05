@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <attr name="pg__x_axis_color" format="color"/>
-    <attr name="pg__x_axis_thickness" format="dimension"/>
-    <attr name="pg__selected_line_color" format="color"/>
-    <attr name="pg__selected_line_thickness" format="dimension"/>
-    <attr name="pg__selector" format="reference"/>
-    <attr name="pg__text_color" format="color"/>
-    <attr name="pg__text_size" format="dimension"/>
-    <attr name="pg__graph_color" format="color"/>
-    <attr name="pg__selected_graph_color" format="color"/>
-    <attr name="pg__x_axis_num_of_middle_points" format="integer"/>
-    <attr name="pg__x_axis_indicator" format="reference"/>
+    <attr name="pg__x_axis_color" format="color" />
+    <attr name="pg__x_axis_thickness" format="dimension" />
+    <attr name="pg__selected_line_color" format="color" />
+    <attr name="pg__selected_line_thickness" format="dimension" />
+    <attr name="pg__selector" format="reference" />
+    <attr name="pg__text_color" format="color" />
+    <attr name="pg__text_size" format="dimension" />
+    <attr name="pg__graph_color" format="color" />
+    <attr name="pg__selected_graph_color" format="color" />
+    <attr name="pg__x_axis_num_of_middle_points" format="integer" />
+    <attr name="pg__x_axis_indicator" format="reference" />
 
-    <declare-styleable name="pg__LaGrange">
-        <attr name="pg__x_axis_color"/>
-        <attr name="pg__x_axis_thickness"/>
-        <attr name="pg__selected_line_color"/>
-        <attr name="pg__selected_line_thickness"/>
-        <attr name="pg__selector"/>
-        <attr name="pg__text_color"/>
-        <attr name="pg__text_size"/>
-        <attr name="pg__graph_color"/>
-        <attr name="pg__selected_graph_color"/>
-        <attr name="pg__x_axis_number_of_middle_points"/>
-        <attr name="pg__x_axis_indicator"/>
+    <declare-styleable name="LaGrange" tools:ignore="ResourceName">
+        <attr name="pg__x_axis_color" />
+        <attr name="pg__x_axis_thickness" />
+        <attr name="pg__selected_line_color" />
+        <attr name="pg__selected_line_thickness" />
+        <attr name="pg__selector" />
+        <attr name="pg__text_color" />
+        <attr name="pg__text_size" />
+        <attr name="pg__graph_color" />
+        <attr name="pg__selected_graph_color" />
+        <attr name="pg__x_axis_number_of_middle_points" />
+        <attr name="pg__x_axis_indicator" />
     </declare-styleable>
 
-    <declare-styleable name="pg__GraphEnd">
-        <attr name="pg__x_axis_color"/>
-        <attr name="pg__x_axis_thickness"/>
-        <attr name="pg__selected_line_color"/>
-        <attr name="pg__selected_line_thickness"/>
-        <attr name="pg__selector"/>
-        <attr name="pg__graph_color"/>
-        <attr name="pg__selected_graph_color"/>
+    <declare-styleable name="GraphEnd" tools:ignore="ResourceName">
+        <attr name="pg__x_axis_color" />
+        <attr name="pg__x_axis_thickness" />
+        <attr name="pg__selected_line_color" />
+        <attr name="pg__selected_line_thickness" />
+        <attr name="pg__selector" />
+        <attr name="pg__graph_color" />
+        <attr name="pg__selected_graph_color" />
     </declare-styleable>
 
 </resources>

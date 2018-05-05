@@ -25,29 +25,29 @@ data class GraphEndAttrs(
         fun create(context: Context,
                    attrs: AttributeSet?,
                    defStyleAttr: Int): GraphEndAttrs {
-            val styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.pg__GraphEnd, defStyleAttr, 0)
+            val styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.GraphEnd, defStyleAttr, 0)
             val resources = context.resources
 
             val graphEndAttrs = GraphEndAttrs(
                     styledAttrs.getColor(
-                            R.styleable.pg__GraphEnd_pg__x_axis_color,
+                            R.styleable.GraphEnd_pg__x_axis_color,
                             ContextCompat.getColor(context, R.color.pg__default_x_axis_color)),
                     styledAttrs.getDimension(
-                            R.styleable.pg__GraphEnd_pg__x_axis_thickness,
+                            R.styleable.GraphEnd_pg__x_axis_thickness,
                             resources.getDimension(R.dimen.pg__default_line_thickness)),
                     styledAttrs.getColor(
-                            R.styleable.pg__GraphEnd_pg__selected_line_color,
+                            R.styleable.GraphEnd_pg__selected_line_color,
                             ContextCompat.getColor(context, R.color.pg__default_selected_line_color)),
                     styledAttrs.getDimension(
-                            R.styleable.pg__GraphEnd_pg__selected_line_thickness,
+                            R.styleable.GraphEnd_pg__selected_line_thickness,
                             resources.getDimension(R.dimen.pg__default_selected_line_thickness)),
-                    styledAttrs.getDrawable(R.styleable.pg__GraphEnd_pg__selector)
+                    styledAttrs.getDrawable(R.styleable.GraphEnd_pg__selector)
                             ?: ContextCompat.getDrawable(context, R.drawable.pg__ring_selector)!!,
                     styledAttrs.getColor(
-                            R.styleable.pg__GraphEnd_pg__graph_color,
+                            R.styleable.GraphEnd_pg__graph_color,
                             ContextCompat.getColor(context, R.color.pg__default_graph_color)),
                     styledAttrs.getColor(
-                            R.styleable.pg__GraphEnd_pg__selected_graph_color,
+                            R.styleable.GraphEnd_pg__selected_graph_color,
                             ContextCompat.getColor(context, R.color.pg__default_selected_graph_color)),
                     resources.getDimension(R.dimen.pg__graph_end_min_view_width),
                     resources.getDimension(R.dimen.pg__graph_end_min_view_height),

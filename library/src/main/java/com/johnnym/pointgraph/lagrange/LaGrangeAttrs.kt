@@ -30,40 +30,40 @@ data class LaGrangeAttrs(
         fun create(context: Context,
                    attrs: AttributeSet?,
                    defStyleAttr: Int): LaGrangeAttrs {
-            val styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.pg__LaGrange, defStyleAttr, 0)
+            val styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.LaGrange, defStyleAttr, 0)
             val resources = context.resources
 
             val laGrangeAttrs = LaGrangeAttrs(
                     styledAttrs.getColor(
-                            R.styleable.pg__LaGrange_pg__x_axis_color,
+                            R.styleable.LaGrange_pg__x_axis_color,
                             ContextCompat.getColor(context, R.color.pg__default_x_axis_color)),
                     styledAttrs.getDimension(
-                            R.styleable.pg__LaGrange_pg__x_axis_thickness,
+                            R.styleable.LaGrange_pg__x_axis_thickness,
                             resources.getDimension(R.dimen.pg__default_line_thickness)),
                     styledAttrs.getColor(
-                            R.styleable.pg__LaGrange_pg__selected_line_color,
+                            R.styleable.LaGrange_pg__selected_line_color,
                             ContextCompat.getColor(context, R.color.pg__default_selected_line_color)),
                     styledAttrs.getDimension(
-                            R.styleable.pg__LaGrange_pg__selected_line_thickness,
+                            R.styleable.LaGrange_pg__selected_line_thickness,
                             resources.getDimension(R.dimen.pg__default_selected_line_thickness)),
-                    styledAttrs.getDrawable(R.styleable.pg__LaGrange_pg__selector)
+                    styledAttrs.getDrawable(R.styleable.LaGrange_pg__selector)
                             ?: ContextCompat.getDrawable(context, R.drawable.pg__ring_selector)!!,
                     styledAttrs.getColor(
-                            R.styleable.pg__LaGrange_pg__text_color,
+                            R.styleable.LaGrange_pg__text_color,
                             ContextCompat.getColor(context, R.color.pg__default_text_color)),
                     styledAttrs.getDimension(
-                            R.styleable.pg__LaGrange_pg__text_size,
+                            R.styleable.LaGrange_pg__text_size,
                             resources.getDimension(R.dimen.pg__default_text_size)),
                     styledAttrs.getColor(
-                            R.styleable.pg__LaGrange_pg__graph_color,
+                            R.styleable.LaGrange_pg__graph_color,
                             ContextCompat.getColor(context, R.color.pg__default_graph_color)),
                     styledAttrs.getColor(
-                            R.styleable.pg__LaGrange_pg__selected_graph_color,
+                            R.styleable.LaGrange_pg__selected_graph_color,
                             ContextCompat.getColor(context, R.color.pg__default_selected_graph_color)),
                     styledAttrs.getInteger(
-                            R.styleable.pg__LaGrange_pg__x_axis_number_of_middle_points,
+                            R.styleable.LaGrange_pg__x_axis_number_of_middle_points,
                             resources.getInteger(R.integer.pg__default_line_middle_points_num)),
-                    styledAttrs.getDrawable(R.styleable.pg__LaGrange_pg__x_axis_indicator)
+                    styledAttrs.getDrawable(R.styleable.LaGrange_pg__x_axis_indicator)
                             ?: ContextCompat.getDrawable(context, R.drawable.pg__circle_point_indicator)!!,
                     resources.getDimension(R.dimen.pg__la_grange_min_view_width),
                     resources.getDimension(R.dimen.pg__la_grange_min_view_height),
