@@ -2,9 +2,9 @@
 <resources>
 
     <color name="pg__default_x_axis_color">#e0e0e0</color>
-    <color name="pg__default_selected_line_color">#1787ae</color>
-    <color name="pg__default_text_color">#1787ae</color>
-    <color name="pg__default_graph_color">#80e0e0e0</color>
-    <color name="pg__default_selected_graph_color">#c4e1eb</color>
+    <color name="pg__default_selected_line_color">#34414E</color>
+    <color name="pg__default_text_color">#5A6C7F</color>
+    <color name="pg__default_graph_color">#E9EFF5</color>
+    <color name="pg__default_selected_graph_color">#F3306D</color>
 
 </resources>

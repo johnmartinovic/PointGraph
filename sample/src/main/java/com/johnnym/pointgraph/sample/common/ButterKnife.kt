@@ -7,8 +7,8 @@ import android.app.Fragment
 import android.view.View
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-import android.support.v4.app.DialogFragment as SupportDialogFragment
-import android.support.v4.app.Fragment as SupportFragment
+import androidx.fragment.app.DialogFragment as SupportDialogFragment
+import androidx.fragment.app.Fragment as SupportFragment
 
 public fun <V : View> View.bindView(id: Int)
     : ReadOnlyProperty<View, V> = required(id, viewFinder)

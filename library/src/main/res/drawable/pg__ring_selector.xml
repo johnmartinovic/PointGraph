@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:innerRadius="6dp"
-    android:shape="ring"
-    android:thickness="4dp"
-    android:useLevel="false">
-
-    <size
-        android:width="48dp"
-        android:height="48dp"/>
-
-    <solid android:color="#ff0000"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="12dp"
+        android:left="12dp"
+        android:right="12dp"
+        android:top="12dp">
+        <shape android:shape="oval">
+            <size
+                android:width="24dp"
+                android:height="24dp"/>
+            <solid android:color="#34414E"/>
+        </shape>
+    </item>
+</layer-list>

@@ -12,7 +12,6 @@ data class GraphEndDraw(
 
     val paints: GraphEndPaints = GraphEndPaints.create(attributes)
 
-
     private val selector = RectF(
             0f,
             0f,
@@ -83,7 +82,7 @@ data class GraphEndDraw(
     }
 
     private fun drawXAxis(canvas: Canvas) {
-        canvas.drawRect(xAxisRect, paints.xAxisRectPaint)
+        canvas.drawRoundRect(xAxisRect, attributes.xAxisThickness, attributes.xAxisThickness, paints.xAxisRectPaint)
     }
 
     private fun drawSelectedLineAndSelector(canvas: Canvas) {

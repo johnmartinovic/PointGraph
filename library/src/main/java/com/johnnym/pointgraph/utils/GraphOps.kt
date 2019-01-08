@@ -1,6 +1,7 @@
 package com.johnnym.pointgraph.utils
 
 import android.animation.ValueAnimator
+import kotlin.properties.Delegates
 
 class GraphOps(listener: Listener) {
 
@@ -19,13 +20,14 @@ class GraphOps(listener: Listener) {
         duration = 300
         addUpdateListener { animation ->
             graphYAxisScaleFactor = animation.animatedValue as Float
-            listener.onGraphYAxisScaleFactor()
         }
     }
 
     private var graphIsShown = false
 
-    var graphYAxisScaleFactor = GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE
+    var graphYAxisScaleFactor by Delegates.observable(GRAPH_Y_AXIS_SCALE_FACTOR_MIN_VALUE) { _, _, _ ->
+        listener.onGraphYAxisScaleFactor()
+    }
         private set
 
     fun toggleGraphVisibility(animated: Boolean) {
